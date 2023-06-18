@@ -22,9 +22,9 @@ public sealed class ServiceHost
 
     public async Task Start()
     {
-        _schedulerService = await _schedulerServiceBuilder.Build();
+        _schedulerService = await _schedulerServiceBuilder.Build().ConfigureAwait(false);
 
-        await StartWebHost(_schedulerService);
+        await StartWebHost(_schedulerService).ConfigureAwait(false);
     }
 
     public async Task Stop()
@@ -33,12 +33,12 @@ public sealed class ServiceHost
 
         if (_schedulerService != null)
         {
-            await _schedulerService.Shutdown();
+            await _schedulerService.Shutdown().ConfigureAwait(false);
         }
 
         if (_app != null)
         {
-            await _app.DisposeAsync();
+            await _app.DisposeAsync().ConfigureAwait(false);
         }
     }
 
