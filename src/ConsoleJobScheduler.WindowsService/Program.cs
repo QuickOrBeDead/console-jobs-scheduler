@@ -1,24 +1,52 @@
 
-var builder = WebApplication.CreateBuilder(args);
+using ConsoleJobScheduler.WindowsService;
+using System.Reflection;
+using Topshelf;
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+static string GetContentRootPath()
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    return Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
 }
 
-app.UseAuthorization();
+var contentRootPath = GetContentRootPath();
+var config = new ConfigurationBuilder()
+    .SetBasePath(contentRootPath)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+#if DEBUG
+    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+#endif
+    .Build();
+var topShelfExitCode = HostFactory.Run(
+        hostConfig =>
+        {
+            hostConfig.Service<ServiceHost>(
+                sc =>
+                {
+                    sc.ConstructUsing(() => new ServiceHost(config, contentRootPath));
+                    sc.WhenStarted(s => s.Start().GetAwaiter().GetResult());
+                    sc.WhenStopped(s => s.Stop().GetAwaiter().GetResult());
+                });
+            hostConfig.EnableServiceRecovery(r =>
+            {
+                r.OnCrashOnly();
 
-app.MapControllers();
+                // First failure
+                r.RestartService(0);
 
-app.Run();
+                // Second failure
+                r.RestartService(1);
+
+                // Corresponds to ‘Subsequent failures: Restart the Service’
+                r.RestartService(5);
+                r.SetResetPeriod(1);
+            });
+            hostConfig.SetStartTimeout(TimeSpan.FromSeconds(180));
+            hostConfig.SetStopTimeout(TimeSpan.FromSeconds(180));
+            hostConfig.StartAutomatically();
+            hostConfig.RunAsLocalSystem();
+            hostConfig.SetServiceName(config["ServiceName"]);
+            hostConfig.SetDisplayName("QuartzScheduler");
+            hostConfig.SetDescription("QuartzScheduler");
+        });
+
+Console.WriteLine($"QuartzScheduler topshelf exit code: {topShelfExitCode}");
