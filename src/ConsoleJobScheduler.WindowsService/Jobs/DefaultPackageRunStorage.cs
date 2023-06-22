@@ -69,12 +69,12 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
             .ToList()!;
     }
 
-    public byte[] GetAttachmentBytes(string packageName, string jobRunId, string attachmentName)
+    public byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName)
     {
         var attachmentsPath = Path.Combine(GetAttachmentsFolder(packageName, jobRunId), attachmentName);
         if (!File.Exists(attachmentsPath))
         {
-            return Array.Empty<byte>();
+            return null;
         }
 
         return File.ReadAllBytes(attachmentsPath);

@@ -23,7 +23,7 @@ public sealed class JobsController : ControllerBase
         return await _schedulerService.GetJobList();
     }
 
-    [HttpGet("{group}/{name}", Name = "Get")]
+    [HttpGet("{group}/{name}")]
     [Produces("application/json")]
     public async Task<IActionResult> Get(string group, string name)
     {

@@ -10,5 +10,5 @@ public interface IPackageRunStorage
 
     IList<string> GetAttachmentNames(string packageName, string jobRunId);
 
-    byte[] GetAttachmentBytes(string packageName, string jobRunId, string attachmentName);
+    byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName);
 }

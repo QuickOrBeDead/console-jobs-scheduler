@@ -40,7 +40,7 @@ public interface ISchedulerService
 
     Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics();
 
-    byte[] GetAttachmentBytes(string packageName, string jobRunId, string attachmentName);
+    byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName);
 }
 
 public sealed class SchedulerService : ISchedulerService
@@ -198,7 +198,7 @@ public sealed class SchedulerService : ISchedulerService
                    );
     }
 
-    public byte[] GetAttachmentBytes(string packageName, string jobRunId, string attachmentName)
+    public byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName)
     {
         return _packageRunStorage.GetAttachmentBytes(packageName, jobRunId, attachmentName);
     }
