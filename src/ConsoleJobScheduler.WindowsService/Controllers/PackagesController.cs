@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PackagesController : Controller
+public class PackagesController : ControllerBase
 {
     private readonly ISchedulerService _schedulerService;
 
@@ -15,6 +15,7 @@ public class PackagesController : Controller
     }
 
     [HttpGet]
+    [Produces("application/json")]
     public IList<string> Get()
     {
         return _schedulerService.GetPackages();
