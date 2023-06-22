@@ -7,7 +7,7 @@ using Quartz;
 
 [Route("api/[controller]")]
 [ApiController]
-public sealed class JobsController : Controller
+public sealed class JobsController : ControllerBase
 {
     private readonly ISchedulerService _schedulerService;
 
@@ -23,6 +23,7 @@ public sealed class JobsController : Controller
     }
 
     [HttpGet("{group}/{name}", Name = "Get")]
+    [Produces("application/json")]
     public async Task<IActionResult> Get(string group, string name)
     {
         var jobKey = new JobKey(name, group);
@@ -43,5 +44,11 @@ public sealed class JobsController : Controller
                     Package = jobDetail.Package,
                     Parameters = jobDetail.Parameters
                 });
+    }
+
+    [HttpPost]
+    public Task Post([FromBody] JobAddOrUpdateModel jobAddOrUpdateModel)
+    {
+        return _schedulerService.AddOrUpdateJob(jobAddOrUpdateModel);
     }
 }
