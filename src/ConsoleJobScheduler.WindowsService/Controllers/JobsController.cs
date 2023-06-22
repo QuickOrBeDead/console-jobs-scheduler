@@ -17,6 +17,7 @@ public sealed class JobsController : ControllerBase
     }
 
     [HttpGet]
+    [Produces("application/json")]
     public async Task<IList<JobListItemModel>> Get()
     {
         return await _schedulerService.GetJobList();
