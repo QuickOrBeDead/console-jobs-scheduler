@@ -78,6 +78,9 @@ public sealed class ServiceHost
         if (!_app.Environment.IsDevelopment())
         {
             _app.UseExceptionHandler("/Error");
+        }
+        else
+        {
             _app.UseSwagger();
             _app.UseSwaggerUI();
         }
