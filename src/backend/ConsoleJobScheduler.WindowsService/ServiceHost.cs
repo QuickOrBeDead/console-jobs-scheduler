@@ -63,6 +63,7 @@ public sealed class ServiceHost
         builder.Services.AddSingleton(schedulerService);
 
         builder.Services.AddSingleton<JobConsoleLogMessageToHubHandler>();
+        builder.Services.AddSpaStaticFiles(configuration: options => { options.RootPath = "wwwroot"; });
 
         _app = builder.Build();
         _app.Lifetime.ApplicationStopped.Register(
@@ -96,7 +97,7 @@ public sealed class ServiceHost
             {
                 if (_app.Environment.IsDevelopment())
                 {
-                    b.UseProxyToSpaDevelopmentServer("http://localhost:8080");
+                    b.UseProxyToSpaDevelopmentServer("http://localhost:5173");
                 }
             });
 
