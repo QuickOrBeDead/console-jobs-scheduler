@@ -91,6 +91,15 @@ public sealed class ServiceHost
         _app.MapControllers();
         _app.MapHub<JobRunConsoleHub>("/jobRunConsoleHub");
 
+        _app.UseSpaStaticFiles();
+        _app.UseSpa(configuration: b =>
+            {
+                if (_app.Environment.IsDevelopment())
+                {
+                    b.UseProxyToSpaDevelopmentServer("http://localhost:8080");
+                }
+            });
+
         schedulerService.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
         await schedulerService.Start(_app.Services.GetRequiredService<ILoggerFactory>());
