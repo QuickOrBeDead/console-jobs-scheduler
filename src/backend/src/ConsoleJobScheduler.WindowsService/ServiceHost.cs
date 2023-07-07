@@ -1,4 +1,5 @@
-﻿namespace ConsoleJobScheduler.WindowsService;
+﻿
+namespace ConsoleJobScheduler.WindowsService;
 
 using ConsoleJobScheduler.WindowsService.Hubs;
 using ConsoleJobScheduler.WindowsService.Hubs.Handlers;
@@ -86,20 +87,22 @@ public sealed class ServiceHost
             _app.UseSwaggerUI();
         }
 
+        _app.UseWhen(x => x.Request.Path == "/", app1 =>
+            app1.UseSpa(spa =>
+                {
+                    if (_app.Environment.IsDevelopment())
+                    {
+                        spa.UseProxyToSpaDevelopmentServer("http://localhost:8080");
+                    }
+                })
+        );
+
+        _app.UseSpaStaticFiles();
         _app.UseStaticFiles();
         _app.UseRouting();
         _app.UseAuthorization();
         _app.MapControllers();
         _app.MapHub<JobRunConsoleHub>("/jobRunConsoleHub");
-
-        _app.UseSpaStaticFiles();
-        _app.UseSpa(configuration: b =>
-            {
-                if (_app.Environment.IsDevelopment())
-                {
-                    b.UseProxyToSpaDevelopmentServer("http://localhost:8080");
-                }
-            });
 
         schedulerService.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
