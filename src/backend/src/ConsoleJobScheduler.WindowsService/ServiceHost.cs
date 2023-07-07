@@ -97,7 +97,7 @@ public sealed class ServiceHost
             {
                 if (_app.Environment.IsDevelopment())
                 {
-                    b.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+                    b.UseProxyToSpaDevelopmentServer("http://localhost:8080");
                 }
             });
 
