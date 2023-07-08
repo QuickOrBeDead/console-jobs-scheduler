@@ -144,6 +144,28 @@ onMounted(async () => {
             </table>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="display-6" style="margin-bottom: 0;">Thread Pool</h4>
+            <hr style="margin: 4px 0px;">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th scope="row">Type</th>
+                    <td>{{ metadata?.threadPoolType }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Size</th>
+                    <td>{{ metadata?.threadPoolSize }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </template>
 
