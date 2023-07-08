@@ -84,6 +84,66 @@ onMounted(async () => {
             </table>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="display-6" style="margin-bottom: 0;">Scheduler</h4>
+            <hr style="margin: 4px 0px;">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th scope="row">Name</th>
+                    <td>{{ metadata?.schedulerName }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Instance Id</th>
+                    <td>{{ metadata?.schedulerInstanceId }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Type</th>
+                    <td>{{ metadata?.schedulerType }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Remote</th>
+                    <td>{{ metadata?.schedulerRemote ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td>{{ metadata?.version }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="display-6" style="margin-bottom: 0;">Job Store</h4>
+            <hr style="margin: 4px 0px;">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th scope="row">Type</th>
+                    <td>{{ metadata?.jobStoreType }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Clustered</th>
+                    <td>{{ metadata?.jobStoreClustered ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Supports Persistence</th>
+                    <td>{{ metadata?.jobStoreSupportsPersistence ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </template>
 

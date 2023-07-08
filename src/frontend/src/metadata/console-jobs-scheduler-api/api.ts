@@ -371,6 +371,18 @@ export interface SchedulerMetadataModel {
      * @memberof SchedulerMetadataModel
      */
     'runningSince'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SchedulerMetadataModel
+     */
+    'jobStoreClustered'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SchedulerMetadataModel
+     */
+    'jobStoreSupportsPersistence'?: boolean;
 }
 /**
  * 

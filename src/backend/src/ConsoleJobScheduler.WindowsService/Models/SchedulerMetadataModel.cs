@@ -27,4 +27,8 @@ public sealed class SchedulerMetadataModel
     public string? Summary { get; set; }
 
     public DateTime? RunningSince { get; set; }
+
+    public bool JobStoreClustered { get; set; }
+
+    public bool JobStoreSupportsPersistence { get; set; }
 }
