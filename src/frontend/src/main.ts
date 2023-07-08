@@ -14,3 +14,12 @@ const routes = [
 ]
 
 createApp(App).use(createRouter({  history : createWebHistory(), routes: routes })).mount('#app')
+
+String.prototype.toLocaleString = function (this: string) {
+    var s = this
+    if (!s) {
+        return ''
+    }
+    
+    return new Date(s).toLocaleString()
+}

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { createApi } from '../api'
-import { SchedulerApi, SchedulerJobExecutionStatisticsModel } from '../metadata/console-jobs-scheduler-api'
+import { SchedulerApi, SchedulerJobExecutionStatisticsModel, SchedulerMetadataModel, SchedulerStateRecordModel } from '../metadata/console-jobs-scheduler-api'
 
-const statistics = ref<SchedulerJobExecutionStatisticsModel>();
+const statistics = ref<SchedulerJobExecutionStatisticsModel>()
+const metadata = ref<SchedulerMetadataModel>()
+const nodes = ref<SchedulerStateRecordModel[]>()
 
 onMounted(async () => {
     const schedulerApi = createApi(SchedulerApi)
-    const data = await schedulerApi.apiSchedulerGet()
-    statistics.value = data.data.statistics;
+    const { data } = await schedulerApi.apiSchedulerGet()
+    statistics.value = data.statistics
+    metadata.value = data.metadata
+    nodes.value = data.nodes ? data.nodes : [];
 })
 </script>
 
@@ -16,7 +20,7 @@ onMounted(async () => {
 <div class="container" style="margin-top: 10px;">
     <div class="row">
         <div class="col-md-12">
-            <h4 style="margin-bottom: 0;">Statistics</h4>
+            <h4 class="display-6" style="margin-bottom: 0;">Statistics</h4>
             <hr style="margin: 4px 0px;">
         </div>
     </div>
@@ -50,6 +54,36 @@ onMounted(async () => {
             </div>
         </div>
     </div>	
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="display-6" style="margin-bottom: 0;">Status</h4>
+            <hr style="margin: 4px 0px;">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th scope="row">Running Since</th>
+                    <td>{{ metadata?.runningSince?.toLocaleString() }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Started</th>
+                    <td>{{ metadata?.started ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">In Standby Mode</th>
+                    <td>{{ metadata?.inStandbyMode ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Shutdown</th>
+                    <td>{{ metadata?.shutdown ? "TRUE" : "FALSE" }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </template>
 

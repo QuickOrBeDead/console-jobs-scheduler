@@ -36,7 +36,8 @@ public sealed class SchedulerController : ControllerBase
                     Summary = metaData.GetSummary(),
                     ThreadPoolSize = metaData.ThreadPoolSize,
                     ThreadPoolType = metaData.ThreadPoolType.ToString(),
-                    Version = metaData.Version
+                    Version = metaData.Version,
+                    RunningSince = metaData.RunningSince?.UtcDateTime
                 },
             nodes.Select(
                 x => new SchedulerStateRecordModel

@@ -25,4 +25,6 @@ public sealed class SchedulerMetadataModel
     public string? Version { get; set; }
 
     public string? Summary { get; set; }
+
+    public DateTime? RunningSince { get; set; }
 }

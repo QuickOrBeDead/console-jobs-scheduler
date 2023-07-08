@@ -365,6 +365,12 @@ export interface SchedulerMetadataModel {
      * @memberof SchedulerMetadataModel
      */
     'summary'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SchedulerMetadataModel
+     */
+    'runningSince'?: string | null;
 }
 /**
  * 
