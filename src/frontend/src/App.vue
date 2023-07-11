@@ -12,13 +12,13 @@
       <div class="collapse navbar-collapse" id="navbarColor02">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Scheduler</a>
+            <router-link class="nav-link" aria-current="page" to="/">Scheduler</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/jobs">Jobs</a>
+            <router-link class="nav-link" to="/jobs">Jobs</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">History</a>
+            <router-link class="nav-link" to="#">History</router-link>
           </li>
         </ul>
       </div>

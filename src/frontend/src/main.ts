@@ -17,7 +17,7 @@ const routes = [
 { path: '/jobs/edit', component: JobsEdit, name: 'EditJob', props: true }
 ]
 
-createApp(App).use(createRouter({  history : createWebHistory(), routes: routes })).mount('#app')
+createApp(App).use(createRouter({  history : createWebHistory(), routes: routes, linkActiveClass: 'active' })).mount('#app')
 
 declare global {
     interface String {
