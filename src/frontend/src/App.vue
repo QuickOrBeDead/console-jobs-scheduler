@@ -18,7 +18,7 @@
             <router-link class="nav-link" to="/jobs">Jobs</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="#">History</router-link>
+            <router-link class="nav-link" to="/history">History</router-link>
           </li>
         </ul>
       </div>

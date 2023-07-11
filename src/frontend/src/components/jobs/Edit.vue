@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, Ref } from 'vue';
+import { ref, onMounted, Ref } from 'vue'
 import { useRoute } from "vue-router"
 import { createApi } from '../../api'
 import { JobDetailModel, JobsApi, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
