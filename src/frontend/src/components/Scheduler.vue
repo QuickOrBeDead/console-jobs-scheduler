@@ -71,7 +71,7 @@ onMounted(async () => {
                     <tbody>
                     <tr>
                         <th scope="row">Running Since</th>
-                        <td>{{ metadata?.runningSince?.toLocaleString() }}</td>
+                        <td>{{ metadata?.runningSince?.toLocaleDateTimeString() }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Started</th>
@@ -179,7 +179,7 @@ onMounted(async () => {
                     </tr>
                     <tr>
                         <th scope="row">Check-in Timestamp</th>
-                        <td>{{ node.checkInTimestamp?.toLocaleString() }}</td>
+                        <td>{{ node.checkInTimestamp?.toLocaleDateTimeString() }}</td>
                     </tr>
                     </tbody>
                 </table>

@@ -36,8 +36,8 @@ onMounted(async () => {
                                     <td class="text-nowrap">{{ job.jobGroup }}</td>
                                     <td class="text-nowrap">{{ job.jobType }}</td>
                                     <td class="text-nowrap">{{ job.triggerDescription }}</td>
-                                    <td class="text-nowrap">{{ job.lastFireTime?.toLocaleString() }}</td>
-                                    <td class="text-nowrap">{{ job.nextFireTime?.toLocaleString() }}</td>
+                                    <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
+                                    <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
                                     <td class="text-nowrap"><a>Edit</a></td>
                                 </tr>
                             </template>
