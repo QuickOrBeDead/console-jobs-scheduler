@@ -4,6 +4,7 @@ using ConsoleJobScheduler.WindowsService.Data;
 using ConsoleJobScheduler.WindowsService.Plugins.Model;
 using ConsoleJobScheduler.WindowsService.Scheduler;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -17,7 +18,7 @@ public sealed class JobHistoryController : ControllerBase
     }
 
     [HttpGet("{pageNumber:int?}")]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<JobExecutionHistory>> Get(int? pageNumber = null)
     {
         return _schedulerService.GetJobExecutionHistory(page: pageNumber.GetValueOrDefault(1));

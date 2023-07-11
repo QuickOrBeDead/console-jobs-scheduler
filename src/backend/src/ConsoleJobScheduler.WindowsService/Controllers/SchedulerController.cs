@@ -4,6 +4,7 @@ using ConsoleJobScheduler.WindowsService.Scheduler;
 using Microsoft.AspNetCore.Mvc;
 
 using ConsoleJobScheduler.WindowsService.Models;
+using System.Net.Mime;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -17,7 +18,7 @@ public sealed class SchedulerController : ControllerBase
     }
 
     [HttpGet]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public async Task<SchedulerInfoModel> Get()
     {
         var (metaData, nodes, statistics) = await _schedulerService.GetStatistics();

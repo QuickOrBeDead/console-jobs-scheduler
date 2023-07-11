@@ -4,6 +4,7 @@ using ConsoleJobScheduler.WindowsService.Scheduler.Models;
 using ConsoleJobScheduler.WindowsService.Scheduler;
 using Microsoft.AspNetCore.Mvc;
 using Quartz;
+using System.Net.Mime;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -17,14 +18,17 @@ public sealed class JobsController : ControllerBase
     }
 
     [HttpGet]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public async Task<IList<JobListItemModel>> Get()
     {
         return await _schedulerService.GetJobList();
     }
 
     [HttpGet("{group}/{name}")]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobDetailModel))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string group, string name)
     {
         var jobKey = new JobKey(name, group);

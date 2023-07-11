@@ -2,6 +2,7 @@
 
 using ConsoleJobScheduler.WindowsService.Scheduler;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -15,7 +16,7 @@ public sealed class PackagesController : ControllerBase
     }
 
     [HttpGet]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public IList<string> Get()
     {
         return _schedulerService.GetPackages();

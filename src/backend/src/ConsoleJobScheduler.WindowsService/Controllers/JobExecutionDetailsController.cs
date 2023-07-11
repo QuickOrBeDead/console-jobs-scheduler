@@ -3,6 +3,7 @@
 using ConsoleJobScheduler.WindowsService.Scheduler;
 
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -16,7 +17,7 @@ public class JobExecutionDetailsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> Get(string id)
     {
        var jobDetail = await _schedulerService.GetJobExecutionDetail(id).ConfigureAwait(false);
@@ -29,14 +30,14 @@ public class JobExecutionDetailsController : ControllerBase
     }
 
     [HttpGet("GetErrorDetail/{id}")]
-    [Produces("application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public Task<string?> GetErrorDetail(string id)
     {
         return _schedulerService.GetJobExecutionErrorDetail(id);
     }
 
     [HttpGet("GetAttachment/{id}")]
-    [Produces("application/octet-stream")]
+    [Produces(MediaTypeNames.Application.Octet)]
     public IActionResult GetAttachment(string id, [FromQuery]string packageName, [FromQuery]string attachmentName)
     {
         var fileContents = _schedulerService.GetAttachmentBytes(packageName, id, attachmentName);
@@ -45,6 +46,6 @@ public class JobExecutionDetailsController : ControllerBase
             return NotFound();
         }
 
-        return File(fileContents, "application/octet-stream", attachmentName);
+        return File(fileContents, MediaTypeNames.Application.Octet, attachmentName);
     }
 }
