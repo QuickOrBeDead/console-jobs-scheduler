@@ -15,7 +15,7 @@
             <a class="nav-link active" aria-current="page" href="/">Scheduler</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Jobs</a>
+            <a class="nav-link" href="/jobs">Jobs</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">History</a>

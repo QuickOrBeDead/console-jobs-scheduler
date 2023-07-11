@@ -8,9 +8,11 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Scheduler from './components/Scheduler.vue'
+import JobsList from './components/jobs/List.vue'
 
 const routes = [
-{ path: '/', component: Scheduler }
+{ path: '/', component: Scheduler },
+{ path: '/jobs', component: JobsList }
 ]
 
 createApp(App).use(createRouter({  history : createWebHistory(), routes: routes })).mount('#app')
