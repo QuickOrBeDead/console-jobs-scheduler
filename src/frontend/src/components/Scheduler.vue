@@ -158,6 +158,32 @@ onMounted(async () => {
             </table>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="display-6" style="margin-bottom: 0;">Nodes</h4>
+            <hr style="margin: 4px 0px;">
+        </div>
+    </div>
+    <div class="row" v-for="node in nodes">
+        <div class="col-12">
+            <table class="table table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th scope="row">Instance Id</th>
+                    <td>{{ node.schedulerInstanceId }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Check-in Interval</th>
+                    <td>{{ node.checkInInterval }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Check-in Timestamp</th>
+                    <td>{{ node.checkInTimestamp?.toLocaleString() }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </template>
 
