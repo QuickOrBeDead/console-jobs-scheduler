@@ -69,6 +69,55 @@ export interface JobAddOrUpdateModel {
 /**
  * 
  * @export
+ * @interface JobDetailModel
+ */
+export interface JobDetailModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'jobName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'jobGroup'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'description'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'cronExpression'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'package'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'parameters'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobDetailModel
+     */
+    'cronExpressionDescription'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface JobExecutionHistory
  */
 export interface JobExecutionHistory {
@@ -224,6 +273,45 @@ export interface JobListItemModel {
      * @memberof JobListItemModel
      */
     'triggerDescription'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface ProblemDetails
+ */
+export interface ProblemDetails {
+    [key: string]: any;
+
+    /**
+     * 
+     * @type {string}
+     * @memberof ProblemDetails
+     */
+    'type'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProblemDetails
+     */
+    'title'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProblemDetails
+     */
+    'status'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProblemDetails
+     */
+    'detail'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProblemDetails
+     */
+    'instance'?: string | null;
 }
 /**
  * 
@@ -982,7 +1070,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobDetailModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGroupNameGet(group, name, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1021,7 +1109,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobsGroupNameGet(group: string, name: string, options?: any): AxiosPromise<void> {
+        apiJobsGroupNameGet(group: string, name: string, options?: any): AxiosPromise<JobDetailModel> {
             return localVarFp.apiJobsGroupNameGet(group, name, options).then((request) => request(axios, basePath));
         },
         /**
