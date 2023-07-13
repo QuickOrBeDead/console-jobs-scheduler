@@ -5,12 +5,43 @@ import { JobExecutionHistoryPagedResult, JobHistoryApi } from '../../metadata/co
 
 const jobHistoryItems = ref<JobExecutionHistoryPagedResult>()
 
-onMounted(async () => {
-    const jobHistoryApi = createApi(JobHistoryApi)
+let totalPages = 0
+let currentPage: number = 1
+let nextPage = 0
+let previousPage = 0
+let start = 0
+let end = 0
+const pages =  ref<number[]>()
+const jobHistoryApi = createApi(JobHistoryApi)
 
-    const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(1)
-    jobHistoryItems.value = data
+onMounted(async () => { 
+   setCurrentPage(1)
 })
+
+async function setCurrentPage(page: number)  {
+    currentPage = page
+
+    const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(currentPage)
+    jobHistoryItems.value = data
+
+    totalPages = data.totalPages!
+    start = Math.max(1, currentPage - 5)
+    end = Math.min(start + 10, totalPages)
+    if (end - start < 10)
+    {
+        start = Math.max(1, end - 10)
+    }
+
+    nextPage = Math.min(currentPage + 1, totalPages)
+    previousPage = Math.max(currentPage - 1, start)
+
+    const pageList = []
+    for (let i = start; i <= end; i++) {
+        pageList.push(i) 
+    }
+
+    pages.value = pageList
+}
 </script>
 
 <template>
@@ -51,6 +82,23 @@ onMounted(async () => {
                             </template>
                         </tbody>
                     </table>
+                    <ul class="pagination justify-content-center">
+                        <li :class="[currentPage == start ? 'disabled': '']" class="page-item">
+                            <a class="page-link" href="#" @click="setCurrentPage(previousPage)" aria-label="Previous">
+                                <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+                        <template v-for="pageNumber in pages">
+                            <li :class="[pageNumber == currentPage ? 'disabled': '']" class="page-item">
+                                <a class="page-link" href="#" @click="setCurrentPage(pageNumber)">{{ pageNumber }}</a>
+                            </li>
+                        </template>
+                        <li :class="[currentPage == end ? 'disabled': '']" class="page-item">
+                            <a class="page-link" href="#" @click="setCurrentPage(nextPage)" aria-label="Next">
+                                <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
