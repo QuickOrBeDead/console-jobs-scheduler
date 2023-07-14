@@ -111,7 +111,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
     {
         if (!string.IsNullOrEmpty(data))
         {
-            _packageRunStorage.AppendToLog(packageName, jobRunId, data);
+            _packageRunStorage.AppendToLog(packageName, jobRunId, data, isError);
             _jobConsoleLogMessagePublisher.Publish(new JobConsoleLogMessageEvent(jobRunId, data, isError));
         }
 

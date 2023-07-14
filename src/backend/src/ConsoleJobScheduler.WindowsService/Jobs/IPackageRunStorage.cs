@@ -1,10 +1,12 @@
 ﻿namespace ConsoleJobScheduler.WindowsService.Jobs;
 
+using ConsoleJobScheduler.WindowsService.Jobs.Models;
+
 public interface IPackageRunStorage
 {
-    void AppendToLog(string packageName, string jobRunId, string content);
+    void AppendToLog(string packageName, string jobRunId, string content, bool isError);
 
-    IList<string> GetLogLines(string packageName, string jobRunId);
+    IList<LogLine> GetLogLines(string packageName, string jobRunId);
 
     string GetAttachmentsPath(string packageName, string jobRunId);
 

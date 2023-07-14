@@ -2,6 +2,7 @@
 
 using System.Collections.ObjectModel;
 
+using ConsoleJobScheduler.WindowsService.Jobs.Models;
 using ConsoleJobScheduler.WindowsService.Plugins.Model;
 
 public sealed class JobExecutionDetailModel
@@ -10,9 +11,9 @@ public sealed class JobExecutionDetailModel
 
     public IList<string> Attachments { get; }
 
-    public IList<string> Logs { get; }
+    public IList<LogLine> Logs { get; }
 
-    public JobExecutionDetailModel(JobExecutionDetail details, IList<string> logs, IList<string> attachments)
+    public JobExecutionDetailModel(JobExecutionDetail details, IList<LogLine> logs, IList<string> attachments)
     {
         if (logs == null)
         {
@@ -26,6 +27,6 @@ public sealed class JobExecutionDetailModel
 
         Details = details ?? throw new ArgumentNullException(nameof(details));
         Attachments = new ReadOnlyCollection<string>(attachments);
-        Logs = new ReadOnlyCollection<string>(logs);
+        Logs = new ReadOnlyCollection<LogLine>(logs);
     }
 }

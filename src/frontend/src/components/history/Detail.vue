@@ -2,21 +2,21 @@
 import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
-import { JobExecutionDetail, JobExecutionDetailsApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
 import { HubConnectionBuilder } from '@aspnet/signalr'
 
 const route = useRoute()
 const id = route.params.id as string
 
 const job = ref<JobExecutionDetail>()
-const logs = reactive<string[]>([])
+const logs = reactive<LogLine[]>([])
 const attachments = ref<string[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
 
 onMounted(async () => {
     const { data } = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
     job.value = data.details
-    logs.push(...data.logs as string[])
+    logs.push(...data.logs as LogLine[])
     attachments.value = data.attachments as string[]
 
     const $console = document.getElementById('console')
@@ -24,7 +24,10 @@ onMounted(async () => {
     var connection = new HubConnectionBuilder().withUrl('/jobRunConsoleHub').build()
 
     connection.on('ReceiveJobConsoleLogMessage', function (data, isError) {
-        logs.push(data)
+        logs.push({
+            message: data,
+            isError: isError
+        })
 
         $console!.scrollTop = $console!.scrollHeight
     })
@@ -53,7 +56,7 @@ onUpdated(() => {
                 <p>
                     <div id="console">
                         <template v-for="jobLog in logs">
-                            <div class="col-12 text-start text-nowrap ps-1" v-html="jobLog"></div>
+                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1" v-html="jobLog.message"></div>
                         </template>
                     </div>
                 </p>

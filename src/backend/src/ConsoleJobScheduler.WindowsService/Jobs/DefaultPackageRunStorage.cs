@@ -1,6 +1,9 @@
 ﻿namespace ConsoleJobScheduler.WindowsService.Jobs;
 
 using System.Collections.ObjectModel;
+using System.Linq;
+
+using ConsoleJobScheduler.WindowsService.Jobs.Models;
 
 public sealed class DefaultPackageRunStorage : IPackageRunStorage
 {
@@ -16,7 +19,7 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         _rootPath = rootPath;
     }
 
-    public void AppendToLog(string packageName, string jobRunId, string content)
+    public void AppendToLog(string packageName, string jobRunId, string content, bool isError)
     {
         var packageLogFolder = GetPackageLogFolder(packageName);
         if (!Directory.Exists(packageLogFolder))
@@ -25,23 +28,35 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         }
 
         var jobLogFile = GetJobLogFilePath(jobRunId, packageLogFolder);
-        File.AppendAllText(jobLogFile, content + "\n");
+        if (isError)
+        {
+            content ??= string.Empty;
+            content = string.Join('\n', content.Split('\n').Select(x => $"##[error] {x}"));
+        }
+
+        File.AppendAllText(jobLogFile, $"{content}\n");
     }
 
-    public IList<string> GetLogLines(string packageName, string jobRunId)
+    public IList<LogLine> GetLogLines(string packageName, string jobRunId)
     {
         if (string.IsNullOrWhiteSpace(packageName))
         {
-            return new ReadOnlyCollection<string>(new List<string>(0));
+            return new ReadOnlyCollection<LogLine>(new List<LogLine>(0));
         }
 
         var logFile = GetJobLogFilePathByPackageName(packageName, jobRunId);
         if (!File.Exists(logFile))
         {
-            return new ReadOnlyCollection<string>(new List<string>(0));
+            return new ReadOnlyCollection<LogLine>(new List<LogLine>(0));
         }
 
-        return File.ReadAllLines(logFile);
+        return File.ReadAllLines(logFile)
+            .Select(x => new LogLine
+                               {
+                                   Message = x,
+                                   IsError = !string.IsNullOrWhiteSpace(x) && x.StartsWith("##[error] ", StringComparison.InvariantCultureIgnoreCase)
+                               })
+            .ToList();
     }
 
     public string GetAttachmentsPath(string packageName, string jobRunId)

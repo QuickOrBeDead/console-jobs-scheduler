@@ -26,8 +26,8 @@ public sealed class SmtpEmailSender : IEmailSender
         var emailsFolder = GetEmailsFolder(packageName, jobRunId);
         foreach (var emailJsonPath in Directory.EnumerateFiles(emailsFolder, "*.json", SearchOption.TopDirectoryOnly))
         {
-            var jsonContent = await File.ReadAllTextAsync(emailJsonPath);
-            await SendMailAsync(JsonSerializer.Deserialize<EmailMessage>(jsonContent));
+            var jsonContent = await File.ReadAllTextAsync(emailJsonPath).ConfigureAwait(false);
+            await SendMailAsync(JsonSerializer.Deserialize<EmailMessage>(jsonContent)).ConfigureAwait(false);
         }
     }
 

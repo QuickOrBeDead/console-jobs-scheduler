@@ -220,10 +220,10 @@ export interface JobExecutionDetailModel {
     'attachments'?: Array<string> | null;
     /**
      * 
-     * @type {Array<string>}
+     * @type {Array<LogLine>}
      * @memberof JobExecutionDetailModel
      */
-    'logs'?: Array<string> | null;
+    'logs'?: Array<LogLine> | null;
 }
 /**
  * 
@@ -383,6 +383,25 @@ export interface JobListItemModel {
      * @memberof JobListItemModel
      */
     'triggerDescription'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface LogLine
+ */
+export interface LogLine {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof LogLine
+     */
+    'isError'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof LogLine
+     */
+    'message'?: string | null;
 }
 /**
  * 
