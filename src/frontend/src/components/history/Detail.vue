@@ -1,18 +1,42 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
-import { JobExecutionDetailModel, JobExecutionDetailsApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobExecutionDetail, JobExecutionDetailsApi } from '../../metadata/console-jobs-scheduler-api'
+import { HubConnectionBuilder } from '@aspnet/signalr'
 
 const route = useRoute()
 const id = route.params.id as string
 
-const job = ref<JobExecutionDetailModel>()
+const job = ref<JobExecutionDetail>()
+const logs = reactive<string[]>([])
+const attachments = ref<string[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
 
-onMounted(async () =>{
+onMounted(async () => {
     const { data } = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
-    job.value = data
+    job.value = data.details
+    logs.push(...data.logs as string[])
+    attachments.value = data.attachments as string[]
+
+    const $console = document.getElementById('console')
+
+    var connection = new HubConnectionBuilder().withUrl('/jobRunConsoleHub').build()
+
+    connection.on('ReceiveJobConsoleLogMessage', function (data, isError) {
+        logs.push(data)
+
+        $console!.scrollTop = $console!.scrollHeight
+    })
+
+    connection.start().then(function () {
+        connection.invoke('AddToGroup', id)
+    })
+})
+
+onUpdated(() => {
+    const $console = document.getElementById('console')
+    $console!.scrollTop = $console!.scrollHeight
 })
 </script>
 <template>
@@ -28,8 +52,8 @@ onMounted(async () =>{
             <div class="col-8">
                 <p>
                     <div id="console">
-                        <template v-if="job?.details?.completed" v-for="jobLog in job.logs">
-                            <div class="col-12 text-start text-nowrap ps-1">{{ jobLog }}</div>
+                        <template v-for="jobLog in logs">
+                            <div class="col-12 text-start text-nowrap ps-1" v-html="jobLog"></div>
                         </template>
                     </div>
                 </p>
@@ -40,52 +64,52 @@ onMounted(async () =>{
                 <table class="table table-striped table-bordered"> <tbody>
                     <tr>
                         <th scope="row">Job Name</th>
-                        <td>{{ job?.details?.jobName }}</td>
+                        <td>{{ job?.jobName }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Job Group</th>
-                        <td>{{ job?.details?.jobGroup }}</td>
+                        <td>{{ job?.jobGroup }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Instance Name</th>
-                        <td>{{ job?.details?.instanceName }}</td>
+                        <td>{{ job?.instanceName }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Trigger Name</th>
-                        <td>{{ job?.details?.triggerName }}</td>
+                        <td>{{ job?.triggerName }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Trigger Group</th>
-                        <td>{{ job?.details?.triggerGroup }}</td>
+                        <td>{{ job?.triggerGroup }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Scheduled Time</th>
-                        <td>{{ job?.details?.scheduledTime?.toLocaleDateTimeString() }}</td>
+                        <td>{{ job?.scheduledTime?.toLocaleDateTimeString() }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Run Time</th>
-                        <td>{{ job?.details?.runTime }}</td>
+                        <td>{{ job?.runTime }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Has Error</th>
-                        <td>{{ job?.details?.hasError ? "TRUE" : "FALSE" }}</td>
+                        <td>{{ job?.hasError ? "TRUE" : "FALSE" }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Error Message</th>
-                        <td>{{ job?.details?.errorMessage }}</td>
+                        <td>{{ job?.errorMessage }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Vetoed</th>
-                        <td>{{ job?.details?.vetoed ? "TRUE" : "FALSE" }}</td>
+                        <td>{{ job?.vetoed ? "TRUE" : "FALSE" }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Completed</th>
-                        <td>{{ job?.details?.completed ? "TRUE" : "FALSE" }}</td>
+                        <td>{{ job?.completed ? "TRUE" : "FALSE" }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Attachments</th>
                         <td>
-                            <template v-for="attachment in job?.attachments">
+                            <template v-for="attachment in attachments">
                                 <a href="#">{{ attachment }}</a>
                                 <br />
                             </template>

@@ -86,7 +86,10 @@ public sealed class ServiceHost
             _app.UseSwaggerUI();
         }
 
-        _app.UseWhen(x => x.Request.Path.HasValue && !x.Request.Path.Value.StartsWith("/api", StringComparison.InvariantCultureIgnoreCase), app1 =>
+        _app.UseWhen(x => 
+                x.Request.Path.HasValue && 
+                !x.Request.Path.Value.StartsWith("/api", StringComparison.InvariantCultureIgnoreCase) &&
+                !x.Request.Path.Value.StartsWith("/jobRunConsoleHub", StringComparison.InvariantCultureIgnoreCase), app1 =>
             app1.UseSpa(spa =>
                 {
                     if (_app.Environment.IsDevelopment())
