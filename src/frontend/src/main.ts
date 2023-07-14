@@ -7,6 +7,7 @@ import App from './App.vue'
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import Pagination from './components/common/Pagination.vue'
 import Scheduler from './components/Scheduler.vue'
 import JobsList from './components/jobs/List.vue'
 import JobsEdit from './components/jobs/Edit.vue'
@@ -19,7 +20,10 @@ const routes = [
 { path: '/history', component: HistoryList }
 ]
 
-createApp(App).use(createRouter({  history : createWebHistory(), routes: routes, linkActiveClass: 'active' })).mount('#app')
+createApp(App)
+    .use(createRouter({  history : createWebHistory(), routes: routes, linkActiveClass: 'active' }))
+    .component('pagination', Pagination)
+    .mount('#app')
 
 declare global {
     interface String {
