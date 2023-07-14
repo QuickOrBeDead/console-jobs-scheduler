@@ -56,7 +56,7 @@ onUpdated(() => {
                 <p>
                     <div id="console">
                         <template v-for="jobLog in logs">
-                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1" v-html="jobLog.message"></div>
+                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.message }}</div>
                         </template>
                     </div>
                 </p>
