@@ -118,6 +118,116 @@ export interface JobDetailModel {
 /**
  * 
  * @export
+ * @interface JobExecutionDetail
+ */
+export interface JobExecutionDetail {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'instanceName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'jobName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'jobGroup'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'triggerName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'triggerGroup'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'packageName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'scheduledTime'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'firedTime'?: string;
+    /**
+     * 
+     * @type {TimeSpan}
+     * @memberof JobExecutionDetail
+     */
+    'runTime'?: TimeSpan;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionDetail
+     */
+    'hasError'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'errorMessage'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionDetail
+     */
+    'completed'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionDetail
+     */
+    'vetoed'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface JobExecutionDetailModel
+ */
+export interface JobExecutionDetailModel {
+    /**
+     * 
+     * @type {JobExecutionDetail}
+     * @memberof JobExecutionDetailModel
+     */
+    'details'?: JobExecutionDetail;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobExecutionDetailModel
+     */
+    'attachments'?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobExecutionDetailModel
+     */
+    'logs'?: Array<string> | null;
+}
+/**
+ * 
+ * @export
  * @interface JobExecutionHistory
  */
 export interface JobExecutionHistory {
@@ -748,7 +858,7 @@ export const JobExecutionDetailsApiFp = function(configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobExecutionDetailsIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiJobExecutionDetailsIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionDetailModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobExecutionDetailsIdGet(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -788,7 +898,7 @@ export const JobExecutionDetailsApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobExecutionDetailsIdGet(id: string, options?: any): AxiosPromise<void> {
+        apiJobExecutionDetailsIdGet(id: string, options?: any): AxiosPromise<JobExecutionDetailModel> {
             return localVarFp.apiJobExecutionDetailsIdGet(id, options).then((request) => request(axios, basePath));
         },
     };

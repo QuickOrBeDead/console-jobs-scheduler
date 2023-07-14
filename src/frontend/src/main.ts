@@ -12,12 +12,14 @@ import Scheduler from './components/Scheduler.vue'
 import JobsList from './components/jobs/List.vue'
 import JobsEdit from './components/jobs/Edit.vue'
 import HistoryList from './components/history/List.vue'
+import JobExecutionDetail from './components/history/Detail.vue'
 
 const routes = [
 { path: '/', component: Scheduler },
 { path: '/jobs', component: JobsList },
 { path: '/jobs/edit', component: JobsEdit, name: 'EditJob', props: true },
-{ path: '/history', component: HistoryList }
+{ path: '/history', component: HistoryList },
+{ path: '/history/details/:id', component: JobExecutionDetail, name: 'JobExecutionDetails', props: true }
 ]
 
 createApp(App)

@@ -1,9 +1,10 @@
 ﻿namespace ConsoleJobScheduler.WindowsService.Controllers;
 
 using ConsoleJobScheduler.WindowsService.Scheduler;
-
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+
+using ConsoleJobScheduler.WindowsService.Scheduler.Models;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -18,6 +19,9 @@ public class JobExecutionDetailsController : ControllerBase
 
     [HttpGet("{id}")]
     [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobExecutionDetailModel))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string id)
     {
        var jobDetail = await _schedulerService.GetJobExecutionDetail(id).ConfigureAwait(false);

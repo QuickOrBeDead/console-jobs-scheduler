@@ -45,7 +45,7 @@ async function setCurrentPage(page: number)  {
                         <tbody>
                             <template v-for="item in jobHistoryItems?.items">
                             <tr :class="[item.completed && !item.hasError && !item.vetoed ? 'table-success': '' ]">
-                                <td class="text-nowrap"><a asp-page="Detail" asp-route-id="@item.Id">{{ item.jobName }}</a></td>
+                                <td class="text-nowrap"><router-link :to="{ name: 'JobExecutionDetails', params: { id: item.id }}">{{ item.jobName }}</router-link></td>
                                 <td class="text-nowrap">{{ item.scheduledTime?.toLocaleDateTimeString() }}</td>
                                 <td class="text-nowrap">{{ item.firedTime?.toLocaleDateTimeString() }}</td>
                                 <td class="text-nowrap">{{ item.nextFireTime?.toLocaleDateTimeString() }}</td>
