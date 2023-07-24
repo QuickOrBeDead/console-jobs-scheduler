@@ -1,5 +1,7 @@
 ﻿namespace ConsoleJobScheduler.WindowsService.Jobs;
 
+using ConsoleJobScheduler.WindowsService.Jobs.Models;
+
 public sealed class DefaultPackageStorage : IPackageStorage
 {
     private readonly string _rootPath;
@@ -25,6 +27,25 @@ public sealed class DefaultPackageStorage : IPackageStorage
             .Select(Path.GetFileNameWithoutExtension)
             .OrderBy(x => x)
             .ToList()!;
+    }
+
+    public PackageDetailsModel? GetPackageDetails(string packageName)
+    {
+        // TODO: validate package name
+
+        if (string.IsNullOrWhiteSpace(packageName))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageName));
+        }
+
+        return Directory.EnumerateFiles(GetPackagesPath(), $"{packageName}.zip", SearchOption.TopDirectoryOnly)
+            .Select(x => new PackageDetailsModel
+                             {
+                                 Name = Path.GetFileNameWithoutExtension(x),
+                                 Path = x,
+                                 ModifyDate = File.GetLastWriteTime(x)
+                             })
+            .FirstOrDefault();
     }
 
     private string GetPackagesPath()

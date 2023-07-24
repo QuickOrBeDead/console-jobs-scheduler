@@ -3,6 +3,7 @@
 using ConsoleJobScheduler.WindowsService.Data;
 using ConsoleJobScheduler.WindowsService.Extensions;
 using ConsoleJobScheduler.WindowsService.Jobs;
+using ConsoleJobScheduler.WindowsService.Jobs.Models;
 using ConsoleJobScheduler.WindowsService.Logging;
 using ConsoleJobScheduler.WindowsService.Plugins.Model;
 using ConsoleJobScheduler.WindowsService.Scheduler.Models;
@@ -12,6 +13,8 @@ using MessagePipe;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.Matchers;
+
+using JobDetailModel = ConsoleJobScheduler.WindowsService.Scheduler.Models.JobDetailModel;
 
 public interface ISchedulerService
 {
@@ -35,6 +38,8 @@ public interface ISchedulerService
     Task<JobDetailModel?> GetJobDetail(JobKey jobKey);
 
     IList<string> GetPackages();
+
+    PackageDetailsModel? GetPackageDetails(string packageName);
 
     Task<IList<JobListItemModel>> GetJobList();
 
@@ -159,6 +164,11 @@ public sealed class SchedulerService : ISchedulerService
     public IList<string> GetPackages()
     {
         return _packageStorage.GetPackages();
+    }
+
+    public PackageDetailsModel? GetPackageDetails(string packageName)
+    {
+        return _packageStorage.GetPackageDetails(packageName);
     }
 
     public async Task<IList<JobListItemModel>> GetJobList()
