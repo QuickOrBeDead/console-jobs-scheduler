@@ -48,6 +48,21 @@ public sealed class DefaultPackageStorage : IPackageStorage
             .FirstOrDefault();
     }
 
+    public Task SavePackage(string packageName, byte[] content)
+    {
+        if (content == null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        if (string.IsNullOrWhiteSpace(packageName))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageName));
+        }
+
+        return File.WriteAllBytesAsync(Path.Combine(GetPackagesPath(), $"{packageName}.zip"), content);
+    }
+
     private string GetPackagesPath()
     {
         return Path.Combine(_rootPath, "packages");

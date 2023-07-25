@@ -9,4 +9,6 @@ public interface IPackageStorage
     IList<string> GetPackages();
 
     PackageDetailsModel? GetPackageDetails(string packageName);
+
+    Task SavePackage(string packageName, byte[] content);
 }

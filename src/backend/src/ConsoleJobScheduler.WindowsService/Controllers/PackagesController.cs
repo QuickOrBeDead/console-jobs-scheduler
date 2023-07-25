@@ -40,4 +40,20 @@ public sealed class PackagesController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("Save")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Save([FromForm] PackageSaveModel model)
+    {
+        if (model.File == null || string.IsNullOrWhiteSpace(model.Name))
+        {
+            return BadRequest();
+        }
+
+        using MemoryStream ms = new();
+        await model.File.CopyToAsync(ms).ConfigureAwait(false);
+        await _schedulerService.SavePackage(model.Name, ms.ToArray()).ConfigureAwait(false);
+        return Ok();
+    }
 }

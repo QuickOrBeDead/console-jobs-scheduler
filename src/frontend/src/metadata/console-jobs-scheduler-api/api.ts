@@ -1389,6 +1389,49 @@ export const PackagesApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @param {string} [name] 
+         * @param {File} [file] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesSavePost: async (name?: string, file?: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Packages/Save`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+
+            if (name !== undefined) { 
+                localVarFormParams.append('Name', name as any);
+            }
+    
+            if (file !== undefined) { 
+                localVarFormParams.append('File', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1418,6 +1461,17 @@ export const PackagesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @param {string} [name] 
+         * @param {File} [file] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiPackagesSavePost(name?: string, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesSavePost(name, file, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -1444,6 +1498,16 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          */
         apiPackagesGet(options?: any): AxiosPromise<Array<string>> {
             return localVarFp.apiPackagesGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} [name] 
+         * @param {File} [file] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesSavePost(name?: string, file?: File, options?: any): AxiosPromise<void> {
+            return localVarFp.apiPackagesSavePost(name, file, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1474,6 +1538,18 @@ export class PackagesApi extends BaseAPI {
      */
     public apiPackagesGet(options?: AxiosRequestConfig) {
         return PackagesApiFp(this.configuration).apiPackagesGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} [name] 
+     * @param {File} [file] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PackagesApi
+     */
+    public apiPackagesSavePost(name?: string, file?: File, options?: AxiosRequestConfig) {
+        return PackagesApiFp(this.configuration).apiPackagesSavePost(name, file, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
