@@ -23,7 +23,7 @@ const routes = [
 { path: '/history', component: HistoryList },
 { path: '/history/details/:id', component: JobExecutionDetail, name: 'JobExecutionDetails', props: true },
 { path: '/packages', component: PackagesList },
-{ path: '/packages/details/:name', component: PackagesEdit, name: 'EditPackage' }
+{ path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage' }
 ]
 
 createApp(App)

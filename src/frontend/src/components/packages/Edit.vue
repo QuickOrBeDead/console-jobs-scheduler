@@ -14,10 +14,13 @@ const isInEditMode = !!name
 const packagesApi = createApi(PackagesApi)
 
 onMounted(async () => {
-    await router.isReady() 
-
-    const { data } = await packagesApi.apiPackagesDetailGet(name)
-    packageDetail.value = data
+    if (isInEditMode) {
+        const { data } = await packagesApi.apiPackagesDetailGet(name)
+        packageDetail.value = data
+    } else {
+        packageDetail.value = {}
+    }
+   
 })
 
 function onFileChanged() {
@@ -27,9 +30,16 @@ function onFileChanged() {
 }
 
 async function save() {
-    if (file.value) {
-        await packagesApi.apiPackagesSavePost(name, file.value)
-        window.location.reload();
+    const packageName = isInEditMode ? name : packageDetail.value.name
+    if (file.value && packageName) {
+        await packagesApi.apiPackagesSavePost(packageName, file.value)
+
+        if (isInEditMode) {
+            window.location.reload()
+        }
+        else {
+            await router.push({ name: 'EditPackage', params: { name: packageName }})
+        }
     }
 }
 </script>
@@ -45,15 +55,16 @@ async function save() {
             <div class="row justify-content-center">
                 <div class="col-6">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div :class="[isInEditMode ? 'col-md-6' : 'col-md-12']">
                             <label for="Name" class="form-label">Name</label>
-                            <label id="Name" class="form-control-plaintext"><b>{{ packageDetail.name }}</b></label>
+                            <label v-if="isInEditMode" id="Name" class="form-control-plaintext"><b>{{ packageDetail.name }}</b></label>
+                            <input v-if="!isInEditMode" id="Name" type="text" class="form-control" v-model="packageDetail.name">
                         </div>
-                        <div class="col-md-6">
+                        <div v-if="isInEditMode" class="col-md-6">
                             <label for="ModifyDate" class="form-label">Last Modify Date</label>
                             <label id="ModifyDate" class="form-control-plaintext"><b>{{ packageDetail.modifyDate?.toLocaleDateTimeString() }}</b></label>
                         </div>
-                        <div class="col-12">
+                        <div v-if="isInEditMode" class="col-12">
                             <label for="Path" class="form-label">Path</label>
                             <label id="Path" class="form-control-plaintext"><b>{{ packageDetail.path }}</b></label>
                         </div>
