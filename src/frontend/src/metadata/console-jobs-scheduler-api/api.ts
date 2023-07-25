@@ -406,6 +406,31 @@ export interface LogLine {
 /**
  * 
  * @export
+ * @interface PackageDetailsModel
+ */
+export interface PackageDetailsModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof PackageDetailsModel
+     */
+    'name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PackageDetailsModel
+     */
+    'path'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PackageDetailsModel
+     */
+    'modifyDate'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface ProblemDetails
  */
 export interface ProblemDetails {
@@ -1303,6 +1328,40 @@ export const PackagesApiAxiosParamCreator = function (configuration?: Configurat
     return {
         /**
          * 
+         * @param {string} [packageName] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesDetailGet: async (packageName?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Packages/Detail`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (packageName !== undefined) {
+                localVarQueryParameter['packageName'] = packageName;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1342,6 +1401,16 @@ export const PackagesApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @param {string} [packageName] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageDetailsModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesDetailGet(packageName, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1361,6 +1430,15 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
     return {
         /**
          * 
+         * @param {string} [packageName] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesDetailGet(packageName?: string, options?: any): AxiosPromise<PackageDetailsModel> {
+            return localVarFp.apiPackagesDetailGet(packageName, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1377,6 +1455,17 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
  * @extends {BaseAPI}
  */
 export class PackagesApi extends BaseAPI {
+    /**
+     * 
+     * @param {string} [packageName] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PackagesApi
+     */
+    public apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig) {
+        return PackagesApiFp(this.configuration).apiPackagesDetailGet(packageName, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @param {*} [options] Override http request option.

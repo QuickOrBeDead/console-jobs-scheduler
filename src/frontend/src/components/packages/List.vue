@@ -30,7 +30,7 @@ onMounted(async () => {
                         <tbody>
                             <template v-for="item in packages">
                             <tr>
-                                <td class="text-nowrap">{{ item }}</td>
+                                <td class="text-nowrap"><router-link :to="{ name: 'EditPackage', params: { name: item } }">{{ item }}</router-link></td>
                             </tr>
                             </template>
                         </tbody>
