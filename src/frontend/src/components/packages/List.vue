@@ -22,7 +22,7 @@ onMounted(async () => {
             <div class="row">
                 <div class="col-12 mb-1">
                     <router-link :to="{ name: 'EditPackage' }" custom v-slot="{ navigate }">
-                        <button class="btn btn-primary float-end" @click="navigate" @keypress.enter="navigate">Add</button>
+                        <button class="btn btn-primary float-end" @click="navigate">Add</button>
                     </router-link>
                 </div>
             </div>
