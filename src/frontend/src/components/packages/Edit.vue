@@ -1,27 +1,46 @@
 <script setup lang="ts">
-import { ref, onMounted, Ref } from 'vue'
+import { ref, onMounted, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createApi } from '../../api'
 import { PackageDetailsModel, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
 const packageDetail = ref<PackageDetailsModel>() as Ref<PackageDetailsModel>
 const fileInput = ref<HTMLInputElement>()
-const file = ref<File>()
+const file = ref<File | null>()
 const route = useRoute()
 const router = useRouter()
-const name = route.params.name as string
-const isInEditMode = !!name
+let name: string
+let isInEditMode: boolean
 const packagesApi = createApi(PackagesApi)
 
-onMounted(async () => {
+const loadPage = async () => {
+    name = route.params.name as string
+    isInEditMode = !!name
+
+    file.value = null
+    if (fileInput.value) {
+        fileInput.value.value = ''
+    }
+
     if (isInEditMode) {
         const { data } = await packagesApi.apiPackagesDetailGet(name)
         packageDetail.value = data
     } else {
         packageDetail.value = {}
     }
-   
+}
+
+onMounted(async () => {
+    await loadPage()
 })
+
+watch(
+  () => route.params, 
+  loadPage,
+  {
+    deep:true
+  }
+)
 
 function onFileChanged() {
     if (fileInput.value && fileInput.value.files) {
@@ -35,9 +54,8 @@ async function save() {
         await packagesApi.apiPackagesSavePost(packageName, file.value)
 
         if (isInEditMode) {
-            window.location.reload()
-        }
-        else {
+            await loadPage()
+        } else {
             await router.push({ name: 'EditPackage', params: { name: packageName }})
         }
     }
