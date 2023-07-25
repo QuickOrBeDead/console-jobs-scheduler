@@ -4,13 +4,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { createApi } from '../../api'
 import { PackageDetailsModel, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
+const route = useRoute()
+const router = useRouter()
+
+let name: string
+let isInEditMode: boolean
+
 const packageDetail = ref<PackageDetailsModel>() as Ref<PackageDetailsModel>
 const fileInput = ref<HTMLInputElement>()
 const file = ref<File | null>()
-const route = useRoute()
-const router = useRouter()
-let name: string
-let isInEditMode: boolean
+
 const packagesApi = createApi(PackagesApi)
 
 const loadPage = async () => {
