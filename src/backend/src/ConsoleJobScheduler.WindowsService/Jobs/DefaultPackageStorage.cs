@@ -65,6 +65,12 @@ public sealed class DefaultPackageStorage : IPackageStorage
 
     private string GetPackagesPath()
     {
-        return Path.Combine(_rootPath, "packages");
+        var path = Path.Combine(_rootPath, "packages");
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        return path;
     }
 }
