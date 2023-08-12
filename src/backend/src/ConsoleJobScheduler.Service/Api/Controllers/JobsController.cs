@@ -55,8 +55,17 @@ public sealed class JobsController : ControllerBase
     }
 
     [HttpPost]
-    public Task Post([FromBody] JobAddOrUpdateModel jobAddOrUpdateModel)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Post([FromBody] JobAddOrUpdateModel model)
     {
-        return _schedulerService.AddOrUpdateJob(jobAddOrUpdateModel);
+        if (string.IsNullOrWhiteSpace(model.JobName) || string.IsNullOrWhiteSpace(model.JobGroup))
+        {
+            return BadRequest();
+        }
+
+        await _schedulerService.AddOrUpdateJob(model).ConfigureAwait(false);
+
+        return Ok();
     }
 }

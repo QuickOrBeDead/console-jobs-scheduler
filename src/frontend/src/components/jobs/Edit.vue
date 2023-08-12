@@ -1,29 +1,69 @@
 <script setup lang="ts">
-import { ref, onMounted, Ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, Ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { createApi } from '../../api'
 import { JobDetailModel, JobsApi, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
+const route = useRoute()
+const router = useRouter()
+
 const job = ref<JobDetailModel>() as Ref<JobDetailModel>
 const packages = ref<string[]>() as Ref<string[]>
-const route = useRoute()
-const jobGroup = route.params.jobGroup as string
-const jobName = route.params.jobName as string
-const isInEditMode = jobGroup && jobName
 
-onMounted(async () => {
-    const packagesApi = createApi(PackagesApi)
-    const jobsApi = createApi(JobsApi)
+let jobGroup: string
+let jobName: string
+let isInEditMode: boolean
+
+const jobsApi = createApi(JobsApi)
+const packagesApi = createApi(PackagesApi)
+
+const loadPage = async () => {
+    jobGroup = route.params.jobGroup as string
+    jobName = route.params.jobName as string
+    isInEditMode = !!jobGroup && !!jobName
 
     const { data } = await packagesApi.apiPackagesGet()
     packages.value = data
    
-    if (isInEditMode)
-    {
+    if (isInEditMode) {
         const { data } = await jobsApi.apiJobsGroupNameGet(jobGroup, jobName)
         job.value = data
     }
+    else {
+        job.value = {}
+    }
+}
+
+onMounted(async () => {
+   await loadPage()
 })
+
+watch(
+  () => route.params, 
+  loadPage,
+  {
+    deep:true
+  }
+)
+
+async function save() {
+    if (job.value) {
+        await jobsApi.apiJobsPost({
+            jobName: job.value.jobName as string,
+            jobGroup: job.value.jobGroup as string,
+            description: job.value.description as string,
+            cronExpression: job.value.cronExpression as string,
+            package: job.value.package as string,
+            parameters: job.value.parameters
+        })
+
+        if (isInEditMode) {
+            await loadPage()
+        } else {
+            await router.push({ name: 'EditJob', params: { jobName: job.value.jobName, jobGroup: job.value.jobGroup }})
+        }
+    }
+}
 </script>
 
 <template>
@@ -69,7 +109,7 @@ onMounted(async () => {
                             <label for="Parameters" class="form-label">Parameters</label>
                             <textarea id="Parameters" class="form-control" v-model="job.parameters" rows="5" cols="30"></textarea>
                         </div>
-                        <button class="btn btn-primary">{{ isInEditMode ? "Edit" : "Add" }} Job</button>
+                        <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} Job</button>
                     </div>
                 </div>
             </div>
