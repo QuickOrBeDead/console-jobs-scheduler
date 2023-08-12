@@ -1,7 +1,9 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 
+using System;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 
 using Events;
 using Exceptions;
@@ -61,7 +63,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 
             using (var process = new Process())
             {
-                var pathToExecutable = Path.Combine(runDirectory, $"{packageName}.exe");
+                var pathToExecutable = Path.Combine(runDirectory, $"{packageName}{(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? string.Empty : ".exe")}");
 
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.FileName = pathToExecutable;
