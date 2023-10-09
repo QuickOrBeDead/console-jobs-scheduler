@@ -17,6 +17,17 @@ onMounted(async () => {
             <div class="row">
                 <div class="col-12">
                     <h1 class="display-6">Job List</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-1">
+                    <router-link :to="{ name: 'EditJob' }" custom v-slot="{ navigate }">
+                        <button class="btn btn-primary float-end" @click="navigate">Add</button>
+                    </router-link>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
                     <table class="table table-striped table-bordered">
                         <thead>
                         <tr>
