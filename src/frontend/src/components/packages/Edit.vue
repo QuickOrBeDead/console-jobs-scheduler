@@ -91,7 +91,7 @@ async function save() {
                         </div>
                         <div class="col-12">
                             <label for="File" class="form-label">Package Zip File</label>
-                            <input id="File" class="form-control" type="file" @change="onFileChanged" ref="fileInput">
+                            <input id="File" class="form-control" type="file" @change="onFileChanged" ref="fileInput" accept=".zip">
                         </div>
                         <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} Package</button>
                     </div>
