@@ -27,6 +27,6 @@ public sealed class ConsoleAppPackageJob : IJob
             throw new InvalidOperationException("jobData.GetString(\"parameters\") is null");
         }
 
-        await _consoleAppPackageRunner.Run(context.FireInstanceId, package, parameters).ConfigureAwait(false);
+        await _consoleAppPackageRunner.Run(context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
     }
 }

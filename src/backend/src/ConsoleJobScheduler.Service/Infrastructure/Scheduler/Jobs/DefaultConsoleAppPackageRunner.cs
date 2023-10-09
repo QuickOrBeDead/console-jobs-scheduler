@@ -41,7 +41,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         _tempRootPath = tempRootPath;
     }
 
-    public async Task Run(string jobRunId, string packageName, string arguments)
+    public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(_tempRootPath, "Temp");
         if (!Directory.Exists(tempDirectory))
@@ -83,7 +83,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 
-                await process.WaitForExitAsync().ConfigureAwait(false);
+                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
                 if (process.ExitCode != 0)
                 {
                     throw new ConsoleAppPackageRunFailException($"Console app package '{packageName}' run failed", process.ExitCode);

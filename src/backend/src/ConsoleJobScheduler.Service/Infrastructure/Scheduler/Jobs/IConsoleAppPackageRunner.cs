@@ -2,5 +2,5 @@
 
 public interface IConsoleAppPackageRunner
 {
-    Task Run(string jobRunId, string packageName, string arguments);
+    Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken);
 }
