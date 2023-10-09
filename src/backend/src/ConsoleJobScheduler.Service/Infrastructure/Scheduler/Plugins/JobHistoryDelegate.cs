@@ -55,7 +55,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
 
     private const string SqlJobExecutionStatistics = @"SELECT
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE VETOED = FALSE) AS TOTAL_EXECUTED_JOBS,
-                                                        (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE COMPLETED = FALSE AND VETOED = FALSE) AS TOTAL_RUNNING_JOBS,
+                                                        (SELECT COUNT(1) FROM {0}FIRED_TRIGGERS WHERE STATE = 'EXECUTING') AS TOTAL_RUNNING_JOBS,
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE VETOED = TRUE) AS TOTAL_VETOED_JOBS,
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE HAS_ERROR = FALSE AND COMPLETED = TRUE AND VETOED = FALSE) AS TOTAL_SUCCEEDED_JOBS,
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE HAS_ERROR = TRUE) AS TOTAL_FAILED_JOBS";
