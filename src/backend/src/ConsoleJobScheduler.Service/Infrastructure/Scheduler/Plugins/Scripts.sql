@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.qrtz_job_history
     trigger_group text COLLATE pg_catalog."default" NOT NULL,
     fired_time bigint NOT NULL,
     sched_time bigint NOT NULL,
+    last_signal_time bigint NOT NULL,
     run_time bigint,
     has_error boolean NOT NULL,
     error_message text COLLATE pg_catalog."default",

@@ -26,6 +26,8 @@ public interface IJobHistoryDelegate
         IJobExecutionContext context,
         CancellationToken cancellationToken = default);
 
+    Task UpdateJobHistoryEntryLastSignalTime(string id, CancellationToken cancellationToken = default);
+
     Task<JobExecutionStatistics> GetJobExecutionStatistics();
 
     Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(int pageSize = 10, int page = 1);
@@ -46,12 +48,14 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     private readonly string _tablePrefix;
 
     private const string SqlInsertJobExecuted =
-        "INSERT INTO {0}JOB_HISTORY (ID, SCHED_NAME, INSTANCE_NAME, TRIGGER_NAME, TRIGGER_GROUP, JOB_NAME, JOB_GROUP, PACKAGE_NAME, SCHED_TIME, FIRED_TIME, VETOED, HAS_ERROR, COMPLETED) VALUES (@id, @schedulerName, @instanceName, @triggerName, @triggerGroup, @jobName, @jobGroup, @packageName, @scheduledTime, @firedTime, FALSE, FALSE, FALSE)";
+        "INSERT INTO {0}JOB_HISTORY (ID, SCHED_NAME, INSTANCE_NAME, TRIGGER_NAME, TRIGGER_GROUP, JOB_NAME, JOB_GROUP, PACKAGE_NAME, SCHED_TIME, FIRED_TIME, LAST_SIGNAL_TIME, VETOED, HAS_ERROR, COMPLETED) VALUES (@id, @schedulerName, @instanceName, @triggerName, @triggerGroup, @jobName, @jobGroup, @packageName, @scheduledTime, @firedTime, @lastSignalTime, FALSE, FALSE, FALSE)";
 
     private const string SqlUpdateJobExecuted =
         "UPDATE {0}JOB_HISTORY SET RUN_TIME = @runTime, HAS_ERROR = @hasError, ERROR_MESSAGE = @errorMessage, ERROR_DETAILS = @errorDetails, COMPLETED = TRUE WHERE ID = @id";
 
     private const string SqlUpdateJobVetoed = "UPDATE {0}JOB_HISTORY SET VETOED = @vetoed WHERE ID = @id";
+
+    private const string SqlUpdateJobLastSignalTime = "UPDATE {0}JOB_HISTORY SET LAST_SIGNAL_TIME = @lastSignalTime WHERE ID = @id";
 
     private const string SqlJobExecutionStatistics = @"SELECT
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE VETOED = FALSE) AS TOTAL_EXECUTED_JOBS,
@@ -101,6 +105,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                 _dbAccessor.AddCommandParameter(command, "triggerGroup", context.Trigger.Key.Group);
                 _dbAccessor.AddCommandParameter(command, "scheduledTime", _dbAccessor.GetDbDateTimeValue(context.ScheduledFireTimeUtc));
                 _dbAccessor.AddCommandParameter(command, "firedTime", _dbAccessor.GetDbDateTimeValue(context.FireTimeUtc));
+                _dbAccessor.AddCommandParameter(command, "lastSignalTime", _dbAccessor.GetDbDateTimeValue(context.ScheduledFireTimeUtc));
                 _dbAccessor.AddCommandParameter(command, "packageName", GetJobData(context.JobDetail, "package"));
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 connection.Commit(false);
@@ -123,6 +128,22 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                 _dbAccessor.AddCommandParameter(command, "hasError", _dbAccessor.GetDbBooleanValue(jobException != null));
                 _dbAccessor.AddCommandParameter(command, "errorMessage", jobException?.Message);
                 _dbAccessor.AddCommandParameter(command, "errorDetails", jobException?.ToString());
+
+                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                connection.Commit(false);
+            }
+        }
+    }
+
+    public async Task UpdateJobHistoryEntryLastSignalTime(string id, CancellationToken cancellationToken = default)
+    {
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobLastSignalTime, _tablePrefix);
+        using (var connection = GetConnection(IsolationLevel.ReadCommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", id);
+                _dbAccessor.AddCommandParameter(command, "lastSignalTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
 
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 connection.Commit(false);
