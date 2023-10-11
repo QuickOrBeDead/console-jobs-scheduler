@@ -41,6 +41,7 @@ async function setCurrentPage(page: number)  {
                             <th scope="column">Run Time</th>
                             <th scope="column">Has Error</th>
                             <th scope="column">Vetoed</th>
+                            <th scope="column" style="text-align: center">Status</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -55,6 +56,7 @@ async function setCurrentPage(page: number)  {
                                 <td class="text-nowrap">{{ item.runTime }}</td>
                                 <td>{{ item.hasError ? "TRUE" : "FALSE" }}</td>
                                 <td>{{ item.vetoed ? "TRUE" : "FALSE" }}</td>
+                                <td style="text-align: center"><i :class="[item.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : item.completed && !item.hasError && !item.vetoed ? 'bi bi-check-circle-fill text-success' : item.completed && item.hasError && !item.vetoed ? 'bi bi-x-circle-fill text-danger' : item.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i></td>
                             </tr>
                             </template>
                         </tbody>
