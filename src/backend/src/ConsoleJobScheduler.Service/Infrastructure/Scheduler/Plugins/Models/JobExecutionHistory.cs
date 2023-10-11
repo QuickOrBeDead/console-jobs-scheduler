@@ -16,6 +16,8 @@ public sealed class JobExecutionHistory
 
     public DateTime FiredTime { get; set; }
 
+    public DateTime LastSignalTime { get; set; }
+
     public DateTime? NextFireTime { get; set; }
 
     public TimeSpan? RunTime { get; set; }
@@ -25,4 +27,18 @@ public sealed class JobExecutionHistory
     public bool Completed { get; set; }
 
     public bool Vetoed { get; set; }
+
+    public bool HasSignalTimeout { get; set; }
+
+    public void UpdateHasSignalTimeout(TimeSpan timeout)
+    {
+        if (Completed || Vetoed)
+        {
+            HasSignalTimeout = false;
+        }
+        else
+        {
+            HasSignalTimeout = DateTime.UtcNow.Subtract(LastSignalTime.ToUniversalTime()) > timeout;
+        }
+    }
 }

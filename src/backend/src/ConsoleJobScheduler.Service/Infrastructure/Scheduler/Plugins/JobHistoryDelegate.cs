@@ -66,14 +66,14 @@ public class JobHistoryDelegate : IJobHistoryDelegate
 
     private const string SqlJobExecutionHistory = @"
                                     WITH CNT AS (SELECT COUNT(*) COUNT FROM {0}JOB_HISTORY)
-                                    SELECT ID, JOB_NAME, JOB_GROUP, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, HAS_ERROR, VETOED, COMPLETED, (SELECT COUNT FROM CNT) COUNT
+                                    SELECT ID, JOB_NAME, JOB_GROUP, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, LAST_SIGNAL_TIME, HAS_ERROR, VETOED, COMPLETED, (SELECT COUNT FROM CNT) COUNT
                                     FROM {0}JOB_HISTORY 
                                     ORDER BY SCHED_TIME DESC 
                                     LIMIT @pageSize 
                                     OFFSET @offset";
 
     private const string SqlJobExecutionDetail = @"
-                                    SELECT JOB_NAME, INSTANCE_NAME, JOB_GROUP, PACKAGE_NAME, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, HAS_ERROR, ERROR_MESSAGE, VETOED, COMPLETED
+                                    SELECT JOB_NAME, INSTANCE_NAME, JOB_GROUP, PACKAGE_NAME, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, LAST_SIGNAL_TIME, HAS_ERROR, ERROR_MESSAGE, VETOED, COMPLETED
                                     FROM {0}JOB_HISTORY 
                                     WHERE ID = @id";
 
@@ -187,6 +187,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                                                           ScheduledTime = scheduledTime.ToLocalTime(),
                                                           FiredTime = new DateTime(reader.GetInt64("FIRED_TIME"), DateTimeKind.Utc).ToLocalTime(),
                                                           RunTime = GetNullableTimeSpanFromNullableInt64Column(reader, "RUN_TIME"),
+                                                          LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime(),
                                                           Completed = reader.GetBoolean("COMPLETED"),
                                                           Vetoed = reader.GetBoolean("VETOED"),
                                                           HasError = reader.GetBoolean("HAS_ERROR")
@@ -202,6 +203,8 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                         {
                             jobExecutionHistory.NextFireTime = trigger.GetFireTimeAfter(scheduledTime)?.DateTime.ToLocalTime();
                         }
+
+                        jobExecutionHistory.UpdateHasSignalTimeout(TimeSpan.FromMinutes(1));
 
                         result.Add(jobExecutionHistory);
                     }

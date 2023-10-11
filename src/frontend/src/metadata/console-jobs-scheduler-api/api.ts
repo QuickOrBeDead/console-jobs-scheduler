@@ -278,6 +278,12 @@ export interface JobExecutionHistory {
      * @type {string}
      * @memberof JobExecutionHistory
      */
+    'lastSignalTime'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistory
+     */
     'nextFireTime'?: string | null;
     /**
      * 
@@ -303,6 +309,12 @@ export interface JobExecutionHistory {
      * @memberof JobExecutionHistory
      */
     'vetoed'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionHistory
+     */
+    'hasSignalTimeout'?: boolean;
 }
 /**
  * 
