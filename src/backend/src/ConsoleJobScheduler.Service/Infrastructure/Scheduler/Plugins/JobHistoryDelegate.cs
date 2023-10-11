@@ -30,7 +30,7 @@ public interface IJobHistoryDelegate
 
     Task<JobExecutionStatistics> GetJobExecutionStatistics();
 
-    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(int pageSize = 10, int page = 1);
+    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
 
     Task<JobExecutionDetail?> GetJobExecutionDetail(string id);
 
@@ -65,9 +65,10 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                                                         (SELECT COUNT(1) FROM {0}JOB_HISTORY WHERE HAS_ERROR = TRUE) AS TOTAL_FAILED_JOBS";
 
     private const string SqlJobExecutionHistory = @"
-                                    WITH CNT AS (SELECT COUNT(*) COUNT FROM {0}JOB_HISTORY)
+                                    WITH CNT AS (SELECT COUNT(*) COUNT FROM {0}JOB_HISTORY WHERE @jobName = '' OR JOB_NAME = @jobName)
                                     SELECT ID, JOB_NAME, JOB_GROUP, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, LAST_SIGNAL_TIME, HAS_ERROR, VETOED, COMPLETED, (SELECT COUNT FROM CNT) COUNT
-                                    FROM {0}JOB_HISTORY 
+                                    FROM {0}JOB_HISTORY
+                                    WHERE @jobName = '' OR JOB_NAME = @jobName
                                     ORDER BY SCHED_TIME DESC 
                                     LIMIT @pageSize 
                                     OFFSET @offset";
@@ -151,7 +152,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
         }
     }
 
-    public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(int pageSize = 10, int page = 1)
+    public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
@@ -159,6 +160,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             {
                 _dbAccessor.AddCommandParameter(command, "pageSize", pageSize);
                 _dbAccessor.AddCommandParameter(command, "offset", (page - 1) * pageSize);
+                _dbAccessor.AddCommandParameter(command, "jobName", jobName);
 
                 var result = new List<JobExecutionHistory>();
                 var count = 0;

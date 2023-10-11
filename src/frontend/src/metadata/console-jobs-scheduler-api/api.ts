@@ -1013,10 +1013,11 @@ export const JobHistoryApiAxiosParamCreator = function (configuration?: Configur
         /**
          * 
          * @param {number} pageNumber 
+         * @param {string} [jobName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobHistoryPageNumberGet: async (pageNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiJobHistoryPageNumberGet: async (pageNumber: number, jobName?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'pageNumber' is not null or undefined
             assertParamExists('apiJobHistoryPageNumberGet', 'pageNumber', pageNumber)
             const localVarPath = `/api/JobHistory/{pageNumber}`
@@ -1031,6 +1032,10 @@ export const JobHistoryApiAxiosParamCreator = function (configuration?: Configur
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (jobName !== undefined) {
+                localVarQueryParameter['jobName'] = jobName;
+            }
 
 
     
@@ -1056,11 +1061,12 @@ export const JobHistoryApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {number} pageNumber 
+         * @param {string} [jobName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobHistoryPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionHistoryPagedResult>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryPageNumberGet(pageNumber, options);
+        async apiJobHistoryPageNumberGet(pageNumber: number, jobName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionHistoryPagedResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryPageNumberGet(pageNumber, jobName, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1076,11 +1082,12 @@ export const JobHistoryApiFactory = function (configuration?: Configuration, bas
         /**
          * 
          * @param {number} pageNumber 
+         * @param {string} [jobName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobHistoryPageNumberGet(pageNumber: number, options?: any): AxiosPromise<JobExecutionHistoryPagedResult> {
-            return localVarFp.apiJobHistoryPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
+        apiJobHistoryPageNumberGet(pageNumber: number, jobName?: string, options?: any): AxiosPromise<JobExecutionHistoryPagedResult> {
+            return localVarFp.apiJobHistoryPageNumberGet(pageNumber, jobName, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1095,12 +1102,13 @@ export class JobHistoryApi extends BaseAPI {
     /**
      * 
      * @param {number} pageNumber 
+     * @param {string} [jobName] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobHistoryApi
      */
-    public apiJobHistoryPageNumberGet(pageNumber: number, options?: AxiosRequestConfig) {
-        return JobHistoryApiFp(this.configuration).apiJobHistoryPageNumberGet(pageNumber, options).then((request) => request(this.axios, this.basePath));
+    public apiJobHistoryPageNumberGet(pageNumber: number, jobName?: string, options?: AxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).apiJobHistoryPageNumberGet(pageNumber, jobName, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

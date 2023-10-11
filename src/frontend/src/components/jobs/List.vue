@@ -49,7 +49,11 @@ onMounted(async () => {
                                     <td class="text-nowrap">{{ job.triggerDescription }}</td>
                                     <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
                                     <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
-                                    <td class="text-nowrap"><router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }">Edit</router-link></td>
+                                    <td class="text-nowrap">
+                                        <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }">Edit</router-link>
+                                        &nbsp;
+                                        <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}">History</router-link>
+                                    </td>
                                 </tr>
                             </template>
                         </tbody>

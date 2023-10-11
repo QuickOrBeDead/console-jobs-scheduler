@@ -1,22 +1,33 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { createApi } from '../../api'
 import { JobExecutionHistoryPagedResult, JobHistoryApi } from '../../metadata/console-jobs-scheduler-api'
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
 
 const jobHistoryItems = ref<JobExecutionHistoryPagedResult>()
 const totalPages = ref<number>(0)
 const jobHistoryApi = createApi(JobHistoryApi)
 
 onMounted(async () => { 
-   setCurrentPage(1)
+    await loadPage(1)
 })
 
-async function setCurrentPage(page: number)  {
-    const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(page)
+async function loadPage(page: number)  {
+    const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(page, route.params.jobName as string)
     jobHistoryItems.value = data
 
     totalPages.value = data.totalPages!
 }
+
+watch(
+  () => route.params, 
+  () => loadPage(1),
+  {
+    deep:true
+  }
+)
 </script>
 
 <template>
@@ -53,7 +64,7 @@ async function setCurrentPage(page: number)  {
                             </template>
                         </tbody>
                     </table>
-                    <pagination :totalPages="totalPages" @pageChanged="setCurrentPage"></pagination>
+                    <pagination :totalPages="totalPages" @pageChanged="loadPage"></pagination>
                 </div>
             </div>
         </div>

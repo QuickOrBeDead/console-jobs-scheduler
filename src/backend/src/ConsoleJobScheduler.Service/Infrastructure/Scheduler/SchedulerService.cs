@@ -29,7 +29,7 @@ public interface ISchedulerService
 
     Task<string?> GetJobExecutionErrorDetail(string id);
 
-    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(int pageSize = 10, int page = 1);
+    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
 
     Task AddOrUpdateJob(JobAddOrUpdateModel jobModel);
 
@@ -110,9 +110,9 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.GetJobHistoryDelegate().GetJobExecutionErrorDetail(id);
     }
 
-    public Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(int pageSize = 10, int page = 1)
+    public Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
     {
-        return _scheduler.GetJobHistoryDelegate().GetJobExecutionHistory(pageSize, page);
+        return _scheduler.GetJobHistoryDelegate().GetJobExecutionHistory(jobName, pageSize, page);
     }
 
     public async Task AddOrUpdateJob(JobAddOrUpdateModel jobModel)

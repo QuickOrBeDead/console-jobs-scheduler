@@ -20,7 +20,7 @@ const routes = [
 { path: '/', component: Scheduler },
 { path: '/jobs', component: JobsList },
 { path: '/jobs/edit', component: JobsEdit, name: 'EditJob', props: true },
-{ path: '/history', component: HistoryList },
+{ path: '/history/:jobName?', component: HistoryList, name: 'JobHistory' },
 { path: '/history/details/:id', component: JobExecutionDetail, name: 'JobExecutionDetails', props: true },
 { path: '/packages', component: PackagesList },
 { path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage' }
