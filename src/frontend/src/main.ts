@@ -17,6 +17,8 @@ import JobExecutionDetail from './components/history/Detail.vue'
 import PackagesList from './components/packages/List.vue'
 import PackagesEdit from './components/packages/Edit.vue'
 import { AuthHelper } from './authHelper'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const routes = [
 { path: '/', component: Scheduler, meta: { requiresAuth: true } },
@@ -31,13 +33,17 @@ const routes = [
 
 const router = createRouter({ history: createWebHistory(), routes: routes, linkActiveClass: 'active' })
 
-const authHelper = AuthHelper.getInstance()
-authHelper.configureRouter(router)
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
 createApp(App)
     .use(router)
+    .use(pinia)
     .component('pagination', Pagination)
     .mount('#app')
+
+const authHelper = new AuthHelper()
+authHelper.configureRouter(router)
 
 declare global {
     interface String {
