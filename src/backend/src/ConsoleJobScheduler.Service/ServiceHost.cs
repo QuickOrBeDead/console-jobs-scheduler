@@ -138,6 +138,15 @@ public sealed class ServiceHost
 
         schedulerService.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
+        using var scope = _app.Services.CreateScope();
+        using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
+        var adminUser = await userManager.FindByNameAsync("admin");
+        if (adminUser == null)
+        {
+            adminUser = new IdentityUser<int>("admin") {Email = "a@b.c"};
+            await userManager.CreateAsync(adminUser, "Password");
+        }
+
         await schedulerService.Start(_app.Services.GetRequiredService<ILoggerFactory>());
         await _app.RunAsync(_app.Configuration["WebAppUrl"]).ConfigureAwait(false);
     }
