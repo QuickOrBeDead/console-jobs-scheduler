@@ -401,3 +401,5 @@ FodyWeavers.xsd
 
 # storage
 .storage/
+scc.exe
+scc.ps1
