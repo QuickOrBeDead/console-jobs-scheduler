@@ -4,6 +4,12 @@ using ConsoleJobScheduler.Service.Api.Hubs;
 using ConsoleJobScheduler.Service.Api.Hubs.Handlers;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using ConsoleJobScheduler.Service.Infrastructure.Data;
+
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 public sealed class ServiceHost
 {
     private bool _stopRequested;
@@ -64,6 +70,30 @@ public sealed class ServiceHost
 
         builder.Services.AddSingleton<JobConsoleLogMessageToHubHandler>();
         builder.Services.AddSpaStaticFiles(configuration: options => { options.RootPath = "wwwroot"; });
+
+        builder.Services.AddDbContext<IdentityManagementDbContext>(o => o.UseNpgsql(builder.Configuration["ConnectionString"]));
+        builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
+            (options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                })
+            .AddEntityFrameworkStores<IdentityManagementDbContext>()
+            .AddDefaultTokenProviders();
+
+        builder.Services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, option =>
+            {
+                option.LoginPath = new PathString("/api/auth/Login");
+                option.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    };
+            });
 
         _app = builder.Build();
         _app.Lifetime.ApplicationStopped.Register(
