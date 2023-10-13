@@ -1,5 +1,26 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import { AuthHelper } from './authHelper';
+import { AuthApi, UserModel } from './metadata/console-jobs-scheduler-api';
+import { createApi } from './api';
+import { useRouter } from 'vue-router';
 
+const authHelper = AuthHelper.getInstance()
+const userInfo = ref<UserModel>()
+
+const router = useRouter()
+
+const authApi = createApi(AuthApi)
+
+authHelper.onAuthenticate = u => userInfo.value = u
+
+async function logout() {
+  await authApi.apiAuthLogoutPost()
+
+  userInfo.value = undefined
+
+  router.push({ path: '/' })
+}
 </script>
 
 <template>
@@ -9,7 +30,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarColor02">
+      <div class="collapse navbar-collapse" id="navbarColor02" v-if="userInfo">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <router-link class="nav-link" aria-current="page" to="/">Scheduler</router-link>
@@ -24,6 +45,14 @@
             <router-link class="nav-link" to="/packages">Packages</router-link>
           </li>
         </ul>
+        <div class="d-flex align-items-center">
+          <span class="navbar-text me-1">
+            {{ userInfo?.userName }}
+          </span>
+          <button type="button" class="btn btn-primary me-3" @click="logout">
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   </nav>
