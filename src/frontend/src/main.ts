@@ -7,10 +7,6 @@ import App from './App.vue'
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { AuthApi } from './metadata/console-jobs-scheduler-api'
-import { createApi } from './api'
-import axios from 'axios'
-
 import Pagination from './components/common/Pagination.vue'
 import Scheduler from './components/Scheduler.vue'
 import Login from './components/Login.vue'
@@ -36,33 +32,7 @@ const routes = [
 const router = createRouter({ history: createWebHistory(), routes: routes, linkActiveClass: 'active' })
 
 const authHelper = AuthHelper.getInstance()
-const authApi = createApi(AuthApi)
-
-router.beforeEach(async (to, _, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    const user = (await authApi.apiAuthGetUserGet())?.data
-    if (user) {
-      if (authHelper.onAuthenticate) {
-        authHelper.onAuthenticate(user)
-      }
-      
-      next()
-    } else {
-      next({ name: 'Login' })
-    }
-  } else {
-    next()
-  }
-})
-
-axios.interceptors.response.use((r: any) => {
-    return r
- }, (error: any) => {
-   if (error.response.status === 401 || error.response.status === 403) {
-    router.push({ path: '/' })
-   }
-   return error
- })
+authHelper.configureRouter(router)
 
 createApp(App)
     .use(router)
