@@ -6,6 +6,9 @@ using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class JobExecutionDetailsController : ControllerBase

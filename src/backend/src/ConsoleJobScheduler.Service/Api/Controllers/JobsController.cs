@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Quartz;
 
 using System.Net.Mime;
+using Microsoft.AspNetCore.Authorization;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public sealed class JobsController : ControllerBase

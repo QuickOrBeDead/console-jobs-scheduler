@@ -2,11 +2,13 @@
 
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
-
 using Microsoft.AspNetCore.Mvc;
 
 using System.Net.Mime;
 
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public sealed class PackagesController : ControllerBase
