@@ -16,6 +16,8 @@ import HistoryList from './components/history/List.vue'
 import JobExecutionDetail from './components/history/Detail.vue'
 import PackagesList from './components/packages/List.vue'
 import PackagesEdit from './components/packages/Edit.vue'
+import UsersList from './components/users/List.vue'
+import UsersEdit from './components/users/Edit.vue'
 
 import { AuthHelper } from './authHelper'
 import { createPinia } from 'pinia'
@@ -29,7 +31,9 @@ const routes = [
 { path: '/history/:jobName?', component: HistoryList, name: 'JobHistory', meta: { requiresAuth: true } },
 { path: '/history/details/:id', component: JobExecutionDetail, name: 'JobExecutionDetails', props: true, meta: { requiresAuth: true } },
 { path: '/packages', component: PackagesList, meta: { requiresAuth: true, roles: ["Admin"] } },
-{ path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage', meta: { requiresAuth: true, roles: ["Admin"] } }
+{ path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage', meta: { requiresAuth: true, roles: ["Admin"] } },
+{ path: '/users', component: UsersList, meta: { requiresAuth: true, roles: ["Admin"] } },
+{ path: '/users/edit/:userId', component: UsersEdit, name: 'EditUser', props: true, meta: { requiresAuth: true, roles: ["Admin"] } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes: routes, linkActiveClass: 'active' })
