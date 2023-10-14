@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { createApi } from '../../api'
 import { JobExecutionHistoryPagedResult, JobHistoryApi } from '../../metadata/console-jobs-scheduler-api'
 import { useRoute } from 'vue-router';
@@ -9,10 +9,6 @@ const route = useRoute()
 const jobHistoryItems = ref<JobExecutionHistoryPagedResult>()
 const totalPages = ref<number>(0)
 const jobHistoryApi = createApi(JobHistoryApi)
-
-onMounted(async () => { 
-    await loadPage(1)
-})
 
 async function loadPage(page: number)  {
     const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(page, route.params.jobName as string)

@@ -15,7 +15,7 @@ let end = 0
 const pages =  ref<number[]>()
 
 watch(() => props.totalPages, () => {
-    setCurrentPage(currentPage)
+   updatePageList()
 })
 
 onMounted(async () => { 
@@ -25,6 +25,12 @@ onMounted(async () => {
 function setCurrentPage(page: number)  {
     currentPage = page
 
+    updatePageList()
+
+    emit('pageChanged', page)
+}
+
+function updatePageList() {
     start = Math.max(1, currentPage - 5)
     end = Math.min(start + 10, props.totalPages)
     if (end - start < 10)
@@ -39,8 +45,6 @@ function setCurrentPage(page: number)  {
     for (let i = start; i <= end; i++) {
         pageList.push(i) 
     }
-
-    emit('pageChanged', page)
 
     pages.value = pageList
 }
