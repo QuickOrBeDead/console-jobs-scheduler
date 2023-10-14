@@ -3,7 +3,7 @@ import { AuthApi } from './metadata/console-jobs-scheduler-api';
 import { createApi } from './api';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useUserStore } from './stores/userStore';
+import { useUserStore, isUserInRole } from './stores/userStore';
 
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
@@ -39,7 +39,7 @@ async function logout() {
           <li class="nav-item">
             <router-link class="nav-link" to="/history">History</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="isUserInRole(user, 'Admin')">
             <router-link class="nav-link" to="/packages">Packages</router-link>
           </li>
         </ul>

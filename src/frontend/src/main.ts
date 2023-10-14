@@ -16,6 +16,7 @@ import HistoryList from './components/history/List.vue'
 import JobExecutionDetail from './components/history/Detail.vue'
 import PackagesList from './components/packages/List.vue'
 import PackagesEdit from './components/packages/Edit.vue'
+
 import { AuthHelper } from './authHelper'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -24,11 +25,11 @@ const routes = [
 { path: '/', component: Scheduler, meta: { requiresAuth: true } },
 { path: '/login', component: Login, name: 'Login' },
 { path: '/jobs', component: JobsList, meta: { requiresAuth: true } },
-{ path: '/jobs/edit', component: JobsEdit, name: 'EditJob', props: true, meta: { requiresAuth: true } },
+{ path: '/jobs/edit', component: JobsEdit, name: 'EditJob', props: true, meta: { requiresAuth: true, roles: ["Admin", "JobEditor"] } },
 { path: '/history/:jobName?', component: HistoryList, name: 'JobHistory', meta: { requiresAuth: true } },
 { path: '/history/details/:id', component: JobExecutionDetail, name: 'JobExecutionDetails', props: true, meta: { requiresAuth: true } },
-{ path: '/packages', component: PackagesList, meta: { requiresAuth: true } },
-{ path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage', meta: { requiresAuth: true } }
+{ path: '/packages', component: PackagesList, meta: { requiresAuth: true, roles: ["Admin"] } },
+{ path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage', meta: { requiresAuth: true, roles: ["Admin"] } }
 ]
 
 const router = createRouter({ history: createWebHistory(), routes: routes, linkActiveClass: 'active' })
@@ -47,9 +48,9 @@ authHelper.configureRouter(router)
 
 declare global {
     interface String {
-        toLocaleDateTimeString(): string;
+        toLocaleDateTimeString(): string
     }
-  }
+}
 
 String.prototype.toLocaleDateTimeString = function (this: string) {
     var s = this
