@@ -2,6 +2,7 @@
 
 using ConsoleJobScheduler.Service.Api.Hubs;
 using ConsoleJobScheduler.Service.Api.Hubs.Handlers;
+using ConsoleJobScheduler.Service.Api.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
 using Microsoft.AspNetCore.Identity;
@@ -140,11 +141,24 @@ public sealed class ServiceHost
 
         using var scope = _app.Services.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
+        using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+        var roles = new[] {Roles.Admin, Roles.JobEditor, Roles.JobViewer};
+        for (var i = 0; i < roles.Length; i++)
+        {
+            var role = roles[i];
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole<int>(role));
+            }
+        }
+
         var adminUser = await userManager.FindByNameAsync("admin");
         if (adminUser == null)
         {
-            adminUser = new IdentityUser<int>("admin") {Email = "a@b.c"};
+            adminUser = new IdentityUser<int>("admin") {Email = "admin@email.com"};
+            
             await userManager.CreateAsync(adminUser, "Password");
+            await userManager.AddToRoleAsync(adminUser, Roles.Admin);
         }
 
         await schedulerService.Start(_app.Services.GetRequiredService<ILoggerFactory>());
