@@ -26,6 +26,25 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface IdentityError
+ */
+export interface IdentityError {
+    /**
+     * 
+     * @type {string}
+     * @memberof IdentityError
+     */
+    'code'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof IdentityError
+     */
+    'description'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface JobAddOrUpdateModel
  */
 export interface JobAddOrUpdateModel {
@@ -815,6 +834,143 @@ export interface TimeSpan {
      * @memberof TimeSpan
      */
     'totalSeconds'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface UserAddOrUpdateModel
+ */
+export interface UserAddOrUpdateModel {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserAddOrUpdateModel
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserAddOrUpdateModel
+     */
+    'userName': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserAddOrUpdateModel
+     */
+    'password'?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserAddOrUpdateModel
+     */
+    'roles'?: Array<string> | null;
+}
+/**
+ * 
+ * @export
+ * @interface UserAddOrUpdateResultModel
+ */
+export interface UserAddOrUpdateResultModel {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserAddOrUpdateResultModel
+     */
+    'userId'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserAddOrUpdateResultModel
+     */
+    'succeeded'?: boolean;
+    /**
+     * 
+     * @type {Array<IdentityError>}
+     * @memberof UserAddOrUpdateResultModel
+     */
+    'errors'?: Array<IdentityError> | null;
+}
+/**
+ * 
+ * @export
+ * @interface UserDetailModel
+ */
+export interface UserDetailModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserDetailModel
+     */
+    'userName'?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserDetailModel
+     */
+    'roles'?: Array<string> | null;
+}
+/**
+ * 
+ * @export
+ * @interface UserListItemModel
+ */
+export interface UserListItemModel {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserListItemModel
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserListItemModel
+     */
+    'userName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserListItemModel
+     */
+    'roles'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface UserListItemModelPagedResult
+ */
+export interface UserListItemModelPagedResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserListItemModelPagedResult
+     */
+    'page'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserListItemModelPagedResult
+     */
+    'totalCount'?: number;
+    /**
+     * 
+     * @type {Array<UserListItemModel>}
+     * @memberof UserListItemModelPagedResult
+     */
+    'items'?: Array<UserListItemModel> | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserListItemModelPagedResult
+     */
+    'pageSize'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserListItemModelPagedResult
+     */
+    'totalPages'?: number;
 }
 /**
  * 
@@ -1956,6 +2112,289 @@ export class SchedulerApi extends BaseAPI {
      */
     public apiSchedulerGet(options?: AxiosRequestConfig) {
         return SchedulerApiFp(this.configuration).apiSchedulerGet(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * UsersApi - axios parameter creator
+ * @export
+ */
+export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersGetRolesGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Users/GetRoles`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersGetUserUserIdGet: async (userId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('apiUsersGetUserUserIdGet', 'userId', userId)
+            const localVarPath = `/api/Users/GetUser/{userId}`
+                .replace(`{${"userId"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {number} pageNumber 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersPageNumberGet: async (pageNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pageNumber' is not null or undefined
+            assertParamExists('apiUsersPageNumberGet', 'pageNumber', pageNumber)
+            const localVarPath = `/api/Users/{pageNumber}`
+                .replace(`{${"pageNumber"}}`, encodeURIComponent(String(pageNumber)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UserAddOrUpdateModel} [userAddOrUpdateModel] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersPost: async (userAddOrUpdateModel?: UserAddOrUpdateModel, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Users`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(userAddOrUpdateModel, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UsersApi - functional programming interface
+ * @export
+ */
+export const UsersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiUsersGetRolesGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersGetRolesGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiUsersGetUserUserIdGet(userId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDetailModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersGetUserUserIdGet(userId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {number} pageNumber 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserListItemModelPagedResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersPageNumberGet(pageNumber, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {UserAddOrUpdateModel} [userAddOrUpdateModel] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiUsersPost(userAddOrUpdateModel?: UserAddOrUpdateModel, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserAddOrUpdateResultModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersPost(userAddOrUpdateModel, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * UsersApi - factory interface
+ * @export
+ */
+export const UsersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UsersApiFp(configuration)
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersGetRolesGet(options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.apiUsersGetRolesGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersGetUserUserIdGet(userId: number, options?: any): AxiosPromise<UserDetailModel> {
+            return localVarFp.apiUsersGetUserUserIdGet(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {number} pageNumber 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersPageNumberGet(pageNumber: number, options?: any): AxiosPromise<UserListItemModelPagedResult> {
+            return localVarFp.apiUsersPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {UserAddOrUpdateModel} [userAddOrUpdateModel] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiUsersPost(userAddOrUpdateModel?: UserAddOrUpdateModel, options?: any): AxiosPromise<UserAddOrUpdateResultModel> {
+            return localVarFp.apiUsersPost(userAddOrUpdateModel, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UsersApi - object-oriented interface
+ * @export
+ * @class UsersApi
+ * @extends {BaseAPI}
+ */
+export class UsersApi extends BaseAPI {
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public apiUsersGetRolesGet(options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).apiUsersGetRolesGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {number} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public apiUsersGetUserUserIdGet(userId: number, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).apiUsersGetUserUserIdGet(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {number} pageNumber 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).apiUsersPageNumberGet(pageNumber, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {UserAddOrUpdateModel} [userAddOrUpdateModel] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public apiUsersPost(userAddOrUpdateModel?: UserAddOrUpdateModel, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).apiUsersPost(userAddOrUpdateModel, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
