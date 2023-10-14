@@ -82,19 +82,19 @@ async function save() {
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="JobName" class="form-label">Job Name</label>
-                            <input id="JobName" class="form-control" v-model="job.jobName"/>
+                            <input id="JobName" type="text" class="form-control" v-model="job.jobName"/>
                         </div>
                         <div class="col-md-6">
                             <label for="JobGroup" class="form-label">Job Group</label>
-                            <input id="JobGroup" class="form-control" v-model="job.jobGroup"/>
+                            <input id="JobGroup" type="text" class="form-control" v-model="job.jobGroup"/>
                         </div>
                         <div class="col-12">
                             <label for="Description" class="form-label">Description</label>
-                            <input id="Description" class="form-control" v-model="job.description"/>
+                            <input id="Description" type="text" class="form-control" v-model="job.description"/>
                         </div>
                         <div class="col-md-6">
                             <label for="CronExpression" class="form-label">Cron Expression</label>
-                            <input id="CronExpression" class="form-control" v-model="job.cronExpression" aria-describedby="helpCron"/>
+                            <input id="CronExpression" type="text" class="form-control" v-model="job.cronExpression" aria-describedby="helpCron"/>
                             <div id="helpCron" class="form-text text-black-50">{{ job.cronExpressionDescription }}</div>
                         </div>
                         <div class="col-md-6">
@@ -107,7 +107,7 @@ async function save() {
                         </div>
                         <div class="col-12">
                             <label for="Parameters" class="form-label">Parameters</label>
-                            <textarea id="Parameters" class="form-control" v-model="job.parameters" rows="5" cols="30"></textarea>
+                            <textarea id="Parameters" class="form-control" v-model="(job.parameters as string)" rows="5" cols="30"></textarea>
                         </div>
                         <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} Job</button>
                     </div>
