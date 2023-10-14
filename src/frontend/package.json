@@ -17,10 +17,10 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.0",
     "vue": "^3.3.4",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.6.0",
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "@types/bootstrap": "^5.2.6",
     "@types/node": "^20.4.0",
     "@vitejs/plugin-vue": "^4.2.3",
