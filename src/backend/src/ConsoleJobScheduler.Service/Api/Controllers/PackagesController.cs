@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 using System.Net.Mime;
 
+using ConsoleJobScheduler.Service.Api.Models;
+
 using Microsoft.AspNetCore.Authorization;
 
-[Authorize]
+[Authorize(Roles = Roles.Admin)]
 [Route("api/[controller]")]
 [ApiController]
 public sealed class PackagesController : ControllerBase

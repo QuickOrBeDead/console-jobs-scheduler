@@ -9,6 +9,9 @@ using Quartz;
 
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
+using ConsoleJobScheduler.Service.Api.Models;
+
+using JobDetailModel = Infrastructure.Scheduler.Models.JobDetailModel;
 
 [Authorize]
 [Route("api/[controller]")]
@@ -22,6 +25,7 @@ public sealed class JobsController : ControllerBase
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
     }
 
+    [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor},{Roles.JobViewer}")]
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     public async Task<IList<JobListItemModel>> Get()
@@ -29,6 +33,7 @@ public sealed class JobsController : ControllerBase
         return await _schedulerService.GetJobList();
     }
 
+    [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
     [HttpGet("{group}/{name}")]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
@@ -45,7 +50,7 @@ public sealed class JobsController : ControllerBase
 
         return Ok(
             new JobDetailModel
-                {
+            {
                     JobName = jobDetail.JobName,
                     JobGroup = jobDetail.JobGroup,
                     Description = jobDetail.Description,
@@ -56,6 +61,7 @@ public sealed class JobsController : ControllerBase
                 });
     }
 
+    [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

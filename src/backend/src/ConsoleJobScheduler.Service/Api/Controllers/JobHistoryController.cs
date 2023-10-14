@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
+using ConsoleJobScheduler.Service.Api.Models;
 
 [Authorize]
 [Route("api/[controller]")]
