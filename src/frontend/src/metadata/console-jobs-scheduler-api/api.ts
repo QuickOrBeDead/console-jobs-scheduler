@@ -828,6 +828,12 @@ export interface UserModel {
      * @memberof UserModel
      */
     'userName'?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserModel
+     */
+    'roles'?: Array<string> | null;
 }
 
 /**
