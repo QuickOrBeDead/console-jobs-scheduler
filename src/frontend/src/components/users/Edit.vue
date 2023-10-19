@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createApi } from '../../api'
+import { callApi, createApi } from '../../api'
 import { UsersApi } from '../../metadata/console-jobs-scheduler-api'
 
 interface UserEditModel {
@@ -15,6 +15,8 @@ const router = useRouter()
 
 const user = ref<UserEditModel>() as Ref<UserEditModel>
 const roles = ref<string[]>() as Ref<string[]>
+const errors = ref<{[key: string]: string[]}>({})
+const errorMessages = ref<string[]>([])
 
 let userId: number | undefined
 let isInEditMode: boolean
@@ -58,21 +60,23 @@ watch(
 )
 
 async function save() {
-    if (user.value) {
-        const { data } = await usersApi.apiUsersPost({
-            id: userId,
-            userName: user.value.userName!,
-            password: '',
-            roles: user.value.roles
-        })
+    errorMessages.value = []
 
+    const { data } = await callApi(() => usersApi.apiUsersPost({
+        id: userId,
+        userName: user.value.userName!,
+        password: user.value.password,
+        roles: user.value.roles
+    }), errors)
+
+    if (data?.succeeded) {
         if (isInEditMode) {
             await loadPage()
         } else {
-            if (data.succeeded) {
-                await router.push({ name: 'EditUser', params: { userId: userId }})
-            }
+            await router.push({ name: 'EditUser', params: { userId: data.userId } })
         }
+    } else if (data?.errors) {
+        errorMessages.value = data.errors.map(x => x.description as string)
     }
 }
 </script>
@@ -90,25 +94,32 @@ async function save() {
             </div>
             <div class="row justify-content-center">
                 <div class="col-6">
+                    <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
+                        <div v-for="msg in errorMessages" class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
+                            <div>{{ msg }}</div>
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="Username" class="form-label">Username</label>
-                            <input id="Username" type="text" class="form-control" :disabled="isInEditMode" v-model="user.userName"/>
+                            <input id="Username" type="text" class="form-control" :disabled="isInEditMode" v-model="user.userName" :class="errors && errors.UserName ? 'is-invalid' : ''"/>
+                            <div v-if="errors && errors.UserName" class="invalid-feedback" role="alert"><template v-for="msg in errors.UserName">{{ msg }}<br></template></div>
                         </div>
                         <div class="col-md-6">
                             <label for="Password" class="form-label">Password</label>
-                            <input id="Password" type="password" class="form-control" v-model="user.password"/>
+                            <input id="Password" type="password" class="form-control" v-model="user.password" :class="errors && errors.Password ? 'is-invalid' : ''"/>
+                            <div v-if="errors && errors.Password" class="invalid-feedback" role="alert"><template v-for="msg in errors.Password">{{ msg }}<br></template></div>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Roles</label>
-                            <ul style="list-style-type: none;">
-                                <li v-for="role in roles">
-                                    <label>
-                                        <input :value="role" :checked="user.roles?.some(x => x === role)" v-model="user.roles" :id="role" type="checkbox" />
-                                        {{ role }}
-                                    </label>
-                                </li>
-                            </ul>
+                            <div>
+                                <div v-for="role in roles" class="form-check" :class="errors && errors.Roles ? 'is-invalid' : ''">
+                                    <input class="form-check-input" :value="role" :checked="user.roles?.some(x => x === role)" v-model="user.roles" :id="`cb-role-${role}`" :class="errors && errors.Roles ? 'is-invalid' : ''" type="checkbox" />
+                                    <label class="form-check-label" :for="`cb-role-${role}`">{{ role }}</label>
+                                </div>
+                                <div v-if="errors && errors.Roles" class="invalid-feedback" role="alert"><template v-for="msg in errors.Roles">{{ msg }}<br></template></div>
+                            </div>
                         </div>
                         <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} User</button>
                     </div>
