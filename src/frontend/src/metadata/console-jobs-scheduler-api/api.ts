@@ -991,6 +991,51 @@ export interface UserModel {
      */
     'roles'?: Array<string> | null;
 }
+/**
+ * 
+ * @export
+ * @interface ValidationProblemDetails
+ */
+export interface ValidationProblemDetails {
+    [key: string]: any;
+
+    /**
+     * 
+     * @type {string}
+     * @memberof ValidationProblemDetails
+     */
+    'type'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ValidationProblemDetails
+     */
+    'title'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ValidationProblemDetails
+     */
+    'status'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ValidationProblemDetails
+     */
+    'detail'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ValidationProblemDetails
+     */
+    'instance'?: string | null;
+    /**
+     * 
+     * @type {{ [key: string]: Array<string>; }}
+     * @memberof ValidationProblemDetails
+     */
+    'errors'?: { [key: string]: Array<string>; } | null;
+}
 
 /**
  * AuthApi - axios parameter creator
