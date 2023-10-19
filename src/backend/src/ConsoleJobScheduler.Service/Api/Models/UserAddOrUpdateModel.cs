@@ -8,6 +8,7 @@ public sealed class UserAddOrUpdateModel
 
     public int Id { get; set; }
 
+    [Display(Name = "Username")]
     [Required, MaxLength(20)]
     public string? UserName { get; set; }
 
