@@ -39,7 +39,8 @@ export class AuthHelper {
       if (error.response.status === 401 || error.response.status === 403) {
         router.push({ path: '/' })
       }
-      return error
+      
+      return Promise.reject(error)
     })
   }
 }
