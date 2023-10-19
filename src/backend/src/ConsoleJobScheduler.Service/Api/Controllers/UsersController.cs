@@ -100,11 +100,23 @@ public sealed class UsersController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserAddOrUpdateResultModel))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
     public async Task<IActionResult> Post([FromBody] UserAddOrUpdateModel model)
     {
+        if (model.Roles.Count == 0)
+        {
+            ModelState.AddModelError(nameof(model.Roles), "The Roles field is required.");
+            return BadRequest(new ValidationProblemDetails(ModelState));
+        }
+
         if (model.Id == 0)
         {
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError(nameof(model.Password), "The Password field is required.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
+
             using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             var user = new IdentityUser<int>(model.UserName!);
             var result = await _userManager.CreateAsync(user, model.Password!);
