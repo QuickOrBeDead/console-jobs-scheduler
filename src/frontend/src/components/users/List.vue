@@ -23,6 +23,13 @@ async function loadPage(page: number)  {
                     <h1 class="display-6">Users</h1>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12 mb-1">
+                    <router-link :to="{ name: 'EditUser' }" custom v-slot="{ navigate }">
+                        <button class="btn btn-primary float-end" @click="navigate">Add</button>
+                    </router-link>
+                </div>
+            </div>
             <div class="row justify-content-center">
                 <div class="col-12">
                     <table class="table table-striped table-bordered">

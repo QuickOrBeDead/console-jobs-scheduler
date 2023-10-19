@@ -33,7 +33,7 @@ const routes = [
 { path: '/packages', component: PackagesList, meta: { requiresAuth: true, roles: ["Admin"] } },
 { path: '/packages/details/:name?', component: PackagesEdit, name: 'EditPackage', meta: { requiresAuth: true, roles: ["Admin"] } },
 { path: '/users', component: UsersList, meta: { requiresAuth: true, roles: ["Admin"] } },
-{ path: '/users/edit/:userId', component: UsersEdit, name: 'EditUser', props: true, meta: { requiresAuth: true, roles: ["Admin"] } },
+{ path: '/users/edit/:userId?', component: UsersEdit, name: 'EditUser', props: true, meta: { requiresAuth: true, roles: ["Admin"] } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes: routes, linkActiveClass: 'active' })
