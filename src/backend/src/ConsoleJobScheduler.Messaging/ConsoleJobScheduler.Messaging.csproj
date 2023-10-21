@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-      <Version>0.1.1</Version>
+      <Version>0.1.3</Version>
       <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
       <Title>Console Jobs Scheduler Messaging</Title>
       <Summary>Console Jobs Scheduler Messaging</Summary>

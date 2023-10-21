@@ -5,26 +5,29 @@ using System.Text.Json;
 
 public sealed class ConsoleMessageWriter
 {
+    public const string JsonPrefix = "##[json]";
+    
     public void WriteEmail(EmailMessage emailMessage)
     {
-        Console.WriteLine(JsonSerializer.Serialize(new ConsoleMessage
-                                                       {
-                                                           MessageType = ConsoleMessageType.Email,
-                                                           Message = emailMessage
-                                                       }));
+        var json = JsonSerializer.Serialize(new ConsoleMessage
+                                                     {
+                                                         MessageType = ConsoleMessageType.Email,
+                                                         Message = emailMessage
+                                                     });
+        Console.WriteLine($"{JsonPrefix}{json}");
     }
 
     public void WriteLog(ConsoleMessageLogType logType, string message)
     {
-
-        Console.WriteLine(JsonSerializer.Serialize(new ConsoleMessage
-                                                       {
-                                                           MessageType = ConsoleMessageType.Log,
-                                                           Message = new ConsoleLogMessage
-                                                                         {
-                                                                             LogType = logType,
-                                                                             Message = message
-                                                                         }
-                                                       }));
+        var json = JsonSerializer.Serialize(new ConsoleMessage
+                                                     {
+                                                         MessageType = ConsoleMessageType.Log,
+                                                         Message = new ConsoleLogMessage
+                                                                       {
+                                                                           LogType = logType,
+                                                                           Message = message
+                                                                       }
+                                                     });
+        Console.WriteLine($"{JsonPrefix}{json}");
     }
 }
