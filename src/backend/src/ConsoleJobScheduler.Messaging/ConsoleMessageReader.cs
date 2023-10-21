@@ -55,7 +55,7 @@ public sealed class ConsoleMessageReader
             return new ConsoleMessage
                        {
                            MessageType = messageType.Value,
-                           Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<ConsoleLogMessage>()
+                           Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<EmailMessage>()
                        };
         }
 
