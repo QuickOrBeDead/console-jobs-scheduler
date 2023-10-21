@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+      <Version>0.1.1</Version>
+      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+      <Title>Console Jobs Scheduler Messaging</Title>
+      <Summary>Console Jobs Scheduler Messaging</Summary>
+      <IsPackable>true</IsPackable>
+      <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      <FileVersion>1.0.0.0</FileVersion>
+      <PackageProjectUrl>https://github.com/QuickOrBeDead/console-jobs-scheduler</PackageProjectUrl>
+      <PackageLicenseUrl>https://github.com/QuickOrBeDead/console-jobs-scheduler/blob/master/LICENSE</PackageLicenseUrl>
+      <Authors>boraa</Authors>
+      <PackageTags>scheduler</PackageTags>
+      <RepositoryUrl>https://github.com/QuickOrBeDead/console-jobs-scheduler.git</RepositoryUrl>
+      <Copyright>Copyright (c) 2023 Bora Akgün</Copyright>
+      <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>
