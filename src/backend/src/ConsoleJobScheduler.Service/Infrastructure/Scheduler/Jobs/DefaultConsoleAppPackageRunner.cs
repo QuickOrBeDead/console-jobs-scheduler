@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
+using ConsoleJobScheduler.Messaging;
+using ConsoleJobScheduler.Messaging.Models;
+
 using Events;
 using Exceptions;
 
@@ -13,12 +16,10 @@ using MessagePipe;
 public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IAsyncPublisher<JobConsoleLogMessageEvent> _jobConsoleLogMessagePublisher;
-
     private readonly IPackageStorage _packageStorage;
-
     private readonly IPackageRunStorage _packageRunStorage;
-
     private readonly IEmailSender _emailSender;
+    private readonly ConsoleMessageReader _consoleMessageReader = new();
 
     private readonly string _tempRootPath;
 
@@ -68,7 +69,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.FileName = pathToExecutable;
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.Arguments = $"{arguments} --attachmentsPath {_packageRunStorage.GetAttachmentsPath(packageName, jobRunId)} --emailsPath {_emailSender.GetEmailsFolder(packageName, jobRunId)}";
+                process.StartInfo.Arguments = $"{arguments} --attachmentsPath {_packageRunStorage.GetAttachmentsPath(packageName, jobRunId)}";
 
                 process.StartInfo.RedirectStandardOutput = true;
                 process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(packageName, jobRunId, e.Data, false);
@@ -88,8 +89,6 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 {
                     throw new ConsoleAppPackageRunFailException($"Console app package '{packageName}' run failed", process.ExitCode);
                 }
-
-                await _emailSender.SendMailsAsync(packageName, jobRunId);
             }
         }
         finally
@@ -109,14 +108,32 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
     }
 
-    private Task ProcessOutputDataHandler(string packageName, string jobRunId, string? data, bool isError)
+    private async Task ProcessOutputDataHandler(string packageName, string jobRunId, string? data, bool isError)
     {
         if (!string.IsNullOrEmpty(data))
         {
-            _packageRunStorage.AppendToLog(packageName, jobRunId, data, isError);
-            _jobConsoleLogMessagePublisher.Publish(new JobConsoleLogMessageEvent(jobRunId, data, isError));
+            if (isError)
+            {
+                _packageRunStorage.AppendToLog(packageName, jobRunId, data, isError);
+                await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError));
+            }
+            else
+            {
+                var consoleMessage = _consoleMessageReader.ReadMessage(data);
+                if (consoleMessage != null)
+                {
+                    if (consoleMessage.MessageType == ConsoleMessageType.Email)
+                    {
+                        await _emailSender.SendMailAsync((EmailMessage) consoleMessage.Message);
+                    }
+                    else if (consoleMessage.MessageType == ConsoleMessageType.Log)
+                    {
+                        var logMessage = (ConsoleLogMessage)consoleMessage.Message;
+                        _packageRunStorage.AppendToLog(packageName, jobRunId, logMessage.Message, false);
+                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError));
+                    }
+                }
+            }
         }
-
-        return Task.CompletedTask;
     }
 }

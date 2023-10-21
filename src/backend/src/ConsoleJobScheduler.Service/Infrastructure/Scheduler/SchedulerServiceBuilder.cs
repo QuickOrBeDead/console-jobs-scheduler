@@ -56,7 +56,6 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
         services.AddSingleton<IJobFactory, ServiceProviderJobFactory>();
 
         var packageStorageRootPath = _config["ConsoleAppPackageStoragePath"] ?? AppDomain.CurrentDomain.BaseDirectory;
-        var emailStorageRootPath = _config["ConsoleAppEmailStoragePath"] ?? AppDomain.CurrentDomain.BaseDirectory;
         var appRunTempRootPath = _config["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory;
 
         services.AddSingleton<IPackageStorage>(_ => new DefaultPackageStorage(packageStorageRootPath));
@@ -67,7 +66,7 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
             x.GetRequiredService<IPackageRunStorage>(),
             x.GetRequiredService<IEmailSender>(),
             appRunTempRootPath));
-        services.AddSingleton<IEmailSender>(_ => new SmtpEmailSender(emailStorageRootPath));
+        services.AddSingleton<IEmailSender>(_ => new SmtpEmailSender());
         services.AddTransient<ConsoleAppPackageJob>();
 
         services.AddMessagePipe(

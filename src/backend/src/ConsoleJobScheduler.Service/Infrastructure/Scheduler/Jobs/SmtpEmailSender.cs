@@ -3,46 +3,12 @@
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
-using System.Text.Json;
 
-using Models;
+using ConsoleJobScheduler.Messaging.Models;
 
 public sealed class SmtpEmailSender : IEmailSender
 {
-    private readonly string _rootPath;
-
-    public SmtpEmailSender(string rootPath)
-    {
-        if (string.IsNullOrWhiteSpace(rootPath))
-        {
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(rootPath));
-        }
-
-        _rootPath = rootPath;
-    }
-
-    public async Task SendMailsAsync(string packageName, string jobRunId)
-    {
-        var emailsFolder = GetEmailsFolder(packageName, jobRunId);
-        foreach (var emailJsonPath in Directory.EnumerateFiles(emailsFolder, "*.json", SearchOption.TopDirectoryOnly))
-        {
-            var jsonContent = await File.ReadAllTextAsync(emailJsonPath).ConfigureAwait(false);
-            await SendMailAsync(JsonSerializer.Deserialize<EmailMessage>(jsonContent)).ConfigureAwait(false);
-        }
-    }
-
-    public string GetEmailsFolder(string packageName, string jobRunId)
-    {
-        var emailsFolder = Path.Combine(_rootPath, "Emails", packageName, jobRunId);
-        if (!Directory.Exists(emailsFolder))
-        {
-            Directory.CreateDirectory(emailsFolder);
-        }
-
-        return emailsFolder;
-    }
-
-    private static async Task SendMailAsync(EmailMessage emailMessage)
+    public async Task SendMailAsync(EmailMessage emailMessage)
     {
         using (var smtpClient = new SmtpClient("localhost", 25))
         {
@@ -71,7 +37,8 @@ public sealed class SmtpEmailSender : IEmailSender
 
             foreach (var attachment in emailMessage.Attachments)
             {
-                mailMessage.Attachments.Add(new Attachment(attachment.FileName, new ContentType(attachment.ContentType)));
+                using var stream = new MemoryStream(Convert.FromBase64String(attachment.FileContent));
+                mailMessage.Attachments.Add(new Attachment(stream, new ContentType(attachment.ContentType)));
             }
 
             await smtpClient.SendMailAsync(mailMessage);
