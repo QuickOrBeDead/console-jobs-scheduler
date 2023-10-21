@@ -403,3 +403,4 @@ FodyWeavers.xsd
 .storage/
 scc.exe
 scc.ps1
+/src/backend/src/publishnuget.ps1
