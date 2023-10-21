@@ -21,10 +21,11 @@ public sealed class EmailMessage
 
     public string? Bcc { get; set; }
 
-    public void AddAttachment(string contentType, byte[] fileBytes)
+    public void AddAttachment(string fileName, string contentType, byte[] fileBytes)
     {
         Attachments.Add(new EmailAttachment
                             {
+                                FileName = fileName,
                                 ContentType = contentType,
                                 FileContent = Convert.ToBase64String(fileBytes)
                             });
