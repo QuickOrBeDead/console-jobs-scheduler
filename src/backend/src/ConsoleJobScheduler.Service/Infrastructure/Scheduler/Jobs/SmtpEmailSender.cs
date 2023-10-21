@@ -35,13 +35,25 @@ public sealed class SmtpEmailSender : IEmailSender
                 mailMessage.To.Add(emailMessage.Bcc);
             }
 
-            foreach (var attachment in emailMessage.Attachments)
+            var attachments = emailMessage.Attachments;
+            var streams = new List<MemoryStream>(attachments.Count);
+            try
             {
-                using var stream = new MemoryStream(Convert.FromBase64String(attachment.FileContent));
-                mailMessage.Attachments.Add(new Attachment(stream, new ContentType(attachment.ContentType)));
-            }
+                for (var i = 0; i < attachments.Count; i++)
+                {
+                    var attachment = attachments[i];
+                    var stream = new MemoryStream(Convert.FromBase64String(attachment.FileContent));
+                    mailMessage.Attachments.Add(new Attachment(stream, new ContentType(attachment.ContentType)) { Name = attachment.FileName ?? $"attachment_{i}" });
 
-            await smtpClient.SendMailAsync(mailMessage);
+                    streams.Add(stream);
+                }
+
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+            finally
+            {
+                streams.ForEach(x => x.Dispose());
+            }
         }
     }
 }
