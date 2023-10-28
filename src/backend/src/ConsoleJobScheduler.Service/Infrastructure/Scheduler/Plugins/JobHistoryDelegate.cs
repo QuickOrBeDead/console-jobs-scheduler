@@ -425,7 +425,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             throw new ArgumentNullException(nameof(email));
         }
 
-        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunAttachment, _tablePrefix);
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunEmail, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
             using (var command = _dbAccessor.PrepareCommand(connection, sql))
