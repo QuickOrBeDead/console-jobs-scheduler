@@ -51,6 +51,10 @@ public interface IJobHistoryDelegate
         CancellationToken cancellationToken = default);
 
     Task<IList<AttachmentInfoModel>> GetJobRunAttachments(string id);
+
+    Task InsertJobRunEmail(
+        EmailModel email,
+        CancellationToken cancellationToken = default);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -103,6 +107,8 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @name, @contentType, @content, @createTime)";
     
     private const string SqlListJobRunAttachment = "SELECT ID, NAME FROM {0}JOB_RUN_ATTACHMENT WHERE JOB_RUN_ID = @jobRunId";
+
+    private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, TO, CC, BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
 
     public JobHistoryDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -372,20 +378,11 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             throw new ArgumentNullException(nameof(attachment));
         }
 
-        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunAttachment, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
-            {
-                _dbAccessor.AddCommandParameter(command, "jobRunId", attachment.JobRunId);
-                _dbAccessor.AddCommandParameter(command, "name", attachment.FileName);
-                _dbAccessor.AddCommandParameter(command, "content", attachment.FileContent);
-                _dbAccessor.AddCommandParameter(command, "contentType", attachment.ContentType);
-                _dbAccessor.AddCommandParameter(command, "emailId", attachment.EmailId);
-                _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
-                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-                connection.Commit(false);
-            }
+            await InsertJobRunAttachment(connection, attachment, cancellationToken);
+
+            connection.Commit(false);
         }
     }
 
@@ -416,6 +413,59 @@ public class JobHistoryDelegate : IJobHistoryDelegate
 
                 return result;
             }
+        }
+    }
+
+    public async Task InsertJobRunEmail(
+        EmailModel email,
+        CancellationToken cancellationToken = default)
+    {
+        if (email == null)
+        {
+            throw new ArgumentNullException(nameof(email));
+        }
+
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunAttachment, _tablePrefix);
+        using (var connection = GetConnection(IsolationLevel.ReadCommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", email.Id);
+                _dbAccessor.AddCommandParameter(command, "jobRunId", email.JobRunId);
+                _dbAccessor.AddCommandParameter(command, "subject", email.Subject);
+                _dbAccessor.AddCommandParameter(command, "body", email.Body);
+                _dbAccessor.AddCommandParameter(command, "to", email.To);
+                _dbAccessor.AddCommandParameter(command, "cc", email.CC);
+                _dbAccessor.AddCommandParameter(command, "bcc", email.Bcc);
+                _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
+                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            foreach (var attachment in email.Attachments)
+            {
+                attachment.EmailId = email.Id;
+                await InsertJobRunAttachment(connection, attachment, cancellationToken).ConfigureAwait(false);
+            }
+
+            connection.Commit(false);
+        }
+    }
+
+    private async Task InsertJobRunAttachment(
+        ConnectionAndTransactionHolder connection,
+        AttachmentModel attachment,
+        CancellationToken cancellationToken)
+    {
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunAttachment, _tablePrefix);
+        using (var command = _dbAccessor.PrepareCommand(connection, sql))
+        {
+            _dbAccessor.AddCommandParameter(command, "jobRunId", attachment.JobRunId);
+            _dbAccessor.AddCommandParameter(command, "name", attachment.FileName);
+            _dbAccessor.AddCommandParameter(command, "content", attachment.FileContent);
+            _dbAccessor.AddCommandParameter(command, "contentType", attachment.ContentType);
+            _dbAccessor.AddCommandParameter(command, "emailId", attachment.EmailId);
+            _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
