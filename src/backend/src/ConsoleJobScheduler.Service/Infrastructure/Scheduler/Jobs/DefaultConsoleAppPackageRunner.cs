@@ -124,10 +124,10 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                     {
                         var emailMessage = (EmailMessage)consoleMessage.Message;
 
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to ${emailMessage.To}", false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false));
                         await _emailSender.SendMailAsync(emailMessage);
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to ${emailMessage.To}", false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false));
                     }
                     else if (consoleMessage.MessageType == ConsoleMessageType.Log)
