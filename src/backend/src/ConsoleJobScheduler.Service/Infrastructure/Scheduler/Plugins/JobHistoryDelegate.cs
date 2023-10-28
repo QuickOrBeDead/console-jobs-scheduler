@@ -49,6 +49,8 @@ public interface IJobHistoryDelegate
     Task InsertJobRunAttachment(
         AttachmentModel attachment,
         CancellationToken cancellationToken = default);
+
+    Task<IList<AttachmentInfoModel>> GetJobRunAttachments(string id);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -95,7 +97,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     private const string SqlJobExecutionErrorDetails = @"SELECT ERROR_DETAILS FROM {0}JOB_HISTORY WHERE ID = @id";
 
     private const string SqlInsertJobRunLog = "INSERT INTO {0}JOB_RUN_LOG (JOB_RUN_ID, CONTENT, IS_ERROR, CREATE_TIME) VALUES (@jobRunId, @content, @isError, @createTime)";
-    
+
     private const string SqlListJobRunLog = "SELECT CONTENT, IS_ERROR FROM {0}JOB_RUN_LOG WHERE JOB_RUN_ID = @id";
 
     private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @name, @contentType, @content, @createTime)";
@@ -386,6 +388,33 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             }
         }
     }
+
+    public async Task<IList<AttachmentInfoModel>> GetJobRunAttachments(string id)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunAttachment, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", id);
+
+                IList<AttachmentInfoModel> result = new List<AttachmentInfoModel>();
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result.Add(
+                            new AttachmentInfoModel
+                            {
+                                    Id = reader.GetInt64("ID"),
+                                    FileName = reader.GetString("NAME")
+                                });
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
             }
         }
     }
