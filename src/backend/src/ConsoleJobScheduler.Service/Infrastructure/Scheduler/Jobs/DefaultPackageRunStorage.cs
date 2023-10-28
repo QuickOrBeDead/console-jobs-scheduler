@@ -19,24 +19,6 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         _rootPath = rootPath;
     }
 
-    public void AddLog(string packageName, string jobRunId, string content, bool isError)
-    {
-        var packageLogFolder = GetPackageLogFolder(packageName);
-        if (!Directory.Exists(packageLogFolder))
-        {
-            Directory.CreateDirectory(packageLogFolder);
-        }
-
-        var jobLogFile = GetJobLogFilePath(jobRunId, packageLogFolder);
-        if (isError)
-        {
-            content ??= string.Empty;
-            content = string.Join('\n', content.Split('\n').Select(x => $"##[error] {x}"));
-        }
-
-        File.AppendAllText(jobLogFile, $"{content}\n");
-    }
-
     public IList<LogLine> GetLogLines(string packageName, string jobRunId)
     {
         if (string.IsNullOrWhiteSpace(packageName))
@@ -57,17 +39,6 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
                                    IsError = !string.IsNullOrWhiteSpace(x) && x.StartsWith("##[error] ", StringComparison.InvariantCultureIgnoreCase)
                                })
             .ToList();
-    }
-
-    public string GetAttachmentsPath(string packageName, string jobRunId)
-    {
-        var attachmentsPath = GetAttachmentsFolder(packageName, jobRunId);
-        if (!Directory.Exists(attachmentsPath))
-        {
-            Directory.CreateDirectory(attachmentsPath);
-        }
-
-        return attachmentsPath;
     }
 
     public IList<string> GetAttachmentNames(string packageName, string jobRunId)

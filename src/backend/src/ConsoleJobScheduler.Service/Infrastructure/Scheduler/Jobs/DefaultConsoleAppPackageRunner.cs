@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 using ConsoleJobScheduler.Messaging;
 using ConsoleJobScheduler.Messaging.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
 
 using Events;
 using Exceptions;
@@ -17,7 +18,6 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IAsyncPublisher<JobConsoleLogMessageEvent> _jobConsoleLogMessagePublisher;
     private readonly IPackageStorage _packageStorage;
-    private readonly IPackageRunStorage _packageRunStorage;
     private readonly IEmailSender _emailSender;
     private readonly ConsoleMessageReader _consoleMessageReader = new();
 
@@ -26,7 +26,6 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
     public DefaultConsoleAppPackageRunner(
         IAsyncPublisher<JobConsoleLogMessageEvent> jobConsoleLogMessagePublisher, 
         IPackageStorage packageStorage,
-        IPackageRunStorage packageRunStorage,
         IEmailSender emailSender,
         string tempRootPath)
     {
@@ -37,12 +36,11 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 
         _jobConsoleLogMessagePublisher = jobConsoleLogMessagePublisher ?? throw new ArgumentNullException(nameof(jobConsoleLogMessagePublisher));
         _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
-        _packageRunStorage = packageRunStorage ?? throw new ArgumentNullException(nameof(packageRunStorage));
         _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
         _tempRootPath = tempRootPath;
     }
 
-    public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
+    public async Task Run(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(_tempRootPath, "Temp");
         if (!Directory.Exists(tempDirectory))
@@ -69,12 +67,12 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.FileName = pathToExecutable;
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.Arguments = $"{arguments} --attachmentsPath {_packageRunStorage.GetAttachmentsPath(packageName, jobRunId)}";
+                process.StartInfo.Arguments = arguments;
 
                 process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(packageName, jobRunId, e.Data, false);
+                process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false);
                 process.StartInfo.RedirectStandardError = true;
-                process.ErrorDataReceived += async (_, e) => await ProcessOutputDataHandler(packageName, jobRunId, e.Data, true);
+                process.ErrorDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true);
 
                 if (!process.Start())
                 {
@@ -108,13 +106,13 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
     }
 
-    private async Task ProcessOutputDataHandler(string packageName, string jobRunId, string? data, bool isError)
+    private async Task ProcessOutputDataHandler(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string? data, bool isError)
     {
         if (!string.IsNullOrEmpty(data))
         {
             if (isError)
             {
-                _packageRunStorage.AddLog(packageName, jobRunId, data, isError);
+                await jobHistoryDelegate.InsertJobRunLog(jobRunId, data, isError);
                 await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError));
             }
             else
@@ -126,16 +124,16 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                     {
                         var emailMessage = (EmailMessage)consoleMessage.Message;
 
-                        _packageRunStorage.AddLog(packageName, jobRunId, $"Sending email to ${emailMessage.To}", false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to ${emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false));
                         await _emailSender.SendMailAsync(emailMessage);
-                        _packageRunStorage.AddLog(packageName, jobRunId, $"Email is sent to ${emailMessage.To}", false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to ${emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false));
                     }
                     else if (consoleMessage.MessageType == ConsoleMessageType.Log)
                     {
                         var logMessage = (ConsoleLogMessage)consoleMessage.Message;
-                        _packageRunStorage.AddLog(packageName, jobRunId, logMessage.Message, false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, logMessage.Message, false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError));
                     }
                 }

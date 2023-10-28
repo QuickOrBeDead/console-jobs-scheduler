@@ -35,6 +35,12 @@ public interface IJobHistoryDelegate
     Task<JobExecutionDetail?> GetJobExecutionDetail(string id);
 
     Task<string?> GetJobExecutionErrorDetail(string id);
+
+    Task InsertJobRunLog(
+        string jobRunId,
+        string content,
+        bool isError,
+        CancellationToken cancellationToken = default);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -79,6 +85,8 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                                     WHERE ID = @id";
 
     private const string SqlJobExecutionErrorDetails = @"SELECT ERROR_DETAILS FROM {0}JOB_HISTORY WHERE ID = @id";
+
+    private const string SqlInsertJobRunLog = "INSERT INTO {0}JOB_RUN_LOG (JOB_RUN_ID, CONTENT, IS_ERROR, CREATE_TIME) VALUES (@jobRunId, @content, @isError, @createTime)";
 
     public JobHistoryDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -278,6 +286,33 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                 connection.Commit(false);
 
                 return null;
+            }
+        }
+    }
+
+    public async Task InsertJobRunLog(
+        string jobRunId,
+        string content,
+        bool isError,
+        CancellationToken cancellationToken = default)
+    {
+        if (isError)
+        {
+            content ??= string.Empty;
+            content = string.Join('\n', content.Split('\n').Select(x => $"##[error] {x}"));
+        }
+
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunLog, _tablePrefix);
+        using (var connection = GetConnection(IsolationLevel.ReadCommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            {
+                _dbAccessor.AddCommandParameter(command, "jobRunId", jobRunId);
+                _dbAccessor.AddCommandParameter(command, "content", content);
+                _dbAccessor.AddCommandParameter(command, "isError", isError);
+                _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
+                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                connection.Commit(false);
             }
         }
     }

@@ -63,7 +63,6 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
         services.AddSingleton<IConsoleAppPackageRunner>(x => new DefaultConsoleAppPackageRunner(
             x.GetRequiredService<IAsyncPublisher<JobConsoleLogMessageEvent>>(),
             x.GetRequiredService<IPackageStorage>(),
-            x.GetRequiredService<IPackageRunStorage>(),
             x.GetRequiredService<IEmailSender>(),
             appRunTempRootPath));
         services.AddSingleton<IEmailSender>(_ => new SmtpEmailSender());
