@@ -114,7 +114,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         {
             if (isError)
             {
-                _packageRunStorage.AppendToLog(packageName, jobRunId, data, isError);
+                _packageRunStorage.AddLog(packageName, jobRunId, data, isError);
                 await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError));
             }
             else
@@ -126,16 +126,16 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                     {
                         var emailMessage = (EmailMessage)consoleMessage.Message;
 
-                        _packageRunStorage.AppendToLog(packageName, jobRunId, $"Sending email to ${emailMessage.To}", false);
+                        _packageRunStorage.AddLog(packageName, jobRunId, $"Sending email to ${emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false));
                         await _emailSender.SendMailAsync(emailMessage);
-                        _packageRunStorage.AppendToLog(packageName, jobRunId, $"Email is sent to ${emailMessage.To}", false);
+                        _packageRunStorage.AddLog(packageName, jobRunId, $"Email is sent to ${emailMessage.To}", false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false));
                     }
                     else if (consoleMessage.MessageType == ConsoleMessageType.Log)
                     {
                         var logMessage = (ConsoleLogMessage)consoleMessage.Message;
-                        _packageRunStorage.AppendToLog(packageName, jobRunId, logMessage.Message, false);
+                        _packageRunStorage.AddLog(packageName, jobRunId, logMessage.Message, false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError));
                     }
                 }

@@ -19,7 +19,7 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         _rootPath = rootPath;
     }
 
-    public void AppendToLog(string packageName, string jobRunId, string content, bool isError)
+    public void AddLog(string packageName, string jobRunId, string content, bool isError)
     {
         var packageLogFolder = GetPackageLogFolder(packageName);
         if (!Directory.Exists(packageLogFolder))

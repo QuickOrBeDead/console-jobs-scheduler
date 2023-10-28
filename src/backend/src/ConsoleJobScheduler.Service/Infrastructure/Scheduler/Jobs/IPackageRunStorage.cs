@@ -4,7 +4,7 @@ using Models;
 
 public interface IPackageRunStorage
 {
-    void AppendToLog(string packageName, string jobRunId, string content, bool isError);
+    void AddLog(string packageName, string jobRunId, string content, bool isError);
 
     IList<LogLine> GetLogLines(string packageName, string jobRunId);
 
