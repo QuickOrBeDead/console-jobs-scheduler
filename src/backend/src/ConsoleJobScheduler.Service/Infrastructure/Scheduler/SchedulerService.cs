@@ -93,16 +93,16 @@ public sealed class SchedulerService : ISchedulerService
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
     {
-        var jobExecutionDetail = await _scheduler.GetJobHistoryDelegate().GetJobExecutionDetail(id);
+        var jobHistoryDelegate = _scheduler.GetJobHistoryDelegate();
+        var jobExecutionDetail = await jobHistoryDelegate.GetJobExecutionDetail(id);
         if (jobExecutionDetail == null)
         {
             return null;
         }
 
-        return new JobExecutionDetailModel(
-            jobExecutionDetail, 
-            _packageRunStorage.GetLogLines(jobExecutionDetail.PackageName, id),
-            _packageRunStorage.GetAttachmentNames(jobExecutionDetail.PackageName, id));
+        var logs = await jobHistoryDelegate.GetJobRunLogs(id);
+
+        return new JobExecutionDetailModel(jobExecutionDetail, logs, _packageRunStorage.GetAttachmentNames(jobExecutionDetail.PackageName, id));
     }
 
     public Task<string?> GetJobExecutionErrorDetail(string id)

@@ -5,6 +5,7 @@ using System.Data.Common;
 
 using ConsoleJobScheduler.Service.Infrastructure.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
 
 using Quartz;
@@ -41,6 +42,8 @@ public interface IJobHistoryDelegate
         string content,
         bool isError,
         CancellationToken cancellationToken = default);
+
+    Task<IList<LogLine>> GetJobRunLogs(string id);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -87,6 +90,8 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     private const string SqlJobExecutionErrorDetails = @"SELECT ERROR_DETAILS FROM {0}JOB_HISTORY WHERE ID = @id";
 
     private const string SqlInsertJobRunLog = "INSERT INTO {0}JOB_RUN_LOG (JOB_RUN_ID, CONTENT, IS_ERROR, CREATE_TIME) VALUES (@jobRunId, @content, @isError, @createTime)";
+    
+    private const string SqlListJobRunLog = "SELECT CONTENT, IS_ERROR FROM {0}JOB_RUN_LOG WHERE JOB_RUN_ID = @id";
 
     public JobHistoryDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -313,6 +318,36 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                 _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 connection.Commit(false);
+            }
+        }
+    }
+
+    public async Task<IList<LogLine>> GetJobRunLogs(string id)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunLog, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", id);
+
+                IList<LogLine> result = new List<LogLine>();
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result.Add(
+                            new LogLine
+                                {
+                                    Message = reader.GetString("CONTENT"), 
+                                    IsError = reader.GetBoolean("IS_ERROR")
+                                });
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
             }
         }
     }

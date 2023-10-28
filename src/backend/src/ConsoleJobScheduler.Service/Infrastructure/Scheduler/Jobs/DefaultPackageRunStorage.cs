@@ -1,9 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 
-using System.Collections.ObjectModel;
 using System.Linq;
-
-using Models;
 
 public sealed class DefaultPackageRunStorage : IPackageRunStorage
 {
@@ -17,28 +14,6 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         }
 
         _rootPath = rootPath;
-    }
-
-    public IList<LogLine> GetLogLines(string packageName, string jobRunId)
-    {
-        if (string.IsNullOrWhiteSpace(packageName))
-        {
-            return new ReadOnlyCollection<LogLine>(new List<LogLine>(0));
-        }
-
-        var logFile = GetJobLogFilePathByPackageName(packageName, jobRunId);
-        if (!File.Exists(logFile))
-        {
-            return new ReadOnlyCollection<LogLine>(new List<LogLine>(0));
-        }
-
-        return File.ReadAllLines(logFile)
-            .Select(x => new LogLine
-                               {
-                                   Message = x,
-                                   IsError = !string.IsNullOrWhiteSpace(x) && x.StartsWith("##[error] ", StringComparison.InvariantCultureIgnoreCase)
-                               })
-            .ToList();
     }
 
     public IList<string> GetAttachmentNames(string packageName, string jobRunId)
@@ -64,21 +39,6 @@ public sealed class DefaultPackageRunStorage : IPackageRunStorage
         }
 
         return File.ReadAllBytes(attachmentsPath);
-    }
-
-    private string GetJobLogFilePathByPackageName(string packageName, string jobRunId)
-    {
-        return GetJobLogFilePath(jobRunId, GetPackageLogFolder(packageName));
-    }
-
-    private static string GetJobLogFilePath(string jobRunId, string packageLogFolder)
-    {
-        return Path.Combine(packageLogFolder, $"{jobRunId}.log");
-    }
-
-    private string GetPackageLogFolder(string packageName)
-    {
-        return Path.Combine(_rootPath, "Logs", packageName);
     }
 
     private string GetAttachmentsFolder(string packageName, string jobRunId)
