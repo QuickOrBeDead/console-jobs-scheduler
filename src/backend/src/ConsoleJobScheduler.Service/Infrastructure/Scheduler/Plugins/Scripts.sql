@@ -65,9 +65,9 @@ CREATE TABLE IF NOT EXISTS public.qrtz_job_run_email
     job_run_id character varying(30) COLLATE pg_catalog."default" NOT NULL,
     subject character varying(256) COLLATE pg_catalog."default" NOT NULL,
     body text COLLATE pg_catalog."default" NOT NULL,
-    "to" text COLLATE pg_catalog."default" NOT NULL,
-    cc text COLLATE pg_catalog."default" NOT NULL,
-    bcc text COLLATE pg_catalog."default" NOT NULL,
+    message_to text COLLATE pg_catalog."default" NOT NULL,
+    message_cc text COLLATE pg_catalog."default" NOT NULL,
+    message_bcc text COLLATE pg_catalog."default" NOT NULL,
     is_sent boolean NOT NULL,
     create_time bigint NOT NULL,
     CONSTRAINT qrtz_job_run_email_pkey PRIMARY KEY (id)
