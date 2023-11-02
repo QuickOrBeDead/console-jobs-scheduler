@@ -60,6 +60,8 @@ public interface IJobHistoryDelegate
         Guid id,
         bool isSent,
         CancellationToken cancellationToken = default);
+
+    Task<byte[]?> GetJobRunAttachmentContent(long id);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -112,6 +114,8 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @emailId, @name, @contentType, @content, @createTime)";
     
     private const string SqlListJobRunAttachment = "SELECT ID, NAME FROM {0}JOB_RUN_ATTACHMENT WHERE JOB_RUN_ID = @jobRunId";
+
+    private const string SqlGetJobRunAttachment = "SELECT CONTENT FROM {0}JOB_RUN_ATTACHMENT WHERE ID = @id";
 
     private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, MESSAGE_TO, MESSAGE_CC, MESSAGE_BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
     
@@ -413,6 +417,31 @@ public class JobHistoryDelegate : IJobHistoryDelegate
                                     Id = reader.GetInt64("ID"),
                                     FileName = reader.GetString("NAME")
                                 });
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
+            }
+        }
+    }
+
+    public async Task<byte[]?> GetJobRunAttachmentContent(long id)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetJobRunAttachment, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", id);
+
+                byte[]? result = null;
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    if (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result = (byte[]) reader.GetValue("CONTENT");
                     }
                 }
 
