@@ -80,7 +80,7 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
         var serviceProvider = services.BuildServiceProvider();
         var scheduler = await serviceProvider.GetRequiredService<ISchedulerFactory>().GetScheduler();
 
-        return new SchedulerService(serviceProvider, scheduler, serviceProvider.GetRequiredService<IPackageStorage>(), serviceProvider.GetRequiredService<IPackageRunStorage>());
+        return new SchedulerService(serviceProvider, scheduler, serviceProvider.GetRequiredService<IPackageStorage>());
     }
 
 }
