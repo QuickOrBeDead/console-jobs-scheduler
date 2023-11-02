@@ -399,7 +399,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
         {
             using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunAttachment, _tablePrefix)))
             {
-                _dbAccessor.AddCommandParameter(command, "id", id);
+                _dbAccessor.AddCommandParameter(command, "jobRunId", id);
 
                 IList<AttachmentInfoModel> result = new List<AttachmentInfoModel>();
 
