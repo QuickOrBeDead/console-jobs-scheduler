@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
-import { JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
+import { AttachmentInfoModel, JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
 import { HubConnectionBuilder } from '@aspnet/signalr'
 
 const route = useRoute()
@@ -10,14 +10,14 @@ const id = route.params.id as string
 
 const job = ref<JobExecutionDetail>()
 const logs = reactive<LogLine[]>([])
-const attachments = ref<string[]>()
+const attachments = ref<AttachmentInfoModel[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
 
 onMounted(async () => {
     const { data } = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
     job.value = data.details
     logs.push(...data.logs as LogLine[])
-    attachments.value = data.attachments as string[]
+    attachments.value = data.attachments as AttachmentInfoModel[]
 
     const $console = document.getElementById('console')
 
@@ -41,6 +41,11 @@ onUpdated(() => {
     const $console = document.getElementById('console')
     $console!.scrollTop = $console!.scrollHeight
 })
+
+function getAttachmentUrl(attachment: AttachmentInfoModel): string {
+    const basePath = jobExecutionDetailsApi["basePath"]
+    return `${basePath}/api/JobExecutionDetails/GetAttachment/${attachment.id}?attachmentName=${encodeURIComponent(attachment.fileName as string)}`
+}
 </script>
 <template>
 <div class="page-container">
@@ -113,7 +118,7 @@ onUpdated(() => {
                         <th scope="row">Attachments</th>
                         <td>
                             <template v-for="attachment in attachments">
-                                <a href="#">{{ attachment }}</a>
+                                <a :href="getAttachmentUrl(attachment)">{{ attachment.fileName }}</a>
                                 <br />
                             </template>
                         </td>
