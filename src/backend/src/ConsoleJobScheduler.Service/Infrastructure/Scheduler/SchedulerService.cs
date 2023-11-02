@@ -43,7 +43,7 @@ public interface ISchedulerService
 
     Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics();
 
-    byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName);
+    Task<byte[]?> GetAttachmentBytes(long id);
 
     Task SavePackage(string packageName, byte[] content);
 }
@@ -53,15 +53,13 @@ public sealed class SchedulerService : ISchedulerService
     private readonly IServiceProvider _serviceProvider;
     private readonly IScheduler _scheduler;
     private readonly IPackageStorage _packageStorage;
-    private readonly IPackageRunStorage _packageRunStorage;
     private readonly DisposableBagBuilder _subscriberDisposableBagBuilder;
 
-    public SchedulerService(IServiceProvider serviceProvider, IScheduler scheduler, IPackageStorage packageStorage, IPackageRunStorage packageRunStorage)
+    public SchedulerService(IServiceProvider serviceProvider, IScheduler scheduler, IPackageStorage packageStorage)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
-        _packageRunStorage = packageRunStorage ?? throw new ArgumentNullException(nameof(packageRunStorage));
         _subscriberDisposableBagBuilder = DisposableBag.CreateBuilder();
     }
 
@@ -94,15 +92,15 @@ public sealed class SchedulerService : ISchedulerService
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
     {
         var jobHistoryDelegate = _scheduler.GetJobHistoryDelegate();
-        var jobExecutionDetail = await jobHistoryDelegate.GetJobExecutionDetail(id);
+        var jobExecutionDetail = await jobHistoryDelegate.GetJobExecutionDetail(id).ConfigureAwait(false);
         if (jobExecutionDetail == null)
         {
             return null;
         }
 
-        var logs = await jobHistoryDelegate.GetJobRunLogs(id);
-
-        return new JobExecutionDetailModel(jobExecutionDetail, logs, _packageRunStorage.GetAttachmentNames(jobExecutionDetail.PackageName, id));
+        var logs = await jobHistoryDelegate.GetJobRunLogs(id).ConfigureAwait(false);
+        var attachments = await jobHistoryDelegate.GetJobRunAttachments(id).ConfigureAwait(false);
+        return new JobExecutionDetailModel(jobExecutionDetail, logs, attachments);
     }
 
     public Task<string?> GetJobExecutionErrorDetail(string id)
@@ -208,9 +206,9 @@ public sealed class SchedulerService : ISchedulerService
                    );
     }
 
-    public byte[]? GetAttachmentBytes(string packageName, string jobRunId, string attachmentName)
+    public Task<byte[]?> GetAttachmentBytes(long id)
     {
-        return _packageRunStorage.GetAttachmentBytes(packageName, jobRunId, attachmentName);
+        return _scheduler.GetJobHistoryDelegate().GetJobRunAttachmentContent(id);
     }
 
     public Task SavePackage(string packageName, byte[] content)

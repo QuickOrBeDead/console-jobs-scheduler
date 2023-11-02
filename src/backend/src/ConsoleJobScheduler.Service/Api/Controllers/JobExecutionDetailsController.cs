@@ -45,9 +45,9 @@ public class JobExecutionDetailsController : ControllerBase
 
     [HttpGet("GetAttachment/{id}")]
     [Produces(MediaTypeNames.Application.Octet)]
-    public IActionResult GetAttachment(string id, [FromQuery]string packageName, [FromQuery]string attachmentName)
+    public async Task<IActionResult> GetAttachment(long id, [FromQuery]string attachmentName)
     {
-        var fileContents = _schedulerService.GetAttachmentBytes(packageName, id, attachmentName);
+        var fileContents = await _schedulerService.GetAttachmentBytes(id).ConfigureAwait(false);
         if (fileContents == null)
         {
             return NotFound();

@@ -9,11 +9,11 @@ public sealed class JobExecutionDetailModel
 {
     public JobExecutionDetail Details { get; }
 
-    public IList<string> Attachments { get; }
+    public IList<AttachmentInfoModel> Attachments { get; }
 
     public IList<LogLine> Logs { get; }
 
-    public JobExecutionDetailModel(JobExecutionDetail details, IList<LogLine> logs, IList<string> attachments)
+    public JobExecutionDetailModel(JobExecutionDetail details, IList<LogLine> logs, IList<AttachmentInfoModel> attachments)
     {
         if (logs == null)
         {
@@ -26,7 +26,7 @@ public sealed class JobExecutionDetailModel
         }
 
         Details = details ?? throw new ArgumentNullException(nameof(details));
-        Attachments = new ReadOnlyCollection<string>(attachments);
+        Attachments = new ReadOnlyCollection<AttachmentInfoModel>(attachments);
         Logs = new ReadOnlyCollection<LogLine>(logs);
     }
 }
