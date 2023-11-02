@@ -26,6 +26,25 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface AttachmentInfoModel
+ */
+export interface AttachmentInfoModel {
+    /**
+     * 
+     * @type {number}
+     * @memberof AttachmentInfoModel
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AttachmentInfoModel
+     */
+    'fileName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface IdentityError
  */
 export interface IdentityError {
@@ -233,10 +252,10 @@ export interface JobExecutionDetailModel {
     'details'?: JobExecutionDetail;
     /**
      * 
-     * @type {Array<string>}
+     * @type {Array<AttachmentInfoModel>}
      * @memberof JobExecutionDetailModel
      */
-    'attachments'?: Array<string> | null;
+    'attachments'?: Array<AttachmentInfoModel> | null;
     /**
      * 
      * @type {Array<LogLine>}
@@ -1258,13 +1277,12 @@ export const JobExecutionDetailsApiAxiosParamCreator = function (configuration?:
     return {
         /**
          * 
-         * @param {string} id 
-         * @param {string} [packageName] 
+         * @param {number} id 
          * @param {string} [attachmentName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobExecutionDetailsGetAttachmentIdGet: async (id: string, packageName?: string, attachmentName?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiJobExecutionDetailsGetAttachmentIdGet: async (id: number, attachmentName?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('apiJobExecutionDetailsGetAttachmentIdGet', 'id', id)
             const localVarPath = `/api/JobExecutionDetails/GetAttachment/{id}`
@@ -1279,10 +1297,6 @@ export const JobExecutionDetailsApiAxiosParamCreator = function (configuration?:
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-
-            if (packageName !== undefined) {
-                localVarQueryParameter['packageName'] = packageName;
-            }
 
             if (attachmentName !== undefined) {
                 localVarQueryParameter['attachmentName'] = attachmentName;
@@ -1377,14 +1391,13 @@ export const JobExecutionDetailsApiFp = function(configuration?: Configuration) 
     return {
         /**
          * 
-         * @param {string} id 
-         * @param {string} [packageName] 
+         * @param {number} id 
          * @param {string} [attachmentName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobExecutionDetailsGetAttachmentIdGet(id: string, packageName?: string, attachmentName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobExecutionDetailsGetAttachmentIdGet(id, packageName, attachmentName, options);
+        async apiJobExecutionDetailsGetAttachmentIdGet(id: number, attachmentName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobExecutionDetailsGetAttachmentIdGet(id, attachmentName, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1419,14 +1432,13 @@ export const JobExecutionDetailsApiFactory = function (configuration?: Configura
     return {
         /**
          * 
-         * @param {string} id 
-         * @param {string} [packageName] 
+         * @param {number} id 
          * @param {string} [attachmentName] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobExecutionDetailsGetAttachmentIdGet(id: string, packageName?: string, attachmentName?: string, options?: any): AxiosPromise<void> {
-            return localVarFp.apiJobExecutionDetailsGetAttachmentIdGet(id, packageName, attachmentName, options).then((request) => request(axios, basePath));
+        apiJobExecutionDetailsGetAttachmentIdGet(id: number, attachmentName?: string, options?: any): AxiosPromise<void> {
+            return localVarFp.apiJobExecutionDetailsGetAttachmentIdGet(id, attachmentName, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1458,15 +1470,14 @@ export const JobExecutionDetailsApiFactory = function (configuration?: Configura
 export class JobExecutionDetailsApi extends BaseAPI {
     /**
      * 
-     * @param {string} id 
-     * @param {string} [packageName] 
+     * @param {number} id 
      * @param {string} [attachmentName] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobExecutionDetailsApi
      */
-    public apiJobExecutionDetailsGetAttachmentIdGet(id: string, packageName?: string, attachmentName?: string, options?: AxiosRequestConfig) {
-        return JobExecutionDetailsApiFp(this.configuration).apiJobExecutionDetailsGetAttachmentIdGet(id, packageName, attachmentName, options).then((request) => request(this.axios, this.basePath));
+    public apiJobExecutionDetailsGetAttachmentIdGet(id: number, attachmentName?: string, options?: AxiosRequestConfig) {
+        return JobExecutionDetailsApiFp(this.configuration).apiJobExecutionDetailsGetAttachmentIdGet(id, attachmentName, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
