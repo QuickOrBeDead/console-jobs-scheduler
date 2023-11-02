@@ -55,6 +55,11 @@ public interface IJobHistoryDelegate
     Task InsertJobRunEmail(
         EmailModel email,
         CancellationToken cancellationToken = default);
+
+    Task UpdateJobRunEmailIsSent(
+        Guid id,
+        bool isSent,
+        CancellationToken cancellationToken = default);
 }
 
 public class JobHistoryDelegate : IJobHistoryDelegate
@@ -102,13 +107,15 @@ public class JobHistoryDelegate : IJobHistoryDelegate
 
     private const string SqlInsertJobRunLog = "INSERT INTO {0}JOB_RUN_LOG (JOB_RUN_ID, CONTENT, IS_ERROR, CREATE_TIME) VALUES (@jobRunId, @content, @isError, @createTime)";
 
-    private const string SqlListJobRunLog = "SELECT CONTENT, IS_ERROR FROM {0}JOB_RUN_LOG WHERE JOB_RUN_ID = @id";
+    private const string SqlListJobRunLog = "SELECT CONTENT, IS_ERROR FROM {0}JOB_RUN_LOG WHERE JOB_RUN_ID = @id ORDER BY ID";
 
-    private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @name, @contentType, @content, @createTime)";
+    private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @emailId, @name, @contentType, @content, @createTime)";
     
     private const string SqlListJobRunAttachment = "SELECT ID, NAME FROM {0}JOB_RUN_ATTACHMENT WHERE JOB_RUN_ID = @jobRunId";
 
-    private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, TO, CC, BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
+    private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, MESSAGE_TO, MESSAGE_CC, MESSAGE_BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
+    
+    private const string SqlUpdateJobRunEmailIsSent = "UPDATE {0}JOB_RUN_EMAIL SET IS_SENT = @isSent WHERE ID = @id";
 
     public JobHistoryDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -432,11 +439,11 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             {
                 _dbAccessor.AddCommandParameter(command, "id", email.Id);
                 _dbAccessor.AddCommandParameter(command, "jobRunId", email.JobRunId);
-                _dbAccessor.AddCommandParameter(command, "subject", email.Subject);
-                _dbAccessor.AddCommandParameter(command, "body", email.Body);
-                _dbAccessor.AddCommandParameter(command, "to", email.To);
-                _dbAccessor.AddCommandParameter(command, "cc", email.CC);
-                _dbAccessor.AddCommandParameter(command, "bcc", email.Bcc);
+                _dbAccessor.AddCommandParameter(command, "subject", email.Subject ?? string.Empty);
+                _dbAccessor.AddCommandParameter(command, "body", email.Body ?? string.Empty);
+                _dbAccessor.AddCommandParameter(command, "to", email.To ?? string.Empty);
+                _dbAccessor.AddCommandParameter(command, "cc", email.CC ?? string.Empty);
+                _dbAccessor.AddCommandParameter(command, "bcc", email.Bcc ?? string.Empty);
                 _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -451,6 +458,24 @@ public class JobHistoryDelegate : IJobHistoryDelegate
         }
     }
 
+    public async Task UpdateJobRunEmailIsSent(
+        Guid id,
+        bool isSent,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobRunEmailIsSent, _tablePrefix);
+        using (var connection = GetConnection(IsolationLevel.ReadCommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            {
+                _dbAccessor.AddCommandParameter(command, "id", id);
+                _dbAccessor.AddCommandParameter(command, "isSent", _dbAccessor.GetDbBooleanValue(isSent));
+                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                connection.Commit(false);
+            }
+        }
+    }
+
     private async Task InsertJobRunAttachment(
         ConnectionAndTransactionHolder connection,
         AttachmentModel attachment,
@@ -461,7 +486,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
         {
             _dbAccessor.AddCommandParameter(command, "jobRunId", attachment.JobRunId);
             _dbAccessor.AddCommandParameter(command, "name", attachment.FileName);
-            _dbAccessor.AddCommandParameter(command, "content", attachment.FileContent);
+            _dbAccessor.AddCommandParameter(command, "content", string.IsNullOrWhiteSpace(attachment.FileContent) ? Array.Empty<byte>() : Convert.FromBase64String(attachment.FileContent));
             _dbAccessor.AddCommandParameter(command, "contentType", attachment.ContentType);
             _dbAccessor.AddCommandParameter(command, "emailId", attachment.EmailId);
             _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
