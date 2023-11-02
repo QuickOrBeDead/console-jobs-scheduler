@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 using ConsoleJobScheduler.Messaging;
 using ConsoleJobScheduler.Messaging.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
 
 using Events;
@@ -70,9 +71,9 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.StartInfo.Arguments = arguments;
 
                 process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false);
+                process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false, cancellationToken);
                 process.StartInfo.RedirectStandardError = true;
-                process.ErrorDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true);
+                process.ErrorDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true, cancellationToken);
 
                 if (!process.Start())
                 {
@@ -106,14 +107,14 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
     }
 
-    private async Task ProcessOutputDataHandler(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string? data, bool isError)
+    private async Task ProcessOutputDataHandler(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrEmpty(data))
         {
             if (isError)
             {
-                await jobHistoryDelegate.InsertJobRunLog(jobRunId, data, isError);
-                await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError));
+                await jobHistoryDelegate.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+                await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError), cancellationToken);
             }
             else
             {
@@ -124,17 +125,35 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                     {
                         var emailMessage = (EmailMessage)consoleMessage.Message;
 
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false));
-                        await _emailSender.SendMailAsync(emailMessage);
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false));
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false), cancellationToken).ConfigureAwait(false);
+                        var emailModel = new EmailModel
+                                             {
+                                                 Subject = emailMessage.Subject,
+                                                 Body = emailMessage.Body,
+                                                 To = emailMessage.To,
+                                                 CC = emailMessage.CC,
+                                                 Bcc = emailMessage.Bcc,
+                                                 JobRunId = jobRunId,
+                                                 Attachments = emailMessage.Attachments.Select(x => new AttachmentModel
+                                                     {
+                                                         JobRunId = jobRunId,
+                                                         FileName = x.FileName,
+                                                         ContentType = x.ContentType,
+                                                         FileContent = x.FileContent
+                                                     }).ToList()
+                                             };
+                        await jobHistoryDelegate.InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
+                        await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
+                        await jobHistoryDelegate.UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false), cancellationToken);
                     }
                     else if (consoleMessage.MessageType == ConsoleMessageType.Log)
                     {
                         var logMessage = (ConsoleLogMessage)consoleMessage.Message;
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, logMessage.Message, false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError));
+                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, logMessage.Message, false, cancellationToken).ConfigureAwait(false);
+                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError), cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
