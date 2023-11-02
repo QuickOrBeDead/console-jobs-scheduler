@@ -8,7 +8,7 @@ using ConsoleJobScheduler.Messaging.Models;
 
 public sealed class SmtpEmailSender : IEmailSender
 {
-    public async Task SendMailAsync(EmailMessage emailMessage)
+    public async Task SendMailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
     {
         using (var smtpClient = new SmtpClient("localhost", 25))
         {
@@ -48,7 +48,7 @@ public sealed class SmtpEmailSender : IEmailSender
                     streams.Add(stream);
                 }
 
-                await smtpClient.SendMailAsync(mailMessage);
+                await smtpClient.SendMailAsync(mailMessage, cancellationToken);
             }
             finally
             {

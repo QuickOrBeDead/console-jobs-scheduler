@@ -4,5 +4,5 @@ namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 
 public interface IEmailSender
 {
-    Task SendMailAsync(EmailMessage emailMessage);
+    Task SendMailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default);
 }
