@@ -3,8 +3,12 @@
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Data;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 using MessagePipe;
+
+using Microsoft.EntityFrameworkCore;
 
 using Quartz;
 using Quartz.Impl;
@@ -58,14 +62,16 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
         var packageStorageRootPath = _config["ConsoleAppPackageStoragePath"] ?? AppDomain.CurrentDomain.BaseDirectory;
         var appRunTempRootPath = _config["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory;
 
+        services.AddDbContext<SettingsDbContext>(o => o.UseNpgsql(_config["ConnectionString"]));
+
         services.AddSingleton<IPackageStorage>(_ => new DefaultPackageStorage(packageStorageRootPath));
-        services.AddSingleton<IPackageRunStorage>(_ => new DefaultPackageRunStorage(packageStorageRootPath));
         services.AddSingleton<IConsoleAppPackageRunner>(x => new DefaultConsoleAppPackageRunner(
             x.GetRequiredService<IAsyncPublisher<JobConsoleLogMessageEvent>>(),
             x.GetRequiredService<IPackageStorage>(),
             x.GetRequiredService<IEmailSender>(),
             appRunTempRootPath));
-        services.AddSingleton<IEmailSender>(_ => new SmtpEmailSender());
+        services.AddTransient<ISettingsService, SettingsService>();
+        services.AddTransient<IEmailSender>(x => new SmtpEmailSender(x.GetRequiredService<ISettingsService>()));
         services.AddTransient<ConsoleAppPackageJob>();
 
         services.AddMessagePipe(
@@ -82,5 +88,4 @@ public sealed class SchedulerServiceBuilder : ISchedulerServiceBuilder
 
         return new SchedulerService(serviceProvider, scheduler, serviceProvider.GetRequiredService<IPackageStorage>());
     }
-
 }
