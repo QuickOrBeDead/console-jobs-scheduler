@@ -1,20 +1,33 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 
+using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 
 using ConsoleJobScheduler.Messaging.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 public sealed class SmtpEmailSender : IEmailSender
 {
+    private readonly ISettingsService _settingsService;
+
+    public SmtpEmailSender(ISettingsService settingsService)
+    {
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+    }
+
     public async Task SendMailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
     {
-        using (var smtpClient = new SmtpClient("localhost", 25))
+        var smtpSettings = await _settingsService.GetSettings<SmtpSettings>().ConfigureAwait(false);
+        using (var smtpClient = new SmtpClient(smtpSettings.Host, smtpSettings.Port) { EnableSsl = smtpSettings.EnableSsl })
         {
+            smtpClient.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password, smtpSettings.Domain);
+
             var mailMessage = new MailMessage
                                   {
-                                      From = new MailAddress("test@test.com", "Test Mailer"),
+                                      From = new MailAddress(smtpSettings.From, smtpSettings.FromName),
                                       Subject = emailMessage.Subject,
                                       Body = emailMessage.Body,
                                       IsBodyHtml = true,
