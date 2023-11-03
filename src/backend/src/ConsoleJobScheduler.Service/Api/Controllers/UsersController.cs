@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using Z.EntityFramework.Plus;
+using ConsoleJobScheduler.Service.Infrastructure.Identity;
 
 [Authorize(Roles = Roles.Admin)]
 [Route("api/[controller]")]

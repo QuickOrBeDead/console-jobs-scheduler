@@ -7,9 +7,9 @@ using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ConsoleJobScheduler.Service.Infrastructure.Data;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
+using ConsoleJobScheduler.Service.Infrastructure.Identity;
 
 public sealed class ServiceHost
 {

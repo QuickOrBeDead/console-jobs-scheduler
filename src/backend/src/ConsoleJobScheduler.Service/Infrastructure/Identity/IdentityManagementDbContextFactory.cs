@@ -1,17 +1,7 @@
-﻿namespace ConsoleJobScheduler.Service.Infrastructure.Data;
+﻿namespace ConsoleJobScheduler.Service.Infrastructure.Identity;
 
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-
-public sealed class IdentityManagementDbContext : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>
-{
-    public IdentityManagementDbContext(DbContextOptions<IdentityManagementDbContext> options) : base(options)
-    {
-    }
-}
-
 
 public class IdentityManagementDbContextFactory : IDesignTimeDbContextFactory<IdentityManagementDbContext>
 {
