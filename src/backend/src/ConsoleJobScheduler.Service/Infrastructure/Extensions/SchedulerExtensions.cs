@@ -64,16 +64,16 @@ public static class SchedulerExtensions
     public static TValue GetContextValue<TValue>(this IScheduler scheduler, string key)
         where TValue : class
     {
-        if (!scheduler.Context.TryGetValue(key, out var jobStoreObject))
+        if (!scheduler.Context.TryGetValue(key, out var valueObject))
         {
             throw new InvalidOperationException($"{key} not found in scheduler context");
         }
 
-        if (jobStoreObject is not TValue jobStore)
+        if (valueObject is not TValue value)
         {
             throw new InvalidOperationException($"{key} must be {typeof(TValue)}");
         }
 
-        return jobStore;
+        return value;
     }
 }
