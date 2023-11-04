@@ -13,6 +13,7 @@ using MessagePipe;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.Matchers;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
 
 public interface ISchedulerService
 {
@@ -20,10 +21,7 @@ public interface ISchedulerService
 
     Task Shutdown();
 
-    TService GetService<TService>()
-        where TService : notnull;
-
-    void SubscribeToEvent<TEvent>(IAsyncMessageHandler<TEvent> handler);
+    void SubscribeToEvent(IAsyncMessageHandler<JobConsoleLogMessageEvent> handler);
 
     Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id);
 
@@ -50,14 +48,14 @@ public interface ISchedulerService
 
 public sealed class SchedulerService : ISchedulerService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IAsyncSubscriber<JobConsoleLogMessageEvent> _subscriber;
     private readonly IScheduler _scheduler;
     private readonly IPackageStorage _packageStorage;
     private readonly DisposableBagBuilder _subscriberDisposableBagBuilder;
 
-    public SchedulerService(IServiceProvider serviceProvider, IScheduler scheduler, IPackageStorage packageStorage)
+    public SchedulerService(IAsyncSubscriber<JobConsoleLogMessageEvent> subscriber, IScheduler scheduler, IPackageStorage packageStorage)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
         _subscriberDisposableBagBuilder = DisposableBag.CreateBuilder();
@@ -77,16 +75,9 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.Shutdown();
     }
 
-    public TService GetService<TService>()
-        where TService : notnull
+    public void SubscribeToEvent(IAsyncMessageHandler<JobConsoleLogMessageEvent> handler)
     {
-        return _serviceProvider.GetRequiredService<TService>();
-    }
-
-    public void SubscribeToEvent<TEvent>(IAsyncMessageHandler<TEvent> handler)
-    {
-        var subscriber = _serviceProvider.GetRequiredService<IAsyncSubscriber<TEvent>>();
-        subscriber.Subscribe(handler).AddTo(_subscriberDisposableBagBuilder);
+        _subscriber.Subscribe(handler).AddTo(_subscriberDisposableBagBuilder);
     }
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)

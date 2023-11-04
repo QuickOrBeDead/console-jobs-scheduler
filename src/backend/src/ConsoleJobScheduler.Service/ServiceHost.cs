@@ -10,28 +10,39 @@ using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ConsoleJobScheduler.Service.Infrastructure.Identity;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Data;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
+using MessagePipe;
+using Quartz.Impl;
+using Quartz.Spi;
+using Quartz.Util;
+using Quartz;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 public sealed class ServiceHost
 {
     private bool _stopRequested;
     private WebApplication? _app;
 
+    private readonly IConfiguration _config;
+
     private readonly string _contentRootPath;
-    private readonly ISchedulerServiceBuilder _schedulerServiceBuilder;
 
     private ISchedulerService? _schedulerService;
 
     public ServiceHost(IConfiguration config, string contentRootPath)
     {
+        _config = config ?? throw new ArgumentNullException(nameof(config));
         _contentRootPath = contentRootPath;
-        _schedulerServiceBuilder = new SchedulerServiceBuilder(config ?? throw new ArgumentNullException(nameof(config)));
     }
 
     public async Task Start()
     {
-        _schedulerService = await _schedulerServiceBuilder.Build().ConfigureAwait(false);
-
-        await StartWebHost(_schedulerService).ConfigureAwait(false);
+        await StartWebHost().ConfigureAwait(false);
     }
 
     public async Task Stop()
@@ -49,7 +60,7 @@ public sealed class ServiceHost
         }
     }
 
-    private async Task StartWebHost(ISchedulerService schedulerService)
+    private async Task StartWebHost()
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = _contentRootPath });
         builder.Services.Configure<HostOptions>(
@@ -66,8 +77,6 @@ public sealed class ServiceHost
 
         builder.Services.AddSignalR();
         builder.Services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
-
-        builder.Services.AddSingleton(schedulerService);
 
         builder.Services.AddSingleton<JobConsoleLogMessageToHubHandler>();
         builder.Services.AddSpaStaticFiles(configuration: options => { options.RootPath = "wwwroot"; });
@@ -96,9 +105,63 @@ public sealed class ServiceHost
                     };
             });
 
+        builder.Services.AddSingleton<ISchedulerFactory>(x =>
+        {
+            var schedulerBuilder = SchedulerBuilder.Create()
+                .WithId(_config["SchedulerInstanceId"])
+                .WithName("ConsoleJobsSchedulerService")
+                .UseDefaultThreadPool(y => y.MaxConcurrency = 100)
+                .UseJobFactory<ServiceProviderJobFactory>()
+                .UsePersistentStore(
+                    o =>
+                    {
+                        o.UseClustering();
+                        o.UseProperties = true;
+                        o.UseJsonSerializer();
+                        o.UsePostgres(
+                                p =>
+                                {
+                                    p.TablePrefix = _config["TablePrefix"];
+                                    p.ConnectionString = _config["ConnectionString"];
+                                });
+                    });
+            schedulerBuilder.SetProperty(StdSchedulerFactory.PropertyJobStoreType, typeof(CustomJobStoreTx).AssemblyQualifiedNameWithoutVersion());
+            schedulerBuilder.SetProperty(JobExecutionHistoryPlugin.PluginConfigurationProperty, typeof(JobExecutionHistoryPlugin).AssemblyQualifiedNameWithoutVersion());
+
+            return new CustomSchedulerFactory(x, schedulerBuilder.Properties);
+        });
+        builder.Services.AddSingleton<IJobFactory, ServiceProviderJobFactory>();
+
+        var packageStorageRootPath = _config["ConsoleAppPackageStoragePath"] ?? AppDomain.CurrentDomain.BaseDirectory;
+        var appRunTempRootPath = _config["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory;
+
+        builder.Services.AddDbContext<SettingsDbContext>(o => o.UseNpgsql(_config["ConnectionString"]));
+
+        builder.Services.AddSingleton<IPackageStorage>(_ => new DefaultPackageStorage(packageStorageRootPath));
+        builder.Services.AddScoped<IConsoleAppPackageRunner>(x => new DefaultConsoleAppPackageRunner(
+            x.GetRequiredService<IAsyncPublisher<JobConsoleLogMessageEvent>>(),
+            x.GetRequiredService<IPackageStorage>(),
+            x.GetRequiredService<IEmailSender>(),
+            appRunTempRootPath));
+        builder.Services.AddScoped<ISettingsService, SettingsService>();
+        builder.Services.AddScoped<IEmailSender>(x => new SmtpEmailSender(x.GetRequiredService<ISettingsService>()));
+        builder.Services.AddTransient<ConsoleAppPackageJob>();
+
+        builder.Services.AddMessagePipe(
+            x =>
+            {
+                x.InstanceLifetime = InstanceLifetime.Singleton;
+                x.RequestHandlerLifetime = InstanceLifetime.Singleton;
+                x.DefaultAsyncPublishStrategy = AsyncPublishStrategy.Parallel;
+                x.EnableAutoRegistration = false;
+            });
+
+        builder.Services.AddSingleton(x => x.GetRequiredService<ISchedulerFactory>().GetScheduler().Result);
+        builder.Services.AddSingleton<ISchedulerService, SchedulerService>();
+
         _app = builder.Build();
         _app.Lifetime.ApplicationStopped.Register(
-            () =>
+                () =>
                 {
                     if (!_stopRequested)
                     {
@@ -137,7 +200,8 @@ public sealed class ServiceHost
         _app.MapControllers();
         _app.MapHub<JobRunConsoleHub>("/jobRunConsoleHub");
 
-        schedulerService.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
+        _schedulerService = _app.Services.GetRequiredService<ISchedulerService>();
+        _schedulerService.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
         using var scope = _app.Services.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
@@ -161,7 +225,7 @@ public sealed class ServiceHost
             await userManager.AddToRoleAsync(adminUser, Roles.Admin);
         }
 
-        await schedulerService.Start(_app.Services.GetRequiredService<ILoggerFactory>());
+        await _schedulerService.Start(_app.Services.GetRequiredService<ILoggerFactory>());
         await _app.RunAsync(_app.Configuration["WebAppUrl"]).ConfigureAwait(false);
     }
 }
