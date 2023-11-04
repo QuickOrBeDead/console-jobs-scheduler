@@ -6,7 +6,7 @@ using System.Net.Mime;
 using System.Text;
 
 using ConsoleJobScheduler.Messaging.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Settings;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 public sealed class SmtpEmailSender : IEmailSender
