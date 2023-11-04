@@ -70,10 +70,22 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.Arguments = arguments;
 
+                var processOutputTasks = new List<Task>();
+
                 process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false, cancellationToken);
+                process.OutputDataReceived += async (_, e) =>
+                    {
+                        var task = ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false, cancellationToken);
+                        processOutputTasks.Add(task);
+                        await task;
+                    };
                 process.StartInfo.RedirectStandardError = true;
-                process.ErrorDataReceived += async (_, e) => await ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true, cancellationToken);
+                process.ErrorDataReceived += async (_, e) =>
+                    {
+                        var task = ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true, cancellationToken);
+                        processOutputTasks.Add(task);
+                        await task;
+                    };
 
                 if (!process.Start())
                 {
@@ -84,6 +96,8 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.BeginErrorReadLine();
 
                 await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                await Task.WhenAll(processOutputTasks).WaitAsync(cancellationToken);
+
                 if (process.ExitCode != 0)
                 {
                     throw new ConsoleAppPackageRunFailException($"Console app package '{packageName}' run failed", process.ExitCode);
