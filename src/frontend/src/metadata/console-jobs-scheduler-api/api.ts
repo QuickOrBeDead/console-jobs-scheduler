@@ -45,6 +45,19 @@ export interface AttachmentInfoModel {
 /**
  * 
  * @export
+ * @interface GeneralSettings
+ */
+export interface GeneralSettings {
+    /**
+     * 
+     * @type {number}
+     * @memberof GeneralSettings
+     */
+    'pageSize'?: number | null;
+}
+/**
+ * 
+ * @export
  * @interface IdentityError
  */
 export interface IdentityError {
@@ -437,6 +450,43 @@ export interface JobListItemModel {
 /**
  * 
  * @export
+ * @interface JobListItemModelPagedResult
+ */
+export interface JobListItemModelPagedResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof JobListItemModelPagedResult
+     */
+    'page'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobListItemModelPagedResult
+     */
+    'totalCount'?: number;
+    /**
+     * 
+     * @type {Array<JobListItemModel>}
+     * @memberof JobListItemModelPagedResult
+     */
+    'items'?: Array<JobListItemModel> | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobListItemModelPagedResult
+     */
+    'pageSize'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobListItemModelPagedResult
+     */
+    'totalPages'?: number;
+}
+/**
+ * 
+ * @export
  * @interface LogLine
  */
 export interface LogLine {
@@ -756,6 +806,61 @@ export interface SignInResult {
      * @memberof SignInResult
      */
     'requiresTwoFactor'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface SmtpSettings
+ */
+export interface SmtpSettings {
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'host'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof SmtpSettings
+     */
+    'port'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'from'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'fromName'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SmtpSettings
+     */
+    'enableSsl'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'userName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'password'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SmtpSettings
+     */
+    'domain'?: string | null;
 }
 /**
  * 
@@ -1621,11 +1726,19 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
     return {
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobsGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/Jobs`;
+        apiJobsGroupNameGet: async (group: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'group' is not null or undefined
+            assertParamExists('apiJobsGroupNameGet', 'group', group)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('apiJobsGroupNameGet', 'name', name)
+            const localVarPath = `/api/Jobs/{group}/{name}`
+                .replace(`{${"group"}}`, encodeURIComponent(String(group)))
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1650,19 +1763,15 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
-         * @param {string} group 
-         * @param {string} name 
+         * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobsGroupNameGet: async (group: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'group' is not null or undefined
-            assertParamExists('apiJobsGroupNameGet', 'group', group)
-            // verify required parameter 'name' is not null or undefined
-            assertParamExists('apiJobsGroupNameGet', 'name', name)
-            const localVarPath = `/api/Jobs/{group}/{name}`
-                .replace(`{${"group"}}`, encodeURIComponent(String(group)))
-                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+        apiJobsPageNumberGet: async (pageNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pageNumber' is not null or undefined
+            assertParamExists('apiJobsPageNumberGet', 'pageNumber', pageNumber)
+            const localVarPath = `/api/Jobs/{pageNumber}`
+                .replace(`{${"pageNumber"}}`, encodeURIComponent(String(pageNumber)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1730,15 +1839,6 @@ export const JobsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async apiJobsGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobListItemModel>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGet(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
          * @param {string} group 
          * @param {string} name 
          * @param {*} [options] Override http request option.
@@ -1746,6 +1846,16 @@ export const JobsApiFp = function(configuration?: Configuration) {
          */
         async apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobDetailModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGroupNameGet(group, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {number} pageNumber 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobsPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobListItemModelPagedResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1770,14 +1880,6 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
     return {
         /**
          * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiJobsGet(options?: any): AxiosPromise<Array<JobListItemModel>> {
-            return localVarFp.apiJobsGet(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @param {string} group 
          * @param {string} name 
          * @param {*} [options] Override http request option.
@@ -1785,6 +1887,15 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          */
         apiJobsGroupNameGet(group: string, name: string, options?: any): AxiosPromise<JobDetailModel> {
             return localVarFp.apiJobsGroupNameGet(group, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {number} pageNumber 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobsPageNumberGet(pageNumber: number, options?: any): AxiosPromise<JobListItemModelPagedResult> {
+            return localVarFp.apiJobsPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1807,16 +1918,6 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
 export class JobsApi extends BaseAPI {
     /**
      * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof JobsApi
-     */
-    public apiJobsGet(options?: AxiosRequestConfig) {
-        return JobsApiFp(this.configuration).apiJobsGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @param {string} group 
      * @param {string} name 
      * @param {*} [options] Override http request option.
@@ -1825,6 +1926,17 @@ export class JobsApi extends BaseAPI {
      */
     public apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig) {
         return JobsApiFp(this.configuration).apiJobsGroupNameGet(group, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {number} pageNumber 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobsApi
+     */
+    public apiJobsPageNumberGet(pageNumber: number, options?: AxiosRequestConfig) {
+        return JobsApiFp(this.configuration).apiJobsPageNumberGet(pageNumber, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2168,6 +2280,282 @@ export class SchedulerApi extends BaseAPI {
      */
     public apiSchedulerGet(options?: AxiosRequestConfig) {
         return SchedulerApiFp(this.configuration).apiSchedulerGet(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * SettingsApi - axios parameter creator
+ * @export
+ */
+export const SettingsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsGetGeneralSettingsGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Settings/GetGeneralSettings`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsGetSmtpSettingsGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Settings/GetSmtpSettings`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {GeneralSettings} [generalSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsSaveGeneralSettingsPost: async (generalSettings?: GeneralSettings, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Settings/SaveGeneralSettings`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(generalSettings, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {SmtpSettings} [smtpSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsSaveSmtpSettingsPost: async (smtpSettings?: SmtpSettings, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Settings/SaveSmtpSettings`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(smtpSettings, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SettingsApi - functional programming interface
+ * @export
+ */
+export const SettingsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SettingsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSettingsGetGeneralSettingsGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GeneralSettings>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSettingsGetGeneralSettingsGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSettingsGetSmtpSettingsGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmtpSettings>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSettingsGetSmtpSettingsGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {GeneralSettings} [generalSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSettingsSaveGeneralSettingsPost(generalSettings?: GeneralSettings, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSettingsSaveGeneralSettingsPost(generalSettings, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {SmtpSettings} [smtpSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSettingsSaveSmtpSettingsPost(smtpSettings?: SmtpSettings, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSettingsSaveSmtpSettingsPost(smtpSettings, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * SettingsApi - factory interface
+ * @export
+ */
+export const SettingsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SettingsApiFp(configuration)
+    return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsGetGeneralSettingsGet(options?: any): AxiosPromise<GeneralSettings> {
+            return localVarFp.apiSettingsGetGeneralSettingsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsGetSmtpSettingsGet(options?: any): AxiosPromise<SmtpSettings> {
+            return localVarFp.apiSettingsGetSmtpSettingsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {GeneralSettings} [generalSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsSaveGeneralSettingsPost(generalSettings?: GeneralSettings, options?: any): AxiosPromise<void> {
+            return localVarFp.apiSettingsSaveGeneralSettingsPost(generalSettings, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {SmtpSettings} [smtpSettings] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSettingsSaveSmtpSettingsPost(smtpSettings?: SmtpSettings, options?: any): AxiosPromise<void> {
+            return localVarFp.apiSettingsSaveSmtpSettingsPost(smtpSettings, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SettingsApi - object-oriented interface
+ * @export
+ * @class SettingsApi
+ * @extends {BaseAPI}
+ */
+export class SettingsApi extends BaseAPI {
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SettingsApi
+     */
+    public apiSettingsGetGeneralSettingsGet(options?: AxiosRequestConfig) {
+        return SettingsApiFp(this.configuration).apiSettingsGetGeneralSettingsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SettingsApi
+     */
+    public apiSettingsGetSmtpSettingsGet(options?: AxiosRequestConfig) {
+        return SettingsApiFp(this.configuration).apiSettingsGetSmtpSettingsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {GeneralSettings} [generalSettings] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SettingsApi
+     */
+    public apiSettingsSaveGeneralSettingsPost(generalSettings?: GeneralSettings, options?: AxiosRequestConfig) {
+        return SettingsApiFp(this.configuration).apiSettingsSaveGeneralSettingsPost(generalSettings, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {SmtpSettings} [smtpSettings] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SettingsApi
+     */
+    public apiSettingsSaveSmtpSettingsPost(smtpSettings?: SmtpSettings, options?: AxiosRequestConfig) {
+        return SettingsApiFp(this.configuration).apiSettingsSaveSmtpSettingsPost(smtpSettings, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
