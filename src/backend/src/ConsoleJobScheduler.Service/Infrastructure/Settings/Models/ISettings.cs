@@ -2,9 +2,9 @@
 
 public interface ISettings
 {
-    int CategoryId { get; }
+    SettingCategory GetCategory();
 
     void Map(SettingsData data);
 
-    IDictionary<string, string?> GetData();
+    SettingsData GetData();
 }
