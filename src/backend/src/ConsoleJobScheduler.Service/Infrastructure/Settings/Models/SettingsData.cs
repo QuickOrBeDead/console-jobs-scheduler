@@ -9,9 +9,31 @@ public sealed class SettingsData
 {
     private readonly IDictionary<string, string?> _data;
 
+    public int Count => _data.Count;
+
+    public SettingsData()
+        : this(new Dictionary<string, string?>())
+    {
+    }
+
     public SettingsData(IDictionary<string, string?> data)
     {
         _data = data ?? throw new ArgumentNullException(nameof(data));
+    }
+
+    public void Set(string key, bool? value)
+    {
+        _data[key] = value?.ToString(CultureInfo.InvariantCulture);
+    }
+
+    public void Set(string key, int? value)
+    {
+        _data[key] = value?.ToString(CultureInfo.InvariantCulture);
+    }
+
+    public void Set(string key, string? value)
+    {
+        _data[key] = value;
     }
 
     public string GetString(string key, string defaultValue)
@@ -53,5 +75,10 @@ public sealed class SettingsData
     public static bool TryParse(string? s, out int result)
     {
         return int.TryParse(s, CultureInfo.InvariantCulture, out result);
+    }
+
+    public IEnumerator<KeyValuePair<string, string?>> GetEnumerator()
+    {
+        return _data.GetEnumerator();
     }
 }
