@@ -138,7 +138,10 @@ public sealed class SchedulerService : ISchedulerService
         var allJobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup()).ConfigureAwait(false);
         var pageSize = (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize.GetValueOrDefault(10);
         var totalCount = allJobKeys.Count;
-        var jobKeys = allJobKeys.Skip((page - 1) * pageSize).Take(pageSize);
+        var jobKeys = allJobKeys.OrderBy(x => x.Name)
+                                                 .ThenBy(x => x.Group)
+                                                 .Skip((page - 1) * pageSize)
+                                                 .Take(pageSize);
         var result = new List<JobListItemModel>();
         foreach (var jobKey in jobKeys)
         {
