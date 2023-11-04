@@ -1,6 +1,5 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
 
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 public delegate bool SettingConvertFunc<T>(string? s, out T v);
