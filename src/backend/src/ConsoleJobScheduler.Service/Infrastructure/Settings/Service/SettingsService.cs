@@ -27,7 +27,7 @@ public sealed class SettingsService : ISettingsService
         where TSettings : ISettings, new()
     {
         var settings = new TSettings();
-        var settingValues = (await _settingsDbContext.Settings.Where(x => x.CategoryId == settings.CategoryId).ToListAsync())
+        var settingValues = (await _settingsDbContext.Settings.Where(x => x.CategoryId == settings.GetCategory()).ToListAsync())
             .ToDictionary(x => x.Name, x => x.Value);
         settings.Map(new SettingsData(settingValues));
         return settings;
@@ -42,17 +42,20 @@ public sealed class SettingsService : ISettingsService
         }
 
         var data = settings.GetData();
-        IList<SettingModel> settingModels = new List<SettingModel>(data.Count);
+        var settingModels = new List<SettingModel>(data.Count);
         using (var dataEnumerator = data.GetEnumerator())
         {
-            settingModels.Add(new SettingModel
-                                  {
-                                      CategoryId = settings.CategoryId,
-                                      Name = dataEnumerator.Current.Key,
-                                      Value = dataEnumerator.Current.Value
-                                  });
+            while (dataEnumerator.MoveNext())
+            {
+                settingModels.Add(new SettingModel
+                                      {
+                                          CategoryId = settings.GetCategory(),
+                                          Name = dataEnumerator.Current.Key,
+                                          Value = dataEnumerator.Current.Value
+                                      });
+            }
         }
 
-        return _settingsDbContext.Settings.BulkUpdateAsync(settingModels, x => x.ColumnPrimaryKeyExpression = c => new { c.CategoryId, c.Name });
+        return _settingsDbContext.Settings.BulkMergeAsync(settingModels, x => x.ColumnPrimaryKeyExpression = c => new { c.CategoryId, c.Name });
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+﻿namespace ConsoleJobScheduler.Service.Infrastructure.Settings;
 
-using System.Globalization;
+using System.ComponentModel.DataAnnotations;
+
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
 
 public sealed class SmtpSettings : ISettings
 {
@@ -10,17 +12,20 @@ public sealed class SmtpSettings : ISettings
 
     public string From { get; set; } = default!;
 
+    [Display(Name = "From Name")]
     public string FromName { get; set; } = default!;
 
+    [Display(Name = "Enable Ssl")]
     public bool EnableSsl { get; set; }
 
+    [Display(Name = "Username")]
     public string UserName { get; set; } = default!;
 
     public string Password { get; set; } = default!;
 
     public string? Domain { get; set; }
 
-    public int CategoryId => 1;
+    public SettingCategory GetCategory() => SettingCategory.Smtp;
 
     public void Map(SettingsData data)
     {
@@ -34,18 +39,18 @@ public sealed class SmtpSettings : ISettings
         Domain = data.GetString(nameof(Domain), null!);
     }
 
-    public IDictionary<string, string?> GetData()
+    public SettingsData GetData()
     {
-        return new Dictionary<string, string?>
-                   {
-                       {nameof(Host), Host},
-                       {nameof(Port), Port.ToString(CultureInfo.InvariantCulture)},
-                       {nameof(From), From},
-                       {nameof(FromName), FromName},
-                       {nameof(EnableSsl), EnableSsl.ToString(CultureInfo.InvariantCulture)},
-                       {nameof(UserName), UserName},
-                       {nameof(Password), Password},
-                       {nameof(Domain), Domain}
-                   };
+        var result = new SettingsData();
+        result.Set(nameof(Host), Host);
+        result.Set(nameof(Port), Port);
+        result.Set(nameof(From), From);
+        result.Set(nameof(FromName), FromName);
+        result.Set(nameof(EnableSsl), EnableSsl);
+        result.Set(nameof(UserName), UserName);
+        result.Set(nameof(Password), Password);
+        result.Set(nameof(Domain), string.IsNullOrWhiteSpace(Domain) ? null : Domain);
+
+        return result;
     }
 }
