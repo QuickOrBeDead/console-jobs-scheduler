@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { createApi } from '../../api'
-import { JobListItemModel, JobsApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobListItemModelPagedResult, JobsApi } from '../../metadata/console-jobs-scheduler-api'
 
-const jobs = ref<JobListItemModel[]>()
+const jobs = ref<JobListItemModelPagedResult>()
+const jobsApi = createApi(JobsApi)
+const totalPages = ref<number>(0)
 
 onMounted(async () => {
-    const jobsApi = createApi(JobsApi)
-    const { data } = await jobsApi.apiJobsGet()
-    jobs.value = data
+    await loadPage(1)
 })
+
+async function loadPage(page: number)  {
+    const { data } = await jobsApi.apiJobsPageNumberGet(page)
+    jobs.value = data
+
+    totalPages.value = data.totalPages!
+}
 </script>
 <template>
     <div class="page-container">
@@ -26,7 +33,7 @@ onMounted(async () => {
                     </router-link>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" v-if="jobs">
                 <div class="col-12">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -41,7 +48,7 @@ onMounted(async () => {
                         </tr>
                         </thead>
                         <tbody>
-                            <template v-for="job in jobs">
+                            <template v-for="job in jobs.items">
                                 <tr>
                                     <th class="text-nowrap" scope="row"><a>{{ job.jobName }}</a></th>
                                     <td class="text-nowrap">{{ job.jobGroup }}</td>
@@ -58,6 +65,7 @@ onMounted(async () => {
                             </template>
                         </tbody>
                     </table>
+                    <pagination :totalPages="totalPages" @pageChanged="loadPage"></pagination>
                 </div>
             </div>
         </div>
