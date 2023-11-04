@@ -45,6 +45,9 @@ async function logout() {
           <li class="nav-item" v-if="isUserInRole(user, 'Admin')">
             <router-link class="nav-link" to="/users">Users</router-link>
           </li>
+          <li class="nav-item" v-if="isUserInRole(user, 'Admin')">
+            <router-link class="nav-link" to="/settings">Settings</router-link>
+          </li>
         </ul>
         <div class="d-flex align-items-center">
           <span class="navbar-text me-1">
