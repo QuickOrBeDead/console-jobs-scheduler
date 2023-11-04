@@ -22,7 +22,7 @@ var topShelfExitCode = HostFactory.Run(
             hostConfig.Service<ServiceHost>(
                 sc =>
                 {
-                    sc.ConstructUsing(() => new ServiceHost(config, contentRootPath));
+                    sc.ConstructUsing(() => new ServiceHost(contentRootPath));
                     sc.WhenStarted(s => s.Start().GetAwaiter().GetResult());
                     sc.WhenStopped(s => s.Stop().GetAwaiter().GetResult());
                 });

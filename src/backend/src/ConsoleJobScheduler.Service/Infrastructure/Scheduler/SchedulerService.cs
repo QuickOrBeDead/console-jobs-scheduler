@@ -2,32 +2,25 @@
 
 using ConsoleJobScheduler.Service.Infrastructure.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
-using ConsoleJobScheduler.Service.Infrastructure.Logging;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
 
-using MessagePipe;
-
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.Matchers;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
+
+using ConsoleJobScheduler.Service.Infrastructure.Settings;
+using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 public interface ISchedulerService
 {
-    Task Start(ILoggerFactory loggerFactory);
-
-    Task Shutdown();
-
-    void SubscribeToEvent(IAsyncMessageHandler<JobConsoleLogMessageEvent> handler);
-
     Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id);
 
     Task<string?> GetJobExecutionErrorDetail(string id);
 
-    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
+    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int page = 1);
 
     Task AddOrUpdateJob(JobAddOrUpdateModel jobModel);
 
@@ -37,7 +30,7 @@ public interface ISchedulerService
 
     PackageDetailsModel? GetPackageDetails(string packageName);
 
-    Task<IList<JobListItemModel>> GetJobList();
+    Task<PagedResult<JobListItemModel>> GetJobList(int page = 1);
 
     Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics();
 
@@ -48,36 +41,15 @@ public interface ISchedulerService
 
 public sealed class SchedulerService : ISchedulerService
 {
-    private readonly IAsyncSubscriber<JobConsoleLogMessageEvent> _subscriber;
     private readonly IScheduler _scheduler;
     private readonly IPackageStorage _packageStorage;
-    private readonly DisposableBagBuilder _subscriberDisposableBagBuilder;
+    private readonly ISettingsService _settingsService;
 
-    public SchedulerService(IAsyncSubscriber<JobConsoleLogMessageEvent> subscriber, IScheduler scheduler, IPackageStorage packageStorage)
+    public SchedulerService(IScheduler scheduler, IPackageStorage packageStorage, ISettingsService settingsService)
     {
-        _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
-        _subscriberDisposableBagBuilder = DisposableBag.CreateBuilder();
-    }
-
-    public Task Start(ILoggerFactory loggerFactory)
-    {
-        LoggerFactory.SetLoggerFactory(loggerFactory);
-
-        return _scheduler.Start();
-    }
-
-    public Task Shutdown()
-    {
-        _subscriberDisposableBagBuilder.Build().Dispose();
-
-        return _scheduler.Shutdown();
-    }
-
-    public void SubscribeToEvent(IAsyncMessageHandler<JobConsoleLogMessageEvent> handler)
-    {
-        _subscriber.Subscribe(handler).AddTo(_subscriberDisposableBagBuilder);
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
     }
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
@@ -99,9 +71,10 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.GetJobHistoryDelegate().GetJobExecutionErrorDetail(id);
     }
 
-    public Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
+    public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int page = 1)
     {
-        return _scheduler.GetJobHistoryDelegate().GetJobExecutionHistory(jobName, pageSize, page);
+        var generalSettings = await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false);
+        return await _scheduler.GetJobHistoryDelegate().GetJobExecutionHistory(jobName, generalSettings.PageSize.GetValueOrDefault(10), page).ConfigureAwait(false);
     }
 
     public async Task AddOrUpdateJob(JobAddOrUpdateModel jobModel)
@@ -160,10 +133,13 @@ public sealed class SchedulerService : ISchedulerService
         return _packageStorage.GetPackageDetails(packageName);
     }
 
-    public async Task<IList<JobListItemModel>> GetJobList()
+    public async Task<PagedResult<JobListItemModel>> GetJobList(int page = 1)
     {
-        var jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup()).ConfigureAwait(false);
-        var result = new List<JobListItemModel>(jobKeys.Count);
+        var allJobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup()).ConfigureAwait(false);
+        var pageSize = (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize.GetValueOrDefault(10);
+        var totalCount = allJobKeys.Count;
+        var jobKeys = allJobKeys.Skip((page - 1) * pageSize).Take(pageSize);
+        var result = new List<JobListItemModel>();
         foreach (var jobKey in jobKeys)
         {
             var jobDetail = await _scheduler.GetJobDetail(jobKey).ConfigureAwait(false);
@@ -185,7 +161,7 @@ public sealed class SchedulerService : ISchedulerService
             }
         }
 
-        return result;
+        return new PagedResult<JobListItemModel>(result, pageSize, page, totalCount);
     }
 
     public async Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics()
