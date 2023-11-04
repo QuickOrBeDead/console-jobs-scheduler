@@ -7,11 +7,11 @@ using Quartz;
 [PersistJobDataAfterExecution]
 public sealed class ConsoleAppPackageJob : IJob
 {
-    private readonly IConsoleAppPackageRunner _consoleAppPackageRunner;
+    private readonly IServiceProvider _serviceProvider;
 
-    public ConsoleAppPackageJob(IConsoleAppPackageRunner consoleAppPackageRunner)
+    public ConsoleAppPackageJob(IServiceProvider serviceProvider)
     {
-        _consoleAppPackageRunner = consoleAppPackageRunner ?? throw new ArgumentNullException(nameof(consoleAppPackageRunner));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -62,7 +62,9 @@ public sealed class ConsoleAppPackageJob : IJob
             }
 
             var signalTask = UpdateJobLastSignalTime(context.FireInstanceId, cancellationTokenSource.Token);
-            await _consoleAppPackageRunner.Run(jobHistoryDelegate, context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
+
+            using var serviceScope = _serviceProvider.CreateScope();
+            await serviceScope.ServiceProvider.GetRequiredService<IConsoleAppPackageRunner>().Run(jobHistoryDelegate, context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
 
             cancellationTokenSource.Cancel();
 
