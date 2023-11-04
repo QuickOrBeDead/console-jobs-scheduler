@@ -10,6 +10,7 @@ using Quartz;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using ConsoleJobScheduler.Service.Api.Models;
+using ConsoleJobScheduler.Service.Infrastructure.Data;
 
 using JobDetailModel = Infrastructure.Scheduler.Models.JobDetailModel;
 
@@ -26,11 +27,11 @@ public sealed class JobsController : ControllerBase
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor},{Roles.JobViewer}")]
-    [HttpGet]
+    [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public async Task<IList<JobListItemModel>> Get()
+    public Task<PagedResult<JobListItemModel>> Get(int? pageNumber = null)
     {
-        return await _schedulerService.GetJobList();
+        return _schedulerService.GetJobList(pageNumber.GetValueOrDefault(1));
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
