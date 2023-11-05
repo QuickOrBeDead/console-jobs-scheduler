@@ -41,7 +41,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         _tempRootPath = tempRootPath;
     }
 
-    public async Task Run(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
+    public async Task Run(IJobStoreDelegate jobStoreDelegate, string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(_tempRootPath, "Temp");
         if (!Directory.Exists(tempDirectory))
@@ -75,14 +75,14 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 process.StartInfo.RedirectStandardOutput = true;
                 process.OutputDataReceived += async (_, e) =>
                     {
-                        var task = ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, false, cancellationToken);
+                        var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, false, cancellationToken);
                         processOutputTasks.Add(task);
                         await task;
                     };
                 process.StartInfo.RedirectStandardError = true;
                 process.ErrorDataReceived += async (_, e) =>
                     {
-                        var task = ProcessOutputDataHandler(jobHistoryDelegate, jobRunId, e.Data, true, cancellationToken);
+                        var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, true, cancellationToken);
                         processOutputTasks.Add(task);
                         await task;
                     };
@@ -121,13 +121,13 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
     }
 
-    private async Task ProcessOutputDataHandler(IJobHistoryDelegate jobHistoryDelegate, string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
+    private async Task ProcessOutputDataHandler(IJobStoreDelegate jobStoreDelegate, string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrEmpty(data))
         {
             if (isError)
             {
-                await jobHistoryDelegate.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+                await jobStoreDelegate.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
                 await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, data, isError), cancellationToken);
             }
             else
@@ -139,7 +139,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                     {
                         var emailMessage = (EmailMessage)consoleMessage.Message;
 
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                        await jobStoreDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false), cancellationToken).ConfigureAwait(false);
                         var emailModel = new EmailModel
                                              {
@@ -157,16 +157,16 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                                                          FileContent = x.FileContent
                                                      }).ToList()
                                              };
-                        await jobHistoryDelegate.InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
+                        await jobStoreDelegate.InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
                         await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
-                        await jobHistoryDelegate.UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                        await jobStoreDelegate.UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
+                        await jobStoreDelegate.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false), cancellationToken);
                     }
                     else if (consoleMessage.MessageType == ConsoleMessageType.Log)
                     {
                         var logMessage = (ConsoleLogMessage)consoleMessage.Message;
-                        await jobHistoryDelegate.InsertJobRunLog(jobRunId, logMessage.Message, false, cancellationToken).ConfigureAwait(false);
+                        await jobStoreDelegate.InsertJobRunLog(jobRunId, logMessage.Message, false, cancellationToken).ConfigureAwait(false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError), cancellationToken).ConfigureAwait(false);
                     }
                 }

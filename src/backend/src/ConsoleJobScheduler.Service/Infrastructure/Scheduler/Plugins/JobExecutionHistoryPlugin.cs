@@ -10,11 +10,10 @@ using Quartz.Spi;
 public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
 {
     public const string PluginConfigurationProperty = "quartz.plugin.jobExecutionHistory.type";
-    public const string JobExecutionHistoryDelegateContextKey = "quartz.JobExecutionHistoryDelegate";
 
     private IScheduler _scheduler = null!;
 
-    private IJobHistoryDelegate _jobHistoryDelegate = null!;
+    private IJobStoreDelegate _jobStoreDelegate = null!;
 
     private ILogger<JobExecutionHistoryPlugin>? _logger;
 
@@ -34,9 +33,9 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
         _logger = LoggerFactory.CreateLogger<JobExecutionHistoryPlugin>();
 
         var jobStore = _scheduler.GetJobStore();
-        _jobHistoryDelegate = new JobHistoryDelegate(_scheduler, jobStore.GetDbAccessor(), jobStore.DataSource, jobStore.TablePrefix);
+        _jobStoreDelegate = new JobStoreDelegate(_scheduler, jobStore.GetDbAccessor(), jobStore.DataSource, jobStore.TablePrefix);
 
-        _scheduler.AddJobHistoryDelegate(_jobHistoryDelegate);
+        _scheduler.AddJobStoreDelegate(_jobStoreDelegate);
 
         return Task.CompletedTask;
     }
@@ -50,7 +49,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
-            await _jobHistoryDelegate.InsertJobHistoryEntry(context, cancellationToken).ConfigureAwait(false);
+            await _jobStoreDelegate.InsertJobHistoryEntry(context, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -62,7 +61,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
-            await _jobHistoryDelegate.UpdateJobHistoryEntryVetoed(context, cancellationToken);
+            await _jobStoreDelegate.UpdateJobHistoryEntryVetoed(context, cancellationToken);
         }
         catch (Exception e)
         {
@@ -77,7 +76,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
-            await _jobHistoryDelegate.UpdateJobHistoryEntryCompleted(context, jobException, cancellationToken).ConfigureAwait(false);
+            await _jobStoreDelegate.UpdateJobHistoryEntryCompleted(context, jobException, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {

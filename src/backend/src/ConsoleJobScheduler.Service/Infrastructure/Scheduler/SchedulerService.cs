@@ -54,27 +54,27 @@ public sealed class SchedulerService : ISchedulerService
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
     {
-        var jobHistoryDelegate = _scheduler.GetJobHistoryDelegate();
-        var jobExecutionDetail = await jobHistoryDelegate.GetJobExecutionDetail(id).ConfigureAwait(false);
+        var jobStoreDelegate = _scheduler.GetJobStoreDelegate();
+        var jobExecutionDetail = await jobStoreDelegate.GetJobExecutionDetail(id).ConfigureAwait(false);
         if (jobExecutionDetail == null)
         {
             return null;
         }
 
-        var logs = await jobHistoryDelegate.GetJobRunLogs(id).ConfigureAwait(false);
-        var attachments = await jobHistoryDelegate.GetJobRunAttachments(id).ConfigureAwait(false);
+        var logs = await jobStoreDelegate.GetJobRunLogs(id).ConfigureAwait(false);
+        var attachments = await jobStoreDelegate.GetJobRunAttachments(id).ConfigureAwait(false);
         return new JobExecutionDetailModel(jobExecutionDetail, logs, attachments);
     }
 
     public Task<string?> GetJobExecutionErrorDetail(string id)
     {
-        return _scheduler.GetJobHistoryDelegate().GetJobExecutionErrorDetail(id);
+        return _scheduler.GetJobStoreDelegate().GetJobExecutionErrorDetail(id);
     }
 
     public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int page = 1)
     {
         var generalSettings = await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false);
-        return await _scheduler.GetJobHistoryDelegate().GetJobExecutionHistory(jobName, generalSettings.PageSize.GetValueOrDefault(10), page).ConfigureAwait(false);
+        return await _scheduler.GetJobStoreDelegate().GetJobExecutionHistory(jobName, generalSettings.PageSize.GetValueOrDefault(10), page).ConfigureAwait(false);
     }
 
     public async Task AddOrUpdateJob(JobAddOrUpdateModel jobModel)
@@ -172,13 +172,13 @@ public sealed class SchedulerService : ISchedulerService
         return (
                    await _scheduler.GetMetaData().ConfigureAwait(false), 
                    await _scheduler.GetInstances().ConfigureAwait(false),
-                   await _scheduler.GetJobHistoryDelegate().GetJobExecutionStatistics().ConfigureAwait(false)
+                   await _scheduler.GetJobStoreDelegate().GetJobExecutionStatistics().ConfigureAwait(false)
                    );
     }
 
     public Task<byte[]?> GetAttachmentBytes(long id)
     {
-        return _scheduler.GetJobHistoryDelegate().GetJobRunAttachmentContent(id);
+        return _scheduler.GetJobStoreDelegate().GetJobRunAttachmentContent(id);
     }
 
     public Task SavePackage(string packageName, byte[] content)

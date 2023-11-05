@@ -41,19 +41,19 @@ public static class SchedulerExtensions
         scheduler.AddToContext(CustomSchedulerFactory.JobStoreContextKey, jobStore);
     }
 
-    public static void AddJobHistoryDelegate(this IScheduler scheduler, IJobHistoryDelegate? jobHistoryDelegate)
+    public static void AddJobStoreDelegate(this IScheduler scheduler, IJobStoreDelegate? jobStoreDelegate)
     {
-        if (jobHistoryDelegate == null)
+        if (jobStoreDelegate == null)
         {
-            throw new ArgumentNullException(nameof(jobHistoryDelegate));
+            throw new ArgumentNullException(nameof(jobStoreDelegate));
         }
 
-        scheduler.AddToContext(JobExecutionHistoryPlugin.JobExecutionHistoryDelegateContextKey, jobHistoryDelegate);
+        scheduler.AddToContext(JobStoreDelegate.JobStoreDelegateContextKey, jobStoreDelegate);
     }
 
-    public static IJobHistoryDelegate GetJobHistoryDelegate(this IScheduler scheduler)
+    public static IJobStoreDelegate GetJobStoreDelegate(this IScheduler scheduler)
     {
-        return GetContextValue<IJobHistoryDelegate>(scheduler, JobExecutionHistoryPlugin.JobExecutionHistoryDelegateContextKey);
+        return GetContextValue<IJobStoreDelegate>(scheduler, JobStoreDelegate.JobStoreDelegateContextKey);
     }
 
     public static IExtendedJobStore GetJobStore(this IScheduler scheduler)

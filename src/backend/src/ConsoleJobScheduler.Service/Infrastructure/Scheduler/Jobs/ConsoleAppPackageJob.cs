@@ -29,7 +29,7 @@ public sealed class ConsoleAppPackageJob : IJob
             throw new InvalidOperationException("jobData.GetString(\"parameters\") is null");
         }
 
-        var jobHistoryDelegate = context.Scheduler.GetJobHistoryDelegate();
+        var jobStoreDelegate = context.Scheduler.GetJobStoreDelegate();
         var cancellationTokenSource = new CancellationTokenSource();
         try
         {
@@ -39,7 +39,7 @@ public sealed class ConsoleAppPackageJob : IJob
                 {
                     try
                     {
-                        await jobHistoryDelegate.UpdateJobHistoryEntryLastSignalTime(jobRunId, c);
+                        await jobStoreDelegate.UpdateJobHistoryEntryLastSignalTime(jobRunId, c);
                     }
                     catch
                     {
@@ -64,7 +64,7 @@ public sealed class ConsoleAppPackageJob : IJob
             var signalTask = UpdateJobLastSignalTime(context.FireInstanceId, cancellationTokenSource.Token);
 
             using var serviceScope = _serviceProvider.CreateScope();
-            await serviceScope.ServiceProvider.GetRequiredService<IConsoleAppPackageRunner>().Run(jobHistoryDelegate, context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
+            await serviceScope.ServiceProvider.GetRequiredService<IConsoleAppPackageRunner>().Run(jobStoreDelegate, context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
 
             cancellationTokenSource.Cancel();
 

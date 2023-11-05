@@ -13,7 +13,7 @@ using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Util;
 
-public interface IJobHistoryDelegate
+public interface IJobStoreDelegate
 {
     Task InsertJobHistoryEntry(
         IJobExecutionContext context,
@@ -64,8 +64,10 @@ public interface IJobHistoryDelegate
     Task<byte[]?> GetJobRunAttachmentContent(long id);
 }
 
-public class JobHistoryDelegate : IJobHistoryDelegate
+public class JobStoreDelegate : IJobStoreDelegate
 {
+    public const string JobStoreDelegateContextKey = "quartz.JobStoreDelegate";
+
     private readonly IScheduler _scheduler;
 
     private readonly IDbAccessor _dbAccessor;
@@ -121,7 +123,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
     
     private const string SqlUpdateJobRunEmailIsSent = "UPDATE {0}JOB_RUN_EMAIL SET IS_SENT = @isSent WHERE ID = @id";
 
-    public JobHistoryDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
+    public JobStoreDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
         _scheduler = scheduler;
         _dbAccessor = dbAccessor;
@@ -594,6 +596,7 @@ public class JobHistoryDelegate : IJobHistoryDelegate
             throw new JobPersistenceException(
                 $"Failed to obtain DB connection from data source '{_dataSource}': {e}", e);
         }
+
         if (conn == null)
         {
             throw new JobPersistenceException($"Could not get connection from DataSource '{_dataSource}'");
