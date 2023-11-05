@@ -18,7 +18,7 @@ const tabs: { [key: string]: any } = {
                 <div class="col-md-8">
                     <ul class="nav nav-tabs mb-3" role="tablist">
                         <li class="nav-item" role="presentation" v-for="(_, tab) in tabs">
-                            <button @click="() => currentTab = tab as string" :class="['nav-link', { active: currentTab === tab }]" :id="`${tab}-tab-button`" data-bs-toggle="pill" type="button" role="tab" aria-controls="settings-tab" aria-selected="true">
+                            <button @click="() => currentTab = tab as string" :class="['nav-link', { active: currentTab === tab }]" :id="`${tab}-tab-button`" data-bs-toggle="tab" type="button" role="tab" aria-controls="settings-tab" :aria-selected="currentTab === tab">
                                 {{ tab }}
                             </button>
                         </li>
