@@ -26,9 +26,9 @@ public interface ISchedulerService
 
     Task<JobDetailModel?> GetJobDetail(JobKey jobKey);
 
-    IList<string> GetPackages();
+    Task<IList<string>> GetPackages();
 
-    PackageDetailsModel? GetPackageDetails(string packageName);
+    Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
     Task<PagedResult<JobListItemModel>> GetJobList(int page = 1);
 
@@ -42,13 +42,11 @@ public interface ISchedulerService
 public sealed class SchedulerService : ISchedulerService
 {
     private readonly IScheduler _scheduler;
-    private readonly IPackageStorage _packageStorage;
     private readonly ISettingsService _settingsService;
 
-    public SchedulerService(IScheduler scheduler, IPackageStorage packageStorage, ISettingsService settingsService)
+    public SchedulerService(IScheduler scheduler, ISettingsService settingsService)
     {
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
-        _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
     }
 
@@ -123,14 +121,14 @@ public sealed class SchedulerService : ISchedulerService
                    };
     }
 
-    public IList<string> GetPackages()
+    public Task<IList<string>> GetPackages()
     {
-        return _packageStorage.GetPackages();
+        return _scheduler.GetJobStoreDelegate().GetPackageNames();
     }
 
-    public PackageDetailsModel? GetPackageDetails(string packageName)
+    public Task<PackageDetailsModel?> GetPackageDetails(string packageName)
     {
-        return _packageStorage.GetPackageDetails(packageName);
+        return _scheduler.GetJobStoreDelegate().GetPackageDetails(packageName);
     }
 
     public async Task<PagedResult<JobListItemModel>> GetJobList(int page = 1)
@@ -183,7 +181,7 @@ public sealed class SchedulerService : ISchedulerService
 
     public Task SavePackage(string packageName, byte[] content)
     {
-        return _packageStorage.SavePackage(packageName, content);
+        return _scheduler.GetJobStoreDelegate().SavePackage(packageName, content);
     }
 
     private static string? GetJobData(IJobDetail jobDetail, string key)

@@ -62,6 +62,14 @@ public interface IJobStoreDelegate
         CancellationToken cancellationToken = default);
 
     Task<byte[]?> GetJobRunAttachmentContent(long id);
+
+    Task<Stream?> GetPackageStream(string name);
+
+    Task<IList<string>> GetPackageNames();
+
+    Task<PackageDetailsModel?> GetPackageDetails(string packageName);
+
+    Task SavePackage(string packageName, byte[] content);
 }
 
 public class JobStoreDelegate : IJobStoreDelegate
@@ -122,6 +130,18 @@ public class JobStoreDelegate : IJobStoreDelegate
     private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, MESSAGE_TO, MESSAGE_CC, MESSAGE_BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
     
     private const string SqlUpdateJobRunEmailIsSent = "UPDATE {0}JOB_RUN_EMAIL SET IS_SENT = @isSent WHERE ID = @id";
+
+    private const string SqlGetPackageContent = "SELECT CONTENT FROM {0}PACKAGES WHERE NAME = @name";
+
+    private const string SqlGetAllPackageNames = "SELECT NAME FROM {0}PACKAGES ORDER BY NAME";
+
+    private const string SqlGetPackageDetail = "SELECT NAME, CREATE_TIME FROM {0}PACKAGES WHERE NAME = @name";
+
+    private const string SqlPackageExists = "SELECT NAME FROM {0}PACKAGES WHERE NAME = @name";
+
+    private const string SqlPackageUpdate = "UPDATE {0}PACKAGES SET CONTENT = @content, CREATE_TIME = @createTime WHERE NAME = @name";
+
+    private const string SqlPackageInsert = "INSERT INTO {0}PACKAGES (NAME, CONTENT, CREATE_TIME) VALUES (@name, @content, @createTime)";
 
     public JobStoreDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -503,6 +523,146 @@ public class JobStoreDelegate : IJobStoreDelegate
                 _dbAccessor.AddCommandParameter(command, "isSent", _dbAccessor.GetDbBooleanValue(isSent));
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 connection.Commit(false);
+            }
+        }
+    }
+
+    public async Task<Stream?> GetPackageStream(string name)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageContent, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "name", name);
+
+                byte[]? result = null;
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    if (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result = (byte[])reader.GetValue("CONTENT");
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result == null ? null : new MemoryStream(result);
+            }
+        }
+    }
+
+    public async Task<IList<string>> GetPackageNames()
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetAllPackageNames, _tablePrefix)))
+            {
+                IList<string> result = new List<string>();
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result.Add(reader.GetString("NAME"));
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
+            }
+        }
+    }
+
+    public async Task<PackageDetailsModel?> GetPackageDetails(string packageName)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageDetail, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "name", packageName);
+
+                PackageDetailsModel? result = null;
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    if (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result = new PackageDetailsModel
+                                     {
+                                         Name = reader.GetString("NAME"),
+                                         ModifyDate = new DateTime(reader.GetInt64("CREATE_TIME"), DateTimeKind.Utc).ToLocalTime()
+                                     };
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
+            }
+        }
+    }
+
+    public async Task SavePackage(string packageName, byte[] content)
+    {
+        if (content == null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        if (string.IsNullOrWhiteSpace(packageName))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageName));
+        }
+
+        using (var connection = GetConnection(IsolationLevel.Serializable))
+        {
+            if (await PackageExists(connection, packageName).ConfigureAwait(false))
+            {
+                await UpdatePackage(connection, packageName, content).ConfigureAwait(false);
+            }
+            else
+            {
+                await InsertPackage(connection, packageName, content).ConfigureAwait(false);
+            }
+            connection.Commit(false);
+        }
+    }
+
+    private Task InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    {
+        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
+        {
+            _dbAccessor.AddCommandParameter(command, "name", packageName);
+            _dbAccessor.AddCommandParameter(command, "content", content);
+            _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
+
+            return command.ExecuteNonQueryAsync();
+        }
+    }
+
+    private Task UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    {
+        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
+        {
+            _dbAccessor.AddCommandParameter(command, "name", packageName);
+            _dbAccessor.AddCommandParameter(command, "content", content);
+            _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
+
+            return command.ExecuteNonQueryAsync();
+        }
+    }
+
+    private async Task<bool> PackageExists(ConnectionAndTransactionHolder connection, string packageName)
+    {
+        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageExists, _tablePrefix)))
+        {
+            _dbAccessor.AddCommandParameter(command, "name", packageName);
+
+            using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                return await reader.ReadAsync().ConfigureAwait(false);
             }
         }
     }
