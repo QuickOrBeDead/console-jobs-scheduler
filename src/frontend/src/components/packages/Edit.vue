@@ -85,10 +85,6 @@ async function save() {
                             <label for="ModifyDate" class="form-label">Last Modify Date</label>
                             <label id="ModifyDate" class="form-control-plaintext"><b>{{ packageDetail.modifyDate?.toLocaleDateTimeString() }}</b></label>
                         </div>
-                        <div v-if="isInEditMode" class="col-12">
-                            <label for="Path" class="form-label">Path</label>
-                            <label id="Path" class="form-control-plaintext"><b>{{ packageDetail.path }}</b></label>
-                        </div>
                         <div class="col-12">
                             <label for="File" class="form-label">Package Zip File</label>
                             <input id="File" class="form-control" type="file" @change="onFileChanged" ref="fileInput" accept=".zip">
