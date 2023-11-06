@@ -545,12 +545,6 @@ export interface PackageDetailsModel {
      * @type {string}
      * @memberof PackageDetailsModel
      */
-    'path'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof PackageDetailsModel
-     */
     'modifyDate'?: string | null;
 }
 /**
