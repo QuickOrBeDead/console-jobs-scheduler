@@ -129,15 +129,12 @@ public sealed class ServiceHost
         });
         builder.Services.AddSingleton<IJobFactory, ServiceProviderJobFactory>();
 
-        var packageStorageRootPath = builder.Configuration["ConsoleAppPackageStoragePath"] ?? AppDomain.CurrentDomain.BaseDirectory;
         var appRunTempRootPath = builder.Configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory;
 
         builder.Services.AddDbContext<SettingsDbContext>(o => o.UseNpgsql(builder.Configuration["ConnectionString"]));
 
-        builder.Services.AddSingleton<IPackageStorage>(_ => new DefaultPackageStorage(packageStorageRootPath));
         builder.Services.AddScoped<IConsoleAppPackageRunner>(x => new DefaultConsoleAppPackageRunner(
             x.GetRequiredService<IAsyncPublisher<JobConsoleLogMessageEvent>>(),
-            x.GetRequiredService<IPackageStorage>(),
             x.GetRequiredService<IEmailSender>(),
             appRunTempRootPath));
         builder.Services.AddScoped<ISettingsService, SettingsService>();

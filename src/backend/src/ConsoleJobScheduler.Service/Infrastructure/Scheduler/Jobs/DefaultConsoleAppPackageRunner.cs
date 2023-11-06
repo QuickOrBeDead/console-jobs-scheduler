@@ -18,15 +18,13 @@ using MessagePipe;
 public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IAsyncPublisher<JobConsoleLogMessageEvent> _jobConsoleLogMessagePublisher;
-    private readonly IPackageStorage _packageStorage;
     private readonly IEmailSender _emailSender;
     private readonly ConsoleMessageReader _consoleMessageReader = new();
 
     private readonly string _tempRootPath;
 
     public DefaultConsoleAppPackageRunner(
-        IAsyncPublisher<JobConsoleLogMessageEvent> jobConsoleLogMessagePublisher, 
-        IPackageStorage packageStorage,
+        IAsyncPublisher<JobConsoleLogMessageEvent> jobConsoleLogMessagePublisher,
         IEmailSender emailSender,
         string tempRootPath)
     {
@@ -36,7 +34,6 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
 
         _jobConsoleLogMessagePublisher = jobConsoleLogMessagePublisher ?? throw new ArgumentNullException(nameof(jobConsoleLogMessagePublisher));
-        _packageStorage = packageStorage ?? throw new ArgumentNullException(nameof(packageStorage));
         _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
         _tempRootPath = tempRootPath;
     }
@@ -53,7 +50,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 
         try
         {
-            using (var stream = _packageStorage.GetPackageStream(packageName))
+            using (var stream = await jobStoreDelegate.GetPackageStream(packageName).ConfigureAwait(false))
             {
                 using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
                 {

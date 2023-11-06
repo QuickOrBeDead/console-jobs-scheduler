@@ -24,7 +24,7 @@ public sealed class PackagesController : ControllerBase
 
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    public IList<string> Get()
+    public Task<IList<string>> Get()
     {
         return _schedulerService.GetPackages();
     }
@@ -34,9 +34,9 @@ public sealed class PackagesController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetailsModel))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult Get([FromQuery]string packageName)
+    public async Task<IActionResult> Get([FromQuery]string packageName)
     {
-        var result = _schedulerService.GetPackageDetails(packageName);
+        var result = await _schedulerService.GetPackageDetails(packageName).ConfigureAwait(false);
 
         if (result == null)
         {
