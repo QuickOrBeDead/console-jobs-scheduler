@@ -30,7 +30,7 @@ public sealed class SchedulerController : ControllerBase
             new SchedulerMetadataModel
                 {
                     InStandbyMode = metaData.InStandbyMode,
-                    JobStoreType = metaData.JobStoreType.ToString(),
+                    JobStoreType = metaData.JobStoreType.Name,
                     SchedulerInstanceId = metaData.SchedulerInstanceId,
                     SchedulerName = metaData.SchedulerName,
                     SchedulerRemote = metaData.SchedulerRemote,
