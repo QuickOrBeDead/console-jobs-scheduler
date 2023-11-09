@@ -9,6 +9,7 @@ using System.Net.Mime;
 using ConsoleJobScheduler.Service.Api.Models;
 
 using Microsoft.AspNetCore.Authorization;
+using ConsoleJobScheduler.Service.Infrastructure.Data;
 
 [Authorize(Roles = Roles.Admin)]
 [Route("api/[controller]")]
@@ -22,11 +23,11 @@ public sealed class PackagesController : ControllerBase
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
     }
 
-    [HttpGet]
+    [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<IList<string>> Get()
+    public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
     {
-        return _schedulerService.GetPackages();
+        return _schedulerService.ListPackages(pageNumber.GetValueOrDefault(1));
     }
 
     [HttpGet("Detail")]

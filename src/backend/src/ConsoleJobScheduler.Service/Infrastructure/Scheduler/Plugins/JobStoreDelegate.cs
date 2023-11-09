@@ -32,7 +32,7 @@ public interface IJobStoreDelegate
 
     Task<JobExecutionStatistics> GetJobExecutionStatistics();
 
-    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
+    Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
 
     Task<JobExecutionDetail?> GetJobExecutionDetail(string id);
 
@@ -65,7 +65,7 @@ public interface IJobStoreDelegate
 
     Task<Stream?> GetPackageStream(string name);
 
-    Task<IList<string>> GetPackageNames();
+    Task<IList<string>> ListPackageNames();
 
     Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
@@ -215,7 +215,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
+    public async Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
@@ -552,7 +552,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    public async Task<IList<string>> GetPackageNames()
+    public async Task<IList<string>> ListPackageNames()
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {

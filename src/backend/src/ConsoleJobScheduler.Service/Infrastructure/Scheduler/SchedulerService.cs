@@ -20,17 +20,17 @@ public interface ISchedulerService
 
     Task<string?> GetJobExecutionErrorDetail(string id);
 
-    Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int page = 1);
+    Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int page = 1);
 
     Task AddOrUpdateJob(JobAddOrUpdateModel jobModel);
 
     Task<JobDetailModel?> GetJobDetail(JobKey jobKey);
 
-    Task<IList<string>> GetPackages();
+    Task<IList<string>> ListPackageNames();
 
     Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
-    Task<PagedResult<JobListItemModel>> GetJobList(int page = 1);
+    Task<PagedResult<JobListItemModel>> ListJobs(int page = 1);
 
     Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics();
 
@@ -69,9 +69,9 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.GetJobStoreDelegate().GetJobExecutionErrorDetail(id);
     }
 
-    public async Task<PagedResult<JobExecutionHistory>> GetJobExecutionHistory(string jobName = "", int page = 1)
+    public async Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int page = 1)
     {
-        var generalSettings = await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false);
+        return await _scheduler.GetJobStoreDelegate().ListJobExecutionHistory(jobName, await GetPageSize().ConfigureAwait(false), page).ConfigureAwait(false);
         return await _scheduler.GetJobStoreDelegate().GetJobExecutionHistory(jobName, generalSettings.PageSize.GetValueOrDefault(10), page).ConfigureAwait(false);
     }
 
@@ -121,9 +121,9 @@ public sealed class SchedulerService : ISchedulerService
                    };
     }
 
-    public Task<IList<string>> GetPackages()
+    public Task<IList<string>> ListPackageNames()
     {
-        return _scheduler.GetJobStoreDelegate().GetPackageNames();
+        return _scheduler.GetJobStoreDelegate().ListPackageNames();
     }
 
     public Task<PackageDetailsModel?> GetPackageDetails(string packageName)
@@ -131,10 +131,10 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.GetJobStoreDelegate().GetPackageDetails(packageName);
     }
 
-    public async Task<PagedResult<JobListItemModel>> GetJobList(int page = 1)
+    public async Task<PagedResult<JobListItemModel>> ListJobs(int page = 1)
     {
         var allJobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup()).ConfigureAwait(false);
-        var pageSize = (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize.GetValueOrDefault(10);
+        var pageSize = await GetPageSize().ConfigureAwait(false);
         var totalCount = allJobKeys.Count;
         var jobKeys = allJobKeys.OrderBy(x => x.Name)
                                                  .ThenBy(x => x.Group)
@@ -227,5 +227,10 @@ public sealed class SchedulerService : ISchedulerService
         {
             return string.Empty;
         }
+    }
+
+    private async Task<int> GetPageSize()
+    {
+        return (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize.GetValueOrDefault(10);
     }
 }
