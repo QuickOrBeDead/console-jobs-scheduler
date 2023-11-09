@@ -2038,6 +2038,35 @@ export const PackagesApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesGetPackageNamesGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Packages/GetPackageNames`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2138,6 +2167,15 @@ export const PackagesApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiPackagesGetPackageNamesGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesGetPackageNamesGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2178,6 +2216,14 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
         },
         /**
          * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiPackagesGetPackageNamesGet(options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.apiPackagesGetPackageNamesGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2214,6 +2260,16 @@ export class PackagesApi extends BaseAPI {
      */
     public apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig) {
         return PackagesApiFp(this.configuration).apiPackagesDetailGet(packageName, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PackagesApi
+     */
+    public apiPackagesGetPackageNamesGet(options?: AxiosRequestConfig) {
+        return PackagesApiFp(this.configuration).apiPackagesGetPackageNamesGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
