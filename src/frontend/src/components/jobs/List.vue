@@ -45,24 +45,22 @@ async function loadPage(page: number)  {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                                <template v-for="job in jobs?.items">
-                                                    <tr>
-                                                        <th class="text-nowrap" scope="row">{{ job.jobName }}</th>
-                                                        <td class="text-nowrap">{{ job.jobGroup }}</td>
-                                                        <td class="text-nowrap">{{ job.jobType }}</td>
-                                                        <td class="text-nowrap">{{ job.triggerDescription }}</td>
-                                                        <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
-                                                        <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
-                                                        <td class="text-nowrap">
-                                                            <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" custom v-slot="{ navigate }">
-                                                                <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
-                                                            </router-link>
-                                                            <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" custom v-slot="{ navigate }">
-                                                                <button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="History"><i class="bi bi-search"></i></button>
-                                                            </router-link>
-                                                        </td>
-                                                    </tr>
-                                                </template>
+                                                <tr v-for="job in jobs?.items">
+                                                    <th class="text-nowrap" scope="row">{{ job.jobName }}</th>
+                                                    <td class="text-nowrap">{{ job.jobGroup }}</td>
+                                                    <td class="text-nowrap">{{ job.jobType }}</td>
+                                                    <td class="text-nowrap">{{ job.triggerDescription }}</td>
+                                                    <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
+                                                    <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
+                                                    <td class="text-nowrap">
+                                                        <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" custom v-slot="{ navigate }">
+                                                            <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                                                        </router-link>
+                                                        <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" custom v-slot="{ navigate }">
+                                                            <button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="History"><i class="bi bi-search"></i></button>
+                                                        </router-link>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>

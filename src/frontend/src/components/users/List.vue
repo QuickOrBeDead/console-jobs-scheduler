@@ -41,15 +41,13 @@ async function loadPage(page: number)  {
                         </tr>
                         </thead>
                         <tbody>
-                            <template v-for="item in userItems?.items">
-                            <tr>
+                            <tr v-for="item in userItems?.items">
                                 <td class="text-nowrap">{{ item.userName }}</td>
                                 <td class="text-nowrap">{{ item.roles }}</td>
                                 <td class="text-nowrap" style="text-align: center">
                                     <router-link :to="{ name: 'EditUser', params: { userId: item.id } }">Edit</router-link>
                                 </td>
                             </tr>
-                            </template>
                         </tbody>
                     </table>
                     <pagination :totalPages="userItems?.totalPages" :totalCount="userItems?.totalCount" :pageSize="userItems?.pageSize" :page="userItems?.page" @pageChanged="loadPage"></pagination>
