@@ -49,17 +49,21 @@ watch(
                                                 <th class="text-muted" scope="column">Fired Time</th>
                                                 <th class="text-muted" scope="column">Next Fire Time</th>
                                                 <th class="text-muted" scope="column">Run Time</th>
-                                                <th class="text-muted" scope="column" style="text-align: center">Status</th>
+                                                <th class="text-muted text-center" scope="column">Status</th>
+                                                <th class="text-muted text-center" scope="column">Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                                 <tr v-for="item in jobHistoryItems?.items" :class="[item.hasSignalTimeout ? 'table-warning' : item.completed && !item.hasError && !item.vetoed ? 'table-success' :  item.completed && item.hasError && !item.vetoed ? 'table-danger' : item.vetoed ? 'table-warning' : '' ]">
-                                                    <td class="text-nowrap"><router-link :to="{ name: 'JobExecutionDetails', params: { id: item.id }}">{{ item.jobName }}</router-link></td>
+                                                    <td class="text-nowrap" scope="row">{{ item.jobName }}</td>
                                                     <td class="text-nowrap">{{ item.scheduledTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap">{{ item.firedTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap">{{ item.nextFireTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap">{{ item.runTime }}</td>
-                                                    <td style="text-align: center"><i :class="[item.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : item.completed && !item.hasError && !item.vetoed ? 'bi bi-check-circle-fill text-success' : item.completed && item.hasError && !item.vetoed ? 'bi bi-x-circle-fill text-danger' : item.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i></td>
+                                                    <td class="text-center"><i :class="[item.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : item.completed && !item.hasError && !item.vetoed ? 'bi bi-check-circle-fill text-success' : item.completed && item.hasError && !item.vetoed ? 'bi bi-x-circle-fill text-danger' : item.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i></td>
+                                                    <td class="text-center">
+                                                        <router-link :to="{ name: 'JobExecutionDetails', params: { id: item.id }}" custom v-slot="{ navigate }"><button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="Details"><i class="bi bi-search"></i></button></router-link>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
