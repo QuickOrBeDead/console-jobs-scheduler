@@ -30,7 +30,7 @@ public sealed class PackagesController : ControllerBase
         return _schedulerService.ListPackageNames();
     }
 
-    [HttpGet("{pageNumber:int?}")]
+    [HttpGet("List/{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
     {
@@ -42,7 +42,7 @@ public sealed class PackagesController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetailsModel))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get([FromQuery]string packageName)
+    public async Task<IActionResult> GetDetail([FromQuery]string packageName)
     {
         var result = await _schedulerService.GetPackageDetails(packageName).ConfigureAwait(false);
 
