@@ -2071,10 +2071,10 @@ export const PackagesApiAxiosParamCreator = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesPageNumberGet: async (pageNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiPackagesListPageNumberGet: async (pageNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'pageNumber' is not null or undefined
-            assertParamExists('apiPackagesPageNumberGet', 'pageNumber', pageNumber)
-            const localVarPath = `/api/Packages/{pageNumber}`
+            assertParamExists('apiPackagesListPageNumberGet', 'pageNumber', pageNumber)
+            const localVarPath = `/api/Packages/List/{pageNumber}`
                 .replace(`{${"pageNumber"}}`, encodeURIComponent(String(pageNumber)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2180,8 +2180,8 @@ export const PackagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiPackagesPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageListItemModelPagedResult>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesPageNumberGet(pageNumber, options);
+        async apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageListItemModelPagedResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesListPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2228,8 +2228,8 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesPageNumberGet(pageNumber: number, options?: any): AxiosPromise<PackageListItemModelPagedResult> {
-            return localVarFp.apiPackagesPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
+        apiPackagesListPageNumberGet(pageNumber: number, options?: any): AxiosPromise<PackageListItemModelPagedResult> {
+            return localVarFp.apiPackagesListPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2279,8 +2279,8 @@ export class PackagesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof PackagesApi
      */
-    public apiPackagesPageNumberGet(pageNumber: number, options?: AxiosRequestConfig) {
-        return PackagesApiFp(this.configuration).apiPackagesPageNumberGet(pageNumber, options).then((request) => request(this.axios, this.basePath));
+    public apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig) {
+        return PackagesApiFp(this.configuration).apiPackagesListPageNumberGet(pageNumber, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
