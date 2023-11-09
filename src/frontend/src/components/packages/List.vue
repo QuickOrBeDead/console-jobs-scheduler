@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { createApi } from '../../api'
-import { PackagesApi } from '../../metadata/console-jobs-scheduler-api'
+import { PackageListItemModelPagedResult, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
 const packagesApi = createApi(PackagesApi)
-const packages = ref<Array<string>>()
+const packages = ref<PackageListItemModelPagedResult>()
 
-onMounted(async () => {
-    const { data } = await packagesApi.apiPackagesGet()
+async function loadPage(page: number)  {
+    const { data } = await packagesApi.apiPackagesPageNumberGet(page)
     packages.value = data
-})
+}
 </script>
 <template>
   <div class="page-container">
@@ -35,13 +35,13 @@ onMounted(async () => {
                         </tr>
                         </thead>
                         <tbody>
-                            <template v-for="item in packages">
-                            <tr>
-                                <td class="text-nowrap"><router-link :to="{ name: 'EditPackage', params: { name: item } }">{{ item }}</router-link></td>
+                            <tr v-for="item in packages?.items">
+                                <td class="text-nowrap"><router-link :to="{ name: 'EditPackage', params: { name: item.name } }">{{ item.name }}</router-link></td>
                             </tr>
-                            </template>
                         </tbody>
                     </table>
+
+                    <pagination :totalPages="packages?.totalPages" :totalCount="packages?.totalCount" :pageSize="packages?.pageSize" :page="packages?.page" @pageChanged="loadPage"></pagination>
                 </div>
             </div>
         </div>
