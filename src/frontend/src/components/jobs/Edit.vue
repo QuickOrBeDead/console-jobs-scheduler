@@ -22,7 +22,7 @@ const loadPage = async () => {
     jobName = route.params.jobName as string
     isInEditMode = !!jobGroup && !!jobName
 
-    const { data } = await packagesApi.apiPackagesGet()
+    const { data } = await packagesApi.apiPackagesGetPackageNamesGet()
     packages.value = data
    
     if (isInEditMode) {
