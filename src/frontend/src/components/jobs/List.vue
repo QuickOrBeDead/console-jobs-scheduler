@@ -41,7 +41,7 @@ async function loadPage(page: number)  {
                                                 <th class="text-muted" scope="column">Trigger</th>
                                                 <th class="text-muted" scope="column">Last Fire Time</th>
                                                 <th class="text-muted" scope="column">Next Fire Time</th>
-                                                <th class="text-muted" scope="column">Actions</th>
+                                                <th class="text-muted text-center" scope="column">Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -52,7 +52,7 @@ async function loadPage(page: number)  {
                                                     <td class="text-nowrap">{{ job.triggerDescription }}</td>
                                                     <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
-                                                    <td class="text-nowrap">
+                                                    <td class="text-nowrap text-center">
                                                         <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" custom v-slot="{ navigate }">
                                                             <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
                                                         </router-link>
