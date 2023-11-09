@@ -23,6 +23,13 @@ public sealed class PackagesController : ControllerBase
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
     }
 
+    [HttpGet("GetPackageNames")]
+    [Produces(MediaTypeNames.Application.Json)]
+    public Task<IList<string>> GetPackageNames()
+    {
+        return _schedulerService.ListPackageNames();
+    }
+
     [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
