@@ -1,71 +1,77 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue'
 import { createApi } from '../../api'
 import { JobListItemModelPagedResult, JobsApi } from '../../metadata/console-jobs-scheduler-api'
 
 const jobs = ref<JobListItemModelPagedResult>()
 const jobsApi = createApi(JobsApi)
-const totalPages = ref<number>(0)
-
-onMounted(async () => {
-    await loadPage(1)
-})
 
 async function loadPage(page: number)  {
     const { data } = await jobsApi.apiJobsPageNumberGet(page)
     jobs.value = data
-
-    totalPages.value = data.totalPages!
 }
 </script>
 <template>
     <div class="page-container">
         <div class="container">
             <div class="row">
-                <div class="col-12">
-                    <h1 class="display-6">Job List</h1>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 mb-1">
-                    <router-link :to="{ name: 'EditJob' }" custom v-slot="{ navigate }">
-                        <button class="btn btn-primary float-end" @click="navigate">Add</button>
-                    </router-link>
-                </div>
-            </div>
-            <div class="row" v-if="jobs">
-                <div class="col-12">
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                        <tr>
-                            <th scope="column">Name</th>
-                            <th scope="column">Group</th>
-                            <th scope="column">Type</th>
-                            <th scope="column">Trigger</th>
-                            <th scope="column">Last Fire Time</th>
-                            <th scope="column">Next Fire Time</th>
-                            <th scope="column"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <template v-for="job in jobs.items">
-                                <tr>
-                                    <th class="text-nowrap" scope="row"><a>{{ job.jobName }}</a></th>
-                                    <td class="text-nowrap">{{ job.jobGroup }}</td>
-                                    <td class="text-nowrap">{{ job.jobType }}</td>
-                                    <td class="text-nowrap">{{ job.triggerDescription }}</td>
-                                    <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
-                                    <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
-                                    <td class="text-nowrap">
-                                        <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }">Edit</router-link>
-                                        &nbsp;
-                                        <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}">History</router-link>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <pagination :totalPages="totalPages" @pageChanged="loadPage"></pagination>
+                <div class="col-sm-12">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0 text-muted"><small>Jobs</small></h4>
+                        </div>
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-12 mb-1">
+                                    <button type="button" class="btn btn-outline-primary btn-sm float-start" @click="loadPage(1)"><i class="bi bi-arrow-repeat"></i></button>
+                                    <router-link :to="{ name: 'EditJob' }" custom v-slot="{ navigate }">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill float-end" @click="navigate"><i class="bi bi-plus-circle-fill"></i> New Job</button>
+                                    </router-link>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-2">
+                                            <thead class="table-light fw-semibold">
+                                            <tr>
+                                                <th class="text-muted" scope="column">Name</th>
+                                                <th class="text-muted" scope="column">Group</th>
+                                                <th class="text-muted" scope="column">Type</th>
+                                                <th class="text-muted" scope="column">Trigger</th>
+                                                <th class="text-muted" scope="column">Last Fire Time</th>
+                                                <th class="text-muted" scope="column">Next Fire Time</th>
+                                                <th class="text-muted" scope="column">Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template v-for="job in jobs?.items">
+                                                    <tr>
+                                                        <th class="text-nowrap" scope="row">{{ job.jobName }}</th>
+                                                        <td class="text-nowrap">{{ job.jobGroup }}</td>
+                                                        <td class="text-nowrap">{{ job.jobType }}</td>
+                                                        <td class="text-nowrap">{{ job.triggerDescription }}</td>
+                                                        <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
+                                                        <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
+                                                        <td class="text-nowrap">
+                                                            <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" custom v-slot="{ navigate }">
+                                                                <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                                                            </router-link>
+                                                            <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" custom v-slot="{ navigate }">
+                                                                <button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="History"><i class="bi bi-search"></i></button>
+                                                            </router-link>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                
+                                    <pagination :totalPages="jobs?.totalPages" :totalCount="jobs?.totalCount" :pageSize="jobs?.pageSize" :page="jobs?.page" @pageChanged="loadPage"></pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
