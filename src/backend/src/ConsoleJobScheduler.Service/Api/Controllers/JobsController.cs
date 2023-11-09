@@ -31,7 +31,7 @@ public sealed class JobsController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<JobListItemModel>> Get(int? pageNumber = null)
     {
-        return _schedulerService.GetJobList(pageNumber.GetValueOrDefault(1));
+        return _schedulerService.ListJobs(pageNumber.GetValueOrDefault(1));
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
