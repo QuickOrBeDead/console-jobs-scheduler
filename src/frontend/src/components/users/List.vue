@@ -52,7 +52,7 @@ async function loadPage(page: number)  {
                             </template>
                         </tbody>
                     </table>
-                    <pagination :totalPages="totalPages" @pageChanged="loadPage"></pagination>
+                    <pagination :totalPages="userItems?.totalPages" :totalCount="userItems?.totalCount" :pageSize="userItems?.pageSize" :page="userItems?.page" @pageChanged="loadPage"></pagination>
                 </div>
             </div>
         </div>
