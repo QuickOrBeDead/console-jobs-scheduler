@@ -7,14 +7,11 @@ import { useRoute } from 'vue-router';
 const route = useRoute()
 
 const jobHistoryItems = ref<JobExecutionHistoryPagedResult>()
-const totalPages = ref<number>(0)
 const jobHistoryApi = createApi(JobHistoryApi)
 
 async function loadPage(page: number)  {
     const { data } = await jobHistoryApi.apiJobHistoryPageNumberGet(page, route.params.jobName as string)
     jobHistoryItems.value = data
-
-    totalPages.value = data.totalPages!
 }
 
 watch(
@@ -30,37 +27,50 @@ watch(
     <div class="page-container">
         <div class="container">
             <div class="row">
-                <div class="col-12">
-                    <h1 class="display-6">Job History</h1>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-12">
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                        <tr>
-                            <th scope="column">Job Name</th>
-                            <th scope="column">Scheduled Time</th>
-                            <th scope="column">Fired Time</th>
-                            <th scope="column">Next Fire Time</th>
-                            <th scope="column">Run Time</th>
-                            <th scope="column" style="text-align: center">Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <template v-for="item in jobHistoryItems?.items">
-                            <tr :class="[item.hasSignalTimeout ? 'table-warning' : item.completed && !item.hasError && !item.vetoed ? 'table-success' :  item.completed && item.hasError && !item.vetoed ? 'table-danger' : item.vetoed ? 'table-warning' : '' ]">
-                                <td class="text-nowrap"><router-link :to="{ name: 'JobExecutionDetails', params: { id: item.id }}">{{ item.jobName }}</router-link></td>
-                                <td class="text-nowrap">{{ item.scheduledTime?.toLocaleDateTimeString() }}</td>
-                                <td class="text-nowrap">{{ item.firedTime?.toLocaleDateTimeString() }}</td>
-                                <td class="text-nowrap">{{ item.nextFireTime?.toLocaleDateTimeString() }}</td>
-                                <td class="text-nowrap">{{ item.runTime }}</td>
-                                <td style="text-align: center"><i :class="[item.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : item.completed && !item.hasError && !item.vetoed ? 'bi bi-check-circle-fill text-success' : item.completed && item.hasError && !item.vetoed ? 'bi bi-x-circle-fill text-danger' : item.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i></td>
-                            </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <pagination :totalPages="totalPages" @pageChanged="loadPage"></pagination>
+                <div class="col-sm-12">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0 text-muted"><small>Job History</small></h4>
+                        </div>
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-12 mb-1">
+                                    <button type="button" class="btn btn-outline-primary btn-sm float-start" @click="loadPage(1)"><i class="bi bi-arrow-repeat"></i></button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-2">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-muted" scope="column">Job Name</th>
+                                                <th class="text-muted" scope="column">Scheduled Time</th>
+                                                <th class="text-muted" scope="column">Fired Time</th>
+                                                <th class="text-muted" scope="column">Next Fire Time</th>
+                                                <th class="text-muted" scope="column">Run Time</th>
+                                                <th class="text-muted" scope="column" style="text-align: center">Status</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template v-for="item in jobHistoryItems?.items">
+                                                <tr :class="[item.hasSignalTimeout ? 'table-warning' : item.completed && !item.hasError && !item.vetoed ? 'table-success' :  item.completed && item.hasError && !item.vetoed ? 'table-danger' : item.vetoed ? 'table-warning' : '' ]">
+                                                    <td class="text-nowrap"><router-link :to="{ name: 'JobExecutionDetails', params: { id: item.id }}">{{ item.jobName }}</router-link></td>
+                                                    <td class="text-nowrap">{{ item.scheduledTime?.toLocaleDateTimeString() }}</td>
+                                                    <td class="text-nowrap">{{ item.firedTime?.toLocaleDateTimeString() }}</td>
+                                                    <td class="text-nowrap">{{ item.nextFireTime?.toLocaleDateTimeString() }}</td>
+                                                    <td class="text-nowrap">{{ item.runTime }}</td>
+                                                    <td style="text-align: center"><i :class="[item.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : item.completed && !item.hasError && !item.vetoed ? 'bi bi-check-circle-fill text-success' : item.completed && item.hasError && !item.vetoed ? 'bi bi-x-circle-fill text-danger' : item.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i></td>
+                                                </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <pagination :totalPages="jobHistoryItems?.totalPages" :totalCount="jobHistoryItems?.totalCount" :pageSize="jobHistoryItems?.pageSize" :page="jobHistoryItems?.page" @pageChanged="loadPage"></pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
