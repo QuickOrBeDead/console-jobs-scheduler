@@ -37,6 +37,8 @@ public interface ISchedulerService
     Task<byte[]?> GetAttachmentBytes(long id);
 
     Task SavePackage(string packageName, byte[] content);
+
+    Task<PagedResult<PackageListItemModel>> ListPackages(int page = 1);
 }
 
 public sealed class SchedulerService : ISchedulerService
@@ -72,7 +74,6 @@ public sealed class SchedulerService : ISchedulerService
     public async Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int page = 1)
     {
         return await _scheduler.GetJobStoreDelegate().ListJobExecutionHistory(jobName, await GetPageSize().ConfigureAwait(false), page).ConfigureAwait(false);
-        return await _scheduler.GetJobStoreDelegate().GetJobExecutionHistory(jobName, generalSettings.PageSize.GetValueOrDefault(10), page).ConfigureAwait(false);
     }
 
     public async Task AddOrUpdateJob(JobAddOrUpdateModel jobModel)
@@ -124,6 +125,11 @@ public sealed class SchedulerService : ISchedulerService
     public Task<IList<string>> ListPackageNames()
     {
         return _scheduler.GetJobStoreDelegate().ListPackageNames();
+    }
+
+    public async Task<PagedResult<PackageListItemModel>> ListPackages(int page = 1)
+    {
+        return await _scheduler.GetJobStoreDelegate().ListPackages(await GetPageSize().ConfigureAwait(false), page).ConfigureAwait(false);
     }
 
     public Task<PackageDetailsModel?> GetPackageDetails(string packageName)

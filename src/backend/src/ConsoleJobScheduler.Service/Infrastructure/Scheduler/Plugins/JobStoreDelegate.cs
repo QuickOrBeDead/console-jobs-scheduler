@@ -70,6 +70,8 @@ public interface IJobStoreDelegate
     Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
     Task SavePackage(string packageName, byte[] content);
+
+    Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1);
 }
 
 public class JobStoreDelegate : IJobStoreDelegate
@@ -142,6 +144,14 @@ public class JobStoreDelegate : IJobStoreDelegate
     private const string SqlPackageUpdate = "UPDATE {0}PACKAGES SET CONTENT = @content, CREATE_TIME = @createTime WHERE NAME = @name";
 
     private const string SqlPackageInsert = "INSERT INTO {0}PACKAGES (NAME, CONTENT, CREATE_TIME) VALUES (@name, @content, @createTime)";
+
+    private const string SqlListPackages = @"
+                                    WITH CNT AS (SELECT COUNT(*) COUNT FROM {0}PACKAGES)
+                                    SELECT NAME, (SELECT COUNT FROM CNT) COUNT
+                                    FROM {0}PACKAGES
+                                    ORDER BY NAME
+                                    LIMIT @pageSize
+                                    OFFSET @offset";
 
     public JobStoreDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -627,6 +637,41 @@ public class JobStoreDelegate : IJobStoreDelegate
                 await InsertPackage(connection, packageName, content).ConfigureAwait(false);
             }
             connection.Commit(false);
+        }
+    }
+
+    public async Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1)
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListPackages, _tablePrefix)))
+            {
+                _dbAccessor.AddCommandParameter(command, "pageSize", pageSize);
+                _dbAccessor.AddCommandParameter(command, "offset", (page - 1) * pageSize);
+
+                var result = new List<PackageListItemModel>();
+                var count = 0;
+
+                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    var counter = 0;
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        if (counter == 0)
+                        {
+                            count = reader.GetInt32("COUNT");
+                        }
+
+                        counter++;
+
+                        result.Add(new PackageListItemModel {Name = reader.GetString("NAME")});
+                    }
+                }
+
+                connection.Commit(false);
+
+                return new PagedResult<PackageListItemModel>(result, pageSize, page, count);
+            }
         }
     }
 
