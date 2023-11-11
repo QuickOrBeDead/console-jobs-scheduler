@@ -19,38 +19,50 @@ async function loadPage(page: number)  {
     <div class="page-container">
         <div class="container">
             <div class="row">
-                <div class="col-12">
-                    <h1 class="display-6">Users</h1>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 mb-1">
-                    <router-link :to="{ name: 'EditUser' }" custom v-slot="{ navigate }">
-                        <button class="btn btn-primary float-end" @click="navigate">Add</button>
-                    </router-link>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-12">
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                        <tr>
-                            <th scope="column">Username</th>
-                            <th scope="column">Roles</th>
-                            <th scope="column"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="item in userItems?.items">
-                                <td class="text-nowrap">{{ item.userName }}</td>
-                                <td class="text-nowrap">{{ item.roles }}</td>
-                                <td class="text-nowrap" style="text-align: center">
-                                    <router-link :to="{ name: 'EditUser', params: { userId: item.id } }">Edit</router-link>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <pagination :totalPages="userItems?.totalPages" :totalCount="userItems?.totalCount" :pageSize="userItems?.pageSize" :page="userItems?.page" @pageChanged="loadPage"></pagination>
+                <div class="col-sm-12">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0 text-muted"><small>Users</small></h4>
+                        </div>
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-12 mb-1">
+                                    <button type="button" class="btn btn-outline-primary btn-sm float-start" @click="loadPage(1)"><i class="bi bi-arrow-repeat"></i></button>
+                                    <router-link :to="{ name: 'EditUser' }" custom v-slot="{ navigate }">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill float-end" @click="navigate"><i class="bi bi-plus-circle-fill"></i> New User</button>
+                                    </router-link>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-2">
+                                            <thead class="table-light fw-semibold">
+                                            <tr>
+                                                <th class="text-muted" scope="column">Username</th>
+                                                <th class="text-muted" scope="column">Roles</th>
+                                                <th class="text-muted text-center" scope="column">Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="item in userItems?.items">
+                                                    <td class="text-nowrap" scope="row">{{ item.userName }}</td>
+                                                    <td class="text-nowrap">{{ item.roles }}</td>
+                                                    <td class="text-nowrap text-center">
+                                                        <router-link :to="{ name: 'EditUser', params: { userId: item.id } }" custom v-slot="{ navigate }">
+                                                            <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                                                        </router-link>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <pagination :totalPages="userItems?.totalPages" :totalCount="userItems?.totalCount" :pageSize="userItems?.pageSize" :page="userItems?.page" @pageChanged="loadPage"></pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
