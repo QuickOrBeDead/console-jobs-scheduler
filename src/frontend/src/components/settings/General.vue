@@ -29,8 +29,11 @@ async function save() {
 </script>
 
 <template>
-    <div class="row justify-content-center" v-if="settings">
-        <div class="col-8">
+    <div class="card flex-fill">
+        <div class="card-header">
+            <h6 class="card-title mb-0 text-muted">Misc</h6>
+        </div>
+        <div class="card-body" v-if="settings">
             <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
                 <div v-for="msg in errorMessages" class="d-flex align-items-center">
                     <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
@@ -38,13 +41,13 @@ async function save() {
                 </div>
             </div>
             <div class="row g-3">
-                <div class="col-md-2">
+                <div class="col-md-2 mb-3">
                     <label for="PageSize" class="form-label">Page Size</label>
                     <input id="PageSize" type="number" min="10" max="50" class="form-control" v-model.trim="settings.pageSize" :class="errors && errors.PageSize ? 'is-invalid' : ''"/>
                     <div v-if="errors && errors.PageSize" class="invalid-feedback" role="alert"><template v-for="msg in errors.PageSize">{{ msg }}<br></template></div>
                 </div>
-                <button @click="save" class="btn btn-primary">Save</button>
             </div>
+            <button @click="save" class="btn btn-primary btn-sm">Save Changes</button>
         </div>
     </div>
 </template>
