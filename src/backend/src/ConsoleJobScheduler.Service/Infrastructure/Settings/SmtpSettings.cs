@@ -6,9 +6,11 @@ using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
 
 public sealed class SmtpSettings : ISettings
 {
+    [Required]
     public string Host { get; set; } = default!;
 
-    public int Port { get; set; }
+    [Required, Range(1, 65535)]
+    public int? Port { get; set; }
 
     public string From { get; set; } = default!;
 

@@ -21,7 +21,7 @@ public sealed class SmtpEmailSender : IEmailSender
     public async Task SendMailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
     {
         var smtpSettings = await _settingsService.GetSettings<SmtpSettings>().ConfigureAwait(false);
-        using (var smtpClient = new SmtpClient(smtpSettings.Host, smtpSettings.Port) { EnableSsl = smtpSettings.EnableSsl })
+        using (var smtpClient = new SmtpClient(smtpSettings.Host, smtpSettings.Port.GetValueOrDefault(25)) { EnableSsl = smtpSettings.EnableSsl })
         {
             smtpClient.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password, smtpSettings.Domain);
 
