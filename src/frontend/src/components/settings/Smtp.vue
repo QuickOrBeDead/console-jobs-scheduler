@@ -15,7 +15,12 @@ onMounted(async () => {
 })
 
 async function save() {
-    const { hasError } = await callApi(() => settingsApi.apiSettingsSaveSmtpSettingsPost(settings.value), errors)
+    const model = settings.value
+    if (model && !model.port) {
+        model.port = undefined
+    }
+
+    const { hasError } = await callApi(() => settingsApi.apiSettingsSaveSmtpSettingsPost(model), errors)
 
     if (!hasError) {
         console.log("saved")
@@ -25,8 +30,11 @@ async function save() {
 </script>
 
 <template>
-    <div class="row justify-content-center" v-if="settings">
-        <div class="col-8">
+     <div class="card flex-fill">
+        <div class="card-header">
+            <h6 class="card-title mb-0 text-muted">Settings</h6>
+        </div>
+        <div class="card-body" v-if="settings">
             <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
                 <div v-for="msg in errorMessages" class="d-flex align-items-center">
                     <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
@@ -41,12 +49,12 @@ async function save() {
                 </div>
                 <div class="col-md-3">
                     <label for="Port" class="form-label">Port</label>
-                    <input id="Port" type="number" min="1" max="65535" class="form-control" v-model.trim="settings.port" :class="errors && errors.Port ? 'is-invalid' : ''"/>
+                    <input id="Port" type="number" min="1" max="65535" class="form-control" v-model.number="settings.port" :class="errors && errors.Port ? 'is-invalid' : ''"/>
                     <div v-if="errors && errors.Port" class="invalid-feedback" role="alert"><template v-for="msg in errors.Port">{{ msg }}<br></template></div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
-                    <div class="form-check">
+                    <div class="form-check mt-2">
                         <input id="EnableSsl" type="checkbox" class="form-check-input" v-model.trim="settings.enableSsl" :class="errors && errors.EnableSsl ? 'is-invalid' : ''"/>
                         <label for="EnableSsl" class="form-check-label">Enable Ssl</label>
                     </div>
@@ -62,8 +70,8 @@ async function save() {
                     <input id="FromName" type="text" class="form-control" v-model.trim="settings.fromName" :class="errors && errors.FromName ? 'is-invalid' : ''"/>
                     <div v-if="errors && errors.FromName" class="invalid-feedback" role="alert"><template v-for="msg in errors.FromName">{{ msg }}<br></template></div>
                 </div>
-                <fieldset class="border rounded-3 p-3">
-                    <legend class="float-none w-auto px-3">Credentials</legend>
+                <fieldset class="border rounded-3 p-3 mb-3">
+                    <legend class="float-none w-auto px-3"><small>Credentials</small></legend>
                     <div class="col-md-12">
                         <label for="Domain" class="form-label">Domain</label>
                         <input id="Domain" type="text" class="form-control" v-model.trim="settings.domain" :class="errors && errors.Domain ? 'is-invalid' : ''"/>
@@ -80,8 +88,19 @@ async function save() {
                         <div v-if="errors && errors.Password" class="invalid-feedback" role="alert"><template v-for="msg in errors.Password">{{ msg }}<br></template></div>
                     </div>
                 </fieldset>
-                <button @click="save" class="btn btn-primary">Save</button>
             </div>
+            <button @click="save" class="btn btn-primary btn-sm">Save Changes</button>
+        </div>
+    </div>
+    <div class="row justify-content-center" >
+        <div class="col-8">
+            <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
+                <div v-for="msg in errorMessages" class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
+                    <div>{{ msg }}</div>
+                </div>
+            </div>
+            
         </div>
     </div>
 </template>
