@@ -2,6 +2,14 @@
   margin-top: 10px;
 }
 
-.page-container {
-  margin-top: 10px;
+.tab-content {
+  border: 1px solid #dee2e6;
+  border-top: transparent;
+  padding: 15px;
+}
+
+.tab-content .tab-pane {
+  background-color: #FFF;
+  min-height: 200px;
+  height: auto;
 }
