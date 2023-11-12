@@ -5,7 +5,7 @@ import { Ref } from "vue"
 
 export function createApi<T extends BaseAPI>(ctor: { new (): T }) : T {
     const api = new ctor()
-    api["basePath"] = "http://localhost:5000"
+    api["basePath"] = ""
     return api
 }
 
