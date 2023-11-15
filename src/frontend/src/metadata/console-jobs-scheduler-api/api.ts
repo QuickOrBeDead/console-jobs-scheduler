@@ -177,6 +177,12 @@ export interface JobExecutionDetail {
      * @type {string}
      * @memberof JobExecutionDetail
      */
+    'id'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
     'instanceName'?: string | null;
     /**
      * 
