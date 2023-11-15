@@ -52,79 +52,83 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <h1 class="display-6">Job Execution Details</h1>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <h2 class="display-6 text-center">Job Console</h2>
-            <div class="col-8">
-                <p>
-                    <div id="console">
-                        <template v-for="jobLog in logs">
-                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.message }}</div>
-                        </template>
-                    </div>
-                </p>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-8">
-                <table class="table table-striped table-bordered"> <tbody>
-                    <tr>
-                        <th scope="row">Job Name</th>
-                        <td>{{ job?.jobName }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Job Group</th>
-                        <td>{{ job?.jobGroup }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Instance Name</th>
-                        <td>{{ job?.instanceName }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Trigger Name</th>
-                        <td>{{ job?.triggerName }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Trigger Group</th>
-                        <td>{{ job?.triggerGroup }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Scheduled Time</th>
-                        <td>{{ job?.scheduledTime?.toLocaleDateTimeString() }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Run Time</th>
-                        <td>{{ job?.runTime }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Has Error</th>
-                        <td>{{ job?.hasError ? "TRUE" : "FALSE" }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Error Message</th>
-                        <td>{{ job?.errorMessage }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Vetoed</th>
-                        <td>{{ job?.vetoed ? "TRUE" : "FALSE" }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Completed</th>
-                        <td>{{ job?.completed ? "TRUE" : "FALSE" }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Attachments</th>
-                        <td>
-                            <template v-for="attachment in attachments">
-                                <a :href="getAttachmentUrl(attachment)">{{ attachment.fileName }}</a>
-                                <br />
+                <div class="card flex-fill">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h4 class="card-title mb-0 text-muted"><small>Job Execution Details</small></h4>
+                        <router-link class="nav-link" to="/history" custom v-slot="{ navigate }">
+                            <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
+                        </router-link>
+					</div>
+					<div class="card-body">
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <div class="fs-5">
+                                    <i :class="[job?.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : job?.completed && !job?.hasError && !job?.vetoed ? 'bi bi-check-circle-fill text-success' : job?.completed && job?.hasError && !job?.vetoed ? 'bi bi-x-circle-fill text-danger' : job?.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i>
+                                    <span class="text-muted">#{{ job?.id }}:</span>
+                                    <span class="fw-bold">{{ job?.jobName }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between align-items-center">
+                                <div class="fs-6">
+                                    <span class="fw-lighter">Scheduled at {{ job?.scheduledTime?.toLocaleDateTimeString() }}</span>
+                                    <span class="fw-lighter me-1" title="Node"><i class="bi bi-diagram-2"></i>{{ job?.instanceName }}</span>
+                                    <span class="fw-lighter" title="Job Group"><i class="bi bi-collection"></i> {{ job?.jobGroup }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between align-items-center mt-3">
+                                <div class="fs-6">
+                                    <span class="fw-normal">Trigger Name:</span>
+                                    <span class="fw-light">{{ job?.triggerName }}</span>
+                                </div>
+                                <div class="fs-6">
+                                    <span class="fw-normal">Started:</span>
+                                    <span class="fw-light">{{ job?.firedTime?.toLocaleDateTimeString() }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between align-items-center">
+                                <div class="fs-6">
+                                    <span class="fw-normal">Trigger Group:</span>
+                                    <span class="fw-light">{{ job?.triggerGroup }}</span>
+                                </div>
+                                <div v-if="job?.runTime" class="fs-6">
+                                    <span class="fw-light" title="Run Time"><i class="bi bi-stopwatch"></i> {{ job?.runTime }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <strong><i class="bi bi-activity"></i> Logs</strong>
+                                <p>
+                                    <div id="console">
+                                        <template v-for="jobLog in logs">
+                                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.message }}</div>
+                                        </template>
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <strong><i class="bi bi-paperclip"></i> Attachments <span class="badge bg-secondary">{{ attachments?.length }}</span></strong><br>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item" v-for="attachment in attachments">
+                                            <a class="text-reset" :href="getAttachmentUrl(attachment)" title="Click to Download"><i class="bi bi-file-earmark-arrow-down"></i>{{ attachment.fileName }}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <template v-if="job?.errorMessage">
+                                <hr>
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong><i class="bi bi-bug"></i> Error Message</strong><br>
+                                        <p>{{ job?.errorMessage }}</p>
+                                    </div>
+                                </div>
                             </template>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                            
+                        </div>
+					</div>
+				</div>
             </div>
         </div>
     </div>
