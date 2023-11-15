@@ -5,6 +5,7 @@ using System.Data.Common;
 
 using ConsoleJobScheduler.Service.Infrastructure.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
+using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Extensions;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
@@ -279,7 +280,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                             jobExecutionHistory.NextFireTime = trigger.GetFireTimeAfter(scheduledTime)?.DateTime.ToLocalTime();
                         }
 
-                        jobExecutionHistory.UpdateHasSignalTimeout(TimeSpan.FromMinutes(1));
+                        jobExecutionHistory.UpdateHasSignalTimeout();
 
                         result.Add(jobExecutionHistory);
                     }
@@ -320,8 +321,11 @@ public class JobStoreDelegate : IJobStoreDelegate
                                          Completed = reader.GetBoolean("COMPLETED"),
                                          Vetoed = reader.GetBoolean("VETOED"),
                                          HasError = reader.GetBoolean("HAS_ERROR"),
-                                         ErrorMessage = reader.GetNullableString("ERROR_MESSAGE")
+                                         ErrorMessage = reader.GetNullableString("ERROR_MESSAGE"),
+                                         LastSignalTime = reader.GetDateTime("LAST_SIGNAL_TIME")
                                      };
+
+                        result.UpdateHasSignalTimeout();
                     }
                 }
 

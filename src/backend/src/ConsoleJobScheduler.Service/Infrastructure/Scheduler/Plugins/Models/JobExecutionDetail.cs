@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
 
-public sealed class JobExecutionDetail
+public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
 {
     public string InstanceName { get; set; }
 
@@ -27,4 +27,8 @@ public sealed class JobExecutionDetail
     public bool Completed { get; set; }
 
     public bool Vetoed { get; set; }
+
+    public DateTime LastSignalTime { get; set; }
+
+    public bool HasSignalTimeout { get; set; }
 }

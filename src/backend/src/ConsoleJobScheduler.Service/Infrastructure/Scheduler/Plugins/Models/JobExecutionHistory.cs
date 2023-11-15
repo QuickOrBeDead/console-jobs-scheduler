@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
 
-public sealed class JobExecutionHistory
+public sealed class JobExecutionHistory : IJobExecutionHasLastSignalTimeout
 {
     public string Id { get; set; }
 
@@ -29,16 +29,4 @@ public sealed class JobExecutionHistory
     public bool Vetoed { get; set; }
 
     public bool HasSignalTimeout { get; set; }
-
-    public void UpdateHasSignalTimeout(TimeSpan timeout)
-    {
-        if (Completed || Vetoed)
-        {
-            HasSignalTimeout = false;
-        }
-        else
-        {
-            HasSignalTimeout = DateTime.UtcNow.Subtract(LastSignalTime.ToUniversalTime()) > timeout;
-        }
-    }
 }
