@@ -250,6 +250,18 @@ export interface JobExecutionDetail {
      * @memberof JobExecutionDetail
      */
     'vetoed'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'lastSignalTime'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionDetail
+     */
+    'hasSignalTimeout'?: boolean;
 }
 /**
  * 
@@ -862,13 +874,13 @@ export interface SmtpSettings {
      * @type {string}
      * @memberof SmtpSettings
      */
-    'host'?: string | null;
+    'host': string;
     /**
      * 
      * @type {number}
      * @memberof SmtpSettings
      */
-    'port'?: number;
+    'port': number;
     /**
      * 
      * @type {string}
