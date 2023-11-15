@@ -66,7 +66,7 @@ public sealed class ConsoleAppPackageJob : IJob
             using var serviceScope = _serviceProvider.CreateScope();
             await serviceScope.ServiceProvider.GetRequiredService<IConsoleAppPackageRunner>().Run(jobStoreDelegate, context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
 
-            cancellationTokenSource.Cancel();
+            await cancellationTokenSource.CancelAsync();
 
             try
             {
@@ -84,7 +84,7 @@ public sealed class ConsoleAppPackageJob : IJob
         }
         finally
         {
-            cancellationTokenSource.Cancel();
+            await cancellationTokenSource.CancelAsync();
         }
     }
 }
