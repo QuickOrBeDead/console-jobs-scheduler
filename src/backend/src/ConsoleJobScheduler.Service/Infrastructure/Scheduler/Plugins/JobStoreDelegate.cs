@@ -114,7 +114,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                                     OFFSET @offset";
 
     private const string SqlJobExecutionDetail = @"
-                                    SELECT JOB_NAME, INSTANCE_NAME, JOB_GROUP, PACKAGE_NAME, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, LAST_SIGNAL_TIME, HAS_ERROR, ERROR_MESSAGE, VETOED, COMPLETED
+                                    SELECT ID, JOB_NAME, INSTANCE_NAME, JOB_GROUP, PACKAGE_NAME, TRIGGER_NAME, TRIGGER_GROUP, FIRED_TIME, SCHED_TIME, RUN_TIME, LAST_SIGNAL_TIME, HAS_ERROR, ERROR_MESSAGE, VETOED, COMPLETED
                                     FROM {0}JOB_HISTORY 
                                     WHERE ID = @id";
 
@@ -309,6 +309,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                     {
                         result = new JobExecutionDetail
                                      {
+                                         Id = reader.GetString("ID"),
                                          JobName = reader.GetString("JOB_NAME"),
                                          InstanceName = reader.GetString("INSTANCE_NAME"),
                                          JobGroup = reader.GetString("JOB_GROUP"),
@@ -322,8 +323,8 @@ public class JobStoreDelegate : IJobStoreDelegate
                                          Vetoed = reader.GetBoolean("VETOED"),
                                          HasError = reader.GetBoolean("HAS_ERROR"),
                                          ErrorMessage = reader.GetNullableString("ERROR_MESSAGE"),
-                                         LastSignalTime = reader.GetDateTime("LAST_SIGNAL_TIME")
-                                     };
+                                         LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime()
+                        };
 
                         result.UpdateHasSignalTimeout();
                     }
