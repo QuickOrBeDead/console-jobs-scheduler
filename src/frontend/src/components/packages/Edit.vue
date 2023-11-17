@@ -69,27 +69,33 @@ async function save() {
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="display-6">{{ isInEditMode ? "Edit" : "Add" }} Package</h1>
-                    <hr style="margin: 4px 0px;">
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-6">
-                    <div class="row g-3">
-                        <div :class="[isInEditMode ? 'col-md-6' : 'col-md-12']">
-                            <label for="Name" class="form-label">Name</label>
-                            <label v-if="isInEditMode" id="Name" class="form-control-plaintext"><b>{{ packageDetail.name }}</b></label>
-                            <input v-if="!isInEditMode" id="Name" type="text" class="form-control" v-model="packageDetail.name">
+                    <div class="card flex-fill">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0 text-muted"><small>{{ isInEditMode ? "Edit" : "Add" }} Package</small></h4>
+                            <router-link to="/packages" v-slot="{ navigate }" custom>
+                                <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
+                            </router-link>
                         </div>
-                        <div v-if="isInEditMode" class="col-md-6">
-                            <label for="ModifyDate" class="form-label">Last Modify Date</label>
-                            <label id="ModifyDate" class="form-control-plaintext"><b>{{ packageDetail.modifyDate?.toLocaleDateTimeString() }}</b></label>
+                        <div class="card-body">
+                            <div class="col-12">
+                                <div class="row g-3 mb-3">
+                                    <div :class="[isInEditMode ? 'col-md-6' : 'col-md-12']">
+                                        <label for="Name" class="form-label">Name</label>
+                                        <label v-if="isInEditMode" id="Name" class="form-control-plaintext"><b>{{ packageDetail.name }}</b></label>
+                                        <input v-if="!isInEditMode" id="Name" type="text" class="form-control" v-model="packageDetail.name">
+                                    </div>
+                                    <div v-if="isInEditMode" class="col-md-6">
+                                        <label for="ModifyDate" class="form-label">Last Modify Date</label>
+                                        <label id="ModifyDate" class="form-control-plaintext"><b>{{ packageDetail.modifyDate?.toLocaleDateTimeString() }}</b></label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="File" class="form-label">Package Zip File</label>
+                                        <input id="File" class="form-control" type="file" @change="onFileChanged" ref="fileInput" accept=".zip">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} Package</button>
+                            </div>
                         </div>
-                        <div class="col-12">
-                            <label for="File" class="form-label">Package Zip File</label>
-                            <input id="File" class="form-control" type="file" @change="onFileChanged" ref="fileInput" accept=".zip">
-                        </div>
-                        <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} Package</button>
                     </div>
                 </div>
             </div>
