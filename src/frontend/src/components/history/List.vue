@@ -42,7 +42,7 @@ watch(
                                 <div class="col-12">
                                     <div class="table-responsive">
                                         <table class="table table-sm mb-2">
-                                            <thead>
+                                            <thead class="table-light fw-semibold">
                                             <tr>
                                                 <th class="text-muted" scope="column">Job Name</th>
                                                 <th class="text-muted" scope="column">Scheduled Time</th>
