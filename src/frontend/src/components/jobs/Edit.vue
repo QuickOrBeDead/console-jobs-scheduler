@@ -67,8 +67,6 @@ async function save() {
 </script>
 
 <template>
-
-<template v-if="job">
     <div class="page-container">
         <div class="container">
             <div class="row">
@@ -76,12 +74,12 @@ async function save() {
                     <div class="card flex-fill">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="card-title mb-0 text-muted"><small>{{ isInEditMode ? "Edit" : "Add" }} Job</small></h4>
-                            <router-link class="nav-link" to="/jobs" custom v-slot="{ navigate }">
+                            <router-link to="/jobs" v-slot="{ navigate }" custom>
                                 <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
                             </router-link>
                         </div>
                         <div class="card-body">
-                            <div class="col-12">
+                            <div v-if="job" class="col-12">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label for="JobName" class="form-label">Job Name</label>
@@ -121,5 +119,4 @@ async function save() {
             </div>   
         </div>
     </div>
-</template>
 </template>

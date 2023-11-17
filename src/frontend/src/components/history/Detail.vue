@@ -66,7 +66,7 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
                         <span class="fw-lighter me-1" title="Job Group"><i class="bi bi-collection text-warning"></i> {{ job?.jobGroup }}</span>
                         <span class="fw-lighter" title="Trigger Interval"><i class="bi bi-alarm text-secondary"></i> every 5 minutes</span>
                     </div>
-                    <router-link class="nav-link" to="/history" custom v-slot="{ navigate }">
+                    <router-link to="/history" v-slot="{ navigate }" custom>
                         <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
                     </router-link>
                 </div>
