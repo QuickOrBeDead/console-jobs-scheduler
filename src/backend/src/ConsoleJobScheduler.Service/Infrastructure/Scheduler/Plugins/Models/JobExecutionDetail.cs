@@ -33,4 +33,6 @@ public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
     public DateTime LastSignalTime { get; set; }
 
     public bool HasSignalTimeout { get; set; }
+
+    public string? CronExpressionDescription { get; set; }
 }

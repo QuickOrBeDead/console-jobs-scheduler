@@ -268,6 +268,12 @@ export interface JobExecutionDetail {
      * @memberof JobExecutionDetail
      */
     'hasSignalTimeout'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionDetail
+     */
+    'cronExpressionDescription'?: string | null;
 }
 /**
  * 

@@ -13,6 +13,7 @@ using Quartz.Impl.Matchers;
 
 using ConsoleJobScheduler.Service.Infrastructure.Settings;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
+using System.Xml.Linq;
 
 public interface ISchedulerService
 {
@@ -60,6 +61,8 @@ public sealed class SchedulerService : ISchedulerService
         {
             return null;
         }
+
+        jobExecutionDetail.CronExpressionDescription = await GetCronExpressionDescription(new JobKey(jobExecutionDetail.JobName, jobExecutionDetail.JobGroup)).ConfigureAwait(false);
 
         var logs = await jobStoreDelegate.GetJobRunLogs(id).ConfigureAwait(false);
         var attachments = await jobStoreDelegate.GetJobRunAttachments(id).ConfigureAwait(false);
@@ -198,6 +201,12 @@ public sealed class SchedulerService : ISchedulerService
         }
 
         return null;
+    }
+
+    private async Task<string?> GetCronExpressionDescription(JobKey jobKey)
+    {
+        var cronExpression = await GetCronExpression(jobKey).ConfigureAwait(false);
+        return GetCronExpressionDescription(cronExpression);
     }
 
     private async Task<string?> GetCronExpression(JobKey jobKey)
