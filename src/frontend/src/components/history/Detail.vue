@@ -52,50 +52,47 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <div class="card flex-fill">
-					<div class="card-header d-flex justify-content-between align-items-center">
-						<h4 class="card-title mb-0 text-muted"><small>Job Execution Details</small></h4>
-                        <router-link class="nav-link" to="/history" custom v-slot="{ navigate }">
-                            <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
-                        </router-link>
-					</div>
-					<div class="card-body">
-                        <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="fs-5">
+                        <i :class="[job?.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : job?.completed && !job?.hasError && !job?.vetoed ? 'bi bi-check-circle-fill text-success' : job?.completed && job?.hasError && !job?.vetoed ? 'bi bi-x-circle-fill text-danger' : job?.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i>
+                        <span class="text-muted">#{{ job?.id }}:</span>
+                        <span class="fw-bold">{{ job?.jobName }}</span>
+                    </div>
+                </div>
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                    <div class="fs-6">
+                        <span class="fw-lighter">Scheduled at {{ job?.scheduledTime?.toLocaleDateTimeString() }}</span>
+                        <span class="fw-lighter me-1" title="Node"><i class="bi bi-diagram-2 text-primary"></i>{{ job?.instanceName }}</span>
+                        <span class="fw-lighter me-1" title="Job Group"><i class="bi bi-collection text-warning"></i> {{ job?.jobGroup }}</span>
+                        <span class="fw-lighter" title="Trigger Interval"><i class="bi bi-alarm text-secondary"></i> every 5 minutes</span>
+                    </div>
+                    <router-link class="nav-link" to="/history" custom v-slot="{ navigate }">
+                        <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
+                    </router-link>
+                </div>
+                <div class="card flex-fill mt-2 mb-3">
+					<div class="card-body p-3">
+                        <div class="row">
                             <div class="col-12">
-                                <div class="fs-5">
-                                    <i :class="[job?.hasSignalTimeout ? 'bi bi-question-circle-fill text-warning' : job?.completed && !job?.hasError && !job?.vetoed ? 'bi bi-check-circle-fill text-success' : job?.completed && job?.hasError && !job?.vetoed ? 'bi bi-x-circle-fill text-danger' : job?.vetoed ? 'bi bi-stop-circle-fill text-warning' : 'bi bi-play-circle-fill text-primary' ]"></i>
-                                    <span class="text-muted">#{{ job?.id }}:</span>
-                                    <span class="fw-bold">{{ job?.jobName }}</span>
-                                </div>
+                                <strong><i class="bi bi-card-checklist text-info"></i> Summary</strong>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <div class="fs-6">
+                                            <span class="fw-normal">Started:</span>
+                                            <span class="fw-light" title="Start Time"><i class="bi bi-calendar"></i> {{ job?.firedTime?.toLocaleDateTimeString() }}</span>
+                                        </div>
+                                    </li>
+                                    <li v-if="job?.runTime" class="list-group-item">
+                                        <div class="fs-6">
+                                            <span class="fw-normal">Elapsed:</span>
+                                            <span class="fw-light" title="Run Time"><i class="bi bi-stopwatch"></i> {{ job?.runTime }}</span>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
-                            <div class="col-12 d-flex justify-content-between align-items-center">
-                                <div class="fs-6">
-                                    <span class="fw-lighter">Scheduled at {{ job?.scheduledTime?.toLocaleDateTimeString() }}</span>
-                                    <span class="fw-lighter me-1" title="Node"><i class="bi bi-diagram-2"></i>{{ job?.instanceName }}</span>
-                                    <span class="fw-lighter" title="Job Group"><i class="bi bi-collection"></i> {{ job?.jobGroup }}</span>
-                                </div>
-                            </div>
-                            <div class="col-12 d-flex justify-content-between align-items-center mt-3">
-                                <div class="fs-6">
-                                    <span class="fw-normal">Trigger Name:</span>
-                                    <span class="fw-light">{{ job?.triggerName }}</span>
-                                </div>
-                                <div class="fs-6">
-                                    <span class="fw-normal">Started:</span>
-                                    <span class="fw-light">{{ job?.firedTime?.toLocaleDateTimeString() }}</span>
-                                </div>
-                            </div>
-                            <div class="col-12 d-flex justify-content-between align-items-center">
-                                <div class="fs-6">
-                                    <span class="fw-normal">Trigger Group:</span>
-                                    <span class="fw-light">{{ job?.triggerGroup }}</span>
-                                </div>
-                                <div v-if="job?.runTime" class="fs-6">
-                                    <span class="fw-light" title="Run Time"><i class="bi bi-stopwatch"></i> {{ job?.runTime }}</span>
-                                </div>
-                            </div>
-                            <div class="col-12 mt-2">
-                                <strong><i class="bi bi-activity"></i> Logs</strong>
+                            <div class="col-12">
+                                <hr class="mt-2 mb-2">
+                                <strong><i class="bi bi-activity text-success"></i> Logs</strong>
                                 <p>
                                     <div id="console">
                                         <template v-for="jobLog in logs">
@@ -104,28 +101,40 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
                                     </div>
                                 </p>
                             </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1">
-                                    <strong><i class="bi bi-paperclip"></i> Attachments <span class="badge bg-secondary">{{ attachments?.length }}</span></strong><br>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item" v-for="attachment in attachments">
-                                            <a class="text-reset" :href="getAttachmentUrl(attachment)" title="Click to Download"><i class="bi bi-file-earmark-arrow-down"></i>{{ attachment.fileName }}</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <template v-if="job?.errorMessage">
-                                <hr>
+                            <div class="col-12" v-if="job?.errorMessage">
                                 <div class="d-flex align-items-start">
                                     <div class="flex-grow-1">
-                                        <strong><i class="bi bi-bug"></i> Error Message</strong><br>
+                                        <strong><i class="bi bi-bug text-danger"></i> Error Message</strong>
                                         <p>{{ job?.errorMessage }}</p>
                                     </div>
                                 </div>
-                            </template>
-                            
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong><i class="bi bi-paperclip text-warning"></i> Attachments <span class="badge bg-secondary">{{ attachments?.length }}</span></strong><br>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item" v-for="attachment in attachments">
+                                                <a class="text-reset" :href="getAttachmentUrl(attachment)" title="Click to Download"><i class="bi bi-file-earmark-arrow-down"></i>{{ attachment.fileName }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong><i class="bi bi-envelope text-secondary"></i> Emails <span class="badge bg-secondary">0</span></strong><br>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">
+                                                
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 					</div>
 				</div>
