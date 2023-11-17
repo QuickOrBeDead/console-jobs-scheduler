@@ -24,7 +24,7 @@ async function loadPage(page: number)  {
                             <div class="row">
                                 <div class="col-12 mb-1">
                                     <button type="button" class="btn btn-outline-primary btn-sm float-start" @click="loadPage(1)"><i class="bi bi-arrow-repeat"></i></button>
-                                    <router-link :to="{ name: 'EditJob' }" custom v-slot="{ navigate }">
+                                    <router-link :to="{ name: 'EditJob' }" v-slot="{ navigate }" custom>
                                         <button type="button" class="btn btn-outline-primary btn-sm rounded-pill float-end" @click="navigate"><i class="bi bi-plus-circle-fill"></i> New Job</button>
                                     </router-link>
                                 </div>
@@ -53,10 +53,10 @@ async function loadPage(page: number)  {
                                                     <td class="text-nowrap">{{ job.lastFireTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap">{{ job.nextFireTime?.toLocaleDateTimeString() }}</td>
                                                     <td class="text-nowrap text-center">
-                                                        <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" custom v-slot="{ navigate }">
+                                                        <router-link :to="{ name: 'EditJob', params: { jobName: job.jobName, jobGroup: job.jobGroup } }" v-slot="{ navigate }" custom>
                                                             <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
                                                         </router-link>
-                                                        <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" custom v-slot="{ navigate }">
+                                                        <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" v-slot="{ navigate }" custom>
                                                             <button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="History"><i class="bi bi-search"></i></button>
                                                         </router-link>
                                                     </td>

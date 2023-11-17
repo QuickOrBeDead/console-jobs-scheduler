@@ -28,7 +28,7 @@ async function loadPage(page: number)  {
                             <div class="row">
                                 <div class="col-12 mb-1">
                                     <button type="button" class="btn btn-outline-primary btn-sm float-start" @click="loadPage(1)"><i class="bi bi-arrow-repeat"></i></button>
-                                    <router-link :to="{ name: 'EditUser' }" custom v-slot="{ navigate }">
+                                    <router-link :to="{ name: 'EditUser' }" v-slot="{ navigate }" custom>
                                         <button type="button" class="btn btn-outline-primary btn-sm rounded-pill float-end" @click="navigate"><i class="bi bi-plus-circle-fill"></i> New User</button>
                                     </router-link>
                                 </div>
@@ -49,7 +49,7 @@ async function loadPage(page: number)  {
                                                     <td class="text-nowrap" scope="row">{{ item.userName }}</td>
                                                     <td class="text-nowrap">{{ item.roles }}</td>
                                                     <td class="text-nowrap text-center">
-                                                        <router-link :to="{ name: 'EditUser', params: { userId: item.id } }" custom v-slot="{ navigate }">
+                                                        <router-link :to="{ name: 'EditUser', params: { userId: item.id } }" v-slot="{ navigate }" custom>
                                                             <button type="button" class="btn btn-success btn-sm rounded-pill" @click="navigate" title="Edit"><i class="bi bi-pencil-square"></i></button>
                                                         </router-link>
                                                     </td>
