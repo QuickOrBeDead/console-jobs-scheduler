@@ -25,7 +25,7 @@ public sealed class PackagesController : ControllerBase
 
     [HttpGet("GetPackageNames")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<IList<string>> GetPackageNames()
+    public Task<List<string>> GetPackageNames()
     {
         return _schedulerService.ListPackageNames();
     }

@@ -46,13 +46,13 @@ public interface IJobStoreDelegate
         bool isError,
         CancellationToken cancellationToken = default);
 
-    Task<IList<LogLine>> GetJobRunLogs(string id);
+    Task<List<LogLine>> GetJobRunLogs(string id);
 
     Task InsertJobRunAttachment(
         AttachmentModel attachment,
         CancellationToken cancellationToken = default);
 
-    Task<IList<AttachmentInfoModel>> GetJobRunAttachments(string id);
+    Task<List<AttachmentInfoModel>> GetJobRunAttachments(string id);
 
     Task InsertJobRunEmail(
         EmailModel email,
@@ -67,7 +67,7 @@ public interface IJobStoreDelegate
 
     Task<Stream?> GetPackageStream(string name);
 
-    Task<IList<string>> ListPackageNames();
+    Task<List<string>> ListPackageNames();
 
     Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
@@ -394,7 +394,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    public async Task<IList<LogLine>> GetJobRunLogs(string id)
+    public async Task<List<LogLine>> GetJobRunLogs(string id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
@@ -402,7 +402,7 @@ public class JobStoreDelegate : IJobStoreDelegate
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
 
-                IList<LogLine> result = new List<LogLine>();
+                var result = new List<LogLine>();
 
                 using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
@@ -438,7 +438,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    public async Task<IList<AttachmentInfoModel>> GetJobRunAttachments(string id)
+    public async Task<List<AttachmentInfoModel>> GetJobRunAttachments(string id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
@@ -446,7 +446,7 @@ public class JobStoreDelegate : IJobStoreDelegate
             {
                 _dbAccessor.AddCommandParameter(command, "jobRunId", id);
 
-                IList<AttachmentInfoModel> result = new List<AttachmentInfoModel>();
+                var result = new List<AttachmentInfoModel>();
 
                 using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
@@ -571,13 +571,13 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    public async Task<IList<string>> ListPackageNames()
+    public async Task<List<string>> ListPackageNames()
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
             using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetAllPackageNames, _tablePrefix)))
             {
-                IList<string> result = new List<string>();
+                var result = new List<string>();
 
                 using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {

@@ -27,7 +27,7 @@ public interface ISchedulerService
 
     Task<JobDetailModel?> GetJobDetail(JobKey jobKey);
 
-    Task<IList<string>> ListPackageNames();
+    Task<List<string>> ListPackageNames();
 
     Task<PackageDetailsModel?> GetPackageDetails(string packageName);
 
@@ -125,7 +125,7 @@ public sealed class SchedulerService : ISchedulerService
                    };
     }
 
-    public Task<IList<string>> ListPackageNames()
+    public Task<List<string>> ListPackageNames()
     {
         return _scheduler.GetJobStoreDelegate().ListPackageNames();
     }
