@@ -803,13 +803,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
         catch (Exception e)
         {
-            throw new JobPersistenceException(
-                $"Failed to obtain DB connection from data source '{_dataSource}': {e}", e);
-        }
-
-        if (conn == null)
-        {
-            throw new JobPersistenceException($"Could not get connection from DataSource '{_dataSource}'");
+            throw new JobPersistenceException($"Failed to obtain DB connection from data source '{_dataSource}': {e}", e);
         }
 
         try
