@@ -86,10 +86,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
 
     private static void DoNotThrow(Action action)
     {
-        if (action == null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+        ArgumentNullException.ThrowIfNull(action);
 
         try
         {

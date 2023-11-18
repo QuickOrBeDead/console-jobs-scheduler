@@ -15,15 +15,9 @@ public sealed class JobExecutionDetailModel
 
     public JobExecutionDetailModel(JobExecutionDetail details, IList<LogLine> logs, IList<AttachmentInfoModel> attachments)
     {
-        if (logs == null)
-        {
-            throw new ArgumentNullException(nameof(logs));
-        }
+        ArgumentNullException.ThrowIfNull(logs);
 
-        if (attachments == null)
-        {
-            throw new ArgumentNullException(nameof(attachments));
-        }
+        ArgumentNullException.ThrowIfNull(attachments);
 
         Details = details ?? throw new ArgumentNullException(nameof(details));
         Attachments = new ReadOnlyCollection<AttachmentInfoModel>(attachments);

@@ -421,10 +421,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         AttachmentModel attachment,
         CancellationToken cancellationToken = default)
     {
-        if (attachment == null)
-        {
-            throw new ArgumentNullException(nameof(attachment));
-        }
+        ArgumentNullException.ThrowIfNull(attachment);
 
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
@@ -493,10 +490,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         EmailModel email,
         CancellationToken cancellationToken = default)
     {
-        if (email == null)
-        {
-            throw new ArgumentNullException(nameof(email));
-        }
+        ArgumentNullException.ThrowIfNull(email);
 
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunEmail, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
@@ -621,10 +615,7 @@ public class JobStoreDelegate : IJobStoreDelegate
 
     public async Task SavePackage(string packageName, byte[] content)
     {
-        if (content == null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content);
 
         if (string.IsNullOrWhiteSpace(packageName))
         {

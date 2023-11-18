@@ -18,35 +18,22 @@ public static class SchedulerExtensions
 
     public static void AddToContext<TValue>(this IScheduler scheduler, string key, [DisallowNull] TValue value)
     {
-        if (key == null)
-        {
-            throw new ArgumentNullException(nameof(key));
-        }
-
-        if (value == null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(value);
 
         scheduler.Context.Add(key, value);
     }
 
     public static void AddJobStore(this IScheduler scheduler, IExtendedJobStore? jobStore)
     {
-        if (jobStore == null)
-        {
-            throw new ArgumentNullException(nameof(jobStore));
-        }
+        ArgumentNullException.ThrowIfNull(jobStore);
 
         scheduler.AddToContext(CustomSchedulerFactory.JobStoreContextKey, jobStore);
     }
 
     public static void AddJobStoreDelegate(this IScheduler scheduler, IJobStoreDelegate? jobStoreDelegate)
     {
-        if (jobStoreDelegate == null)
-        {
-            throw new ArgumentNullException(nameof(jobStoreDelegate));
-        }
+        ArgumentNullException.ThrowIfNull(jobStoreDelegate);
 
         scheduler.AddToContext(JobStoreDelegate.JobStoreDelegateContextKey, jobStoreDelegate);
     }

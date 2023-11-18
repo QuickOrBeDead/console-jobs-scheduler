@@ -52,10 +52,7 @@ public sealed class SettingsData
 
     public TValue Get<TValue>(string key, SettingConvertFunc<TValue> settingConvertFunc, TValue defaultValue)
     {
-        if (settingConvertFunc == null)
-        {
-            throw new ArgumentNullException(nameof(settingConvertFunc));
-        }
+        ArgumentNullException.ThrowIfNull(settingConvertFunc);
 
         var value = GetValue(key);
         if (value == null)
