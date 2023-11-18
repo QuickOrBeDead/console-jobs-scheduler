@@ -2,6 +2,7 @@
 
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 using ConsoleJobScheduler.Service.Infrastructure.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
@@ -210,6 +211,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task UpdateJobHistoryEntryLastSignalTime(string id, CancellationToken cancellationToken = default)
     {
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobLastSignalTime, _tablePrefix);
@@ -226,6 +228,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<PagedResult<JobExecutionHistory>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -293,6 +296,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<JobExecutionDetail?> GetJobExecutionDetail(string id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -337,6 +341,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<string?> GetJobExecutionErrorDetail(string id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -360,6 +365,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task InsertJobRunLog(
         string jobRunId,
         string content,
@@ -387,6 +393,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<IList<LogLine>> GetJobRunLogs(string id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -461,6 +468,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<byte[]?> GetJobRunAttachmentContent(long id)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -518,6 +526,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task UpdateJobRunEmailIsSent(
         Guid id,
         bool isSent,
@@ -536,6 +545,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<Stream?> GetPackageStream(string name)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -636,6 +646,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -671,7 +682,8 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    private Task InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
+    private Task<int> InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
         using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
         {
@@ -683,7 +695,8 @@ public class JobStoreDelegate : IJobStoreDelegate
         }
     }
 
-    private Task UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
+    private Task<int> UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
         using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
         {
