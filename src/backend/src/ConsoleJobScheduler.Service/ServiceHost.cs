@@ -183,7 +183,13 @@ public sealed class ServiceHost
                 {
                     if (_app.Environment.IsDevelopment())
                     {
-                        spa.UseProxyToSpaDevelopmentServer("http://localhost:8080");
+                        var baseUri = builder.Configuration["SpaDevelopmentServer"];
+                        if (string.IsNullOrWhiteSpace(baseUri))
+                        {
+                            throw new InvalidOperationException("'SpaDevelopmentServer' setting cannot be null in appsettings.json");
+                        }
+
+                        spa.UseProxyToSpaDevelopmentServer(baseUri);
                     }
                 })
         );
