@@ -19,7 +19,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IAsyncPublisher<JobConsoleLogMessageEvent> _jobConsoleLogMessagePublisher;
     private readonly IEmailSender _emailSender;
-    private readonly ConsoleMessageReader _consoleMessageReader = new();
+    private static readonly IConsoleMessageReader _consoleMessageReader = new ConsoleMessageReader();
 
     private readonly string _tempRootPath;
 

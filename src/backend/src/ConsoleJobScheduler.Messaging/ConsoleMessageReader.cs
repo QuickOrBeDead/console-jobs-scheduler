@@ -5,7 +5,12 @@ using System.Text.Json.Nodes;
 
 using ConsoleJobScheduler.Messaging.Models;
 
-public sealed class ConsoleMessageReader
+public interface IConsoleMessageReader
+{
+    ConsoleMessage? ReadMessage(string messageText);
+}
+
+public sealed class ConsoleMessageReader : IConsoleMessageReader
 {
     public ConsoleMessage? ReadMessage(string messageText)
     {
