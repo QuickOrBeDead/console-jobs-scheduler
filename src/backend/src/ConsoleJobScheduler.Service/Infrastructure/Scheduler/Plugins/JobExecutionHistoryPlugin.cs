@@ -85,7 +85,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
         }
     }
 
-    private IJobStoreDelegate GetJobStoreDelegate()
+    private JobStoreDelegate GetJobStoreDelegate()
     {
         if (_jobStoreDelegate == null)
         {
