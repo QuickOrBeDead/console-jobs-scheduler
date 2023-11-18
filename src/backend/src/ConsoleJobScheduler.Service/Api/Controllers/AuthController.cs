@@ -59,7 +59,7 @@ public class AuthController : ControllerBase
         return contextUser.Claims.FirstOrDefault(x => x.Type == type)?.Value;
     }
 
-    private static IList<string> GetRoles(ClaimsPrincipal contextUser)
+    private static List<string> GetRoles(ClaimsPrincipal contextUser)
     {
         return contextUser.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
     }
