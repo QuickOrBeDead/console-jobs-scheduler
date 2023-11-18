@@ -204,7 +204,15 @@ public sealed class ServiceHost
         _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
-        using var scope = _app.Services.CreateScope();
+        await AddInitialData(_app).ConfigureAwait(false);
+
+        await _schedulerManager.Start(_app.Services.GetRequiredService<ILoggerFactory>());
+        await _app.RunAsync(_app.Configuration["WebAppUrl"]).ConfigureAwait(false);
+    }
+
+    private static async Task AddInitialData(IHost host)
+    {
+        using var scope = host.Services.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
         using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var roles = new[] {Roles.Admin, Roles.JobEditor, Roles.JobViewer};
@@ -221,12 +229,9 @@ public sealed class ServiceHost
         if (adminUser == null)
         {
             adminUser = new IdentityUser<int>("admin") {Email = "admin@email.com"};
-            
+
             await userManager.CreateAsync(adminUser, "Password");
             await userManager.AddToRoleAsync(adminUser, Roles.Admin);
         }
-
-        await _schedulerManager.Start(_app.Services.GetRequiredService<ILoggerFactory>());
-        await _app.RunAsync(_app.Configuration["WebAppUrl"]).ConfigureAwait(false);
     }
 }
