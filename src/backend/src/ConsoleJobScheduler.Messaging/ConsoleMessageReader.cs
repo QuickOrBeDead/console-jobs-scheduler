@@ -5,14 +5,9 @@ using System.Text.Json.Nodes;
 
 using ConsoleJobScheduler.Messaging.Models;
 
-public interface IConsoleMessageReader
+public static class ConsoleMessageReader
 {
-    ConsoleMessage? ReadMessage(string messageText);
-}
-
-public sealed class ConsoleMessageReader : IConsoleMessageReader
-{
-    public ConsoleMessage? ReadMessage(string messageText)
+    public static ConsoleMessage? ReadMessage(string messageText)
     {
         if (string.IsNullOrEmpty(messageText))
         {

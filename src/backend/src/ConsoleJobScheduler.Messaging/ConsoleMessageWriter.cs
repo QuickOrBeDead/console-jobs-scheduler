@@ -3,11 +3,11 @@
 using ConsoleJobScheduler.Messaging.Models;
 using System.Text.Json;
 
-public sealed class ConsoleMessageWriter
+public static class ConsoleMessageWriter
 {
     public const string JsonPrefix = "##[json]";
     
-    public void WriteEmail(EmailMessage emailMessage)
+    public static void WriteEmail(EmailMessage emailMessage)
     {
         var json = JsonSerializer.Serialize(new ConsoleMessage
                                                      {
@@ -17,7 +17,7 @@ public sealed class ConsoleMessageWriter
         Console.WriteLine($"{JsonPrefix}{json}");
     }
 
-    public void WriteLog(ConsoleMessageLogType logType, string message)
+    public static void WriteLog(ConsoleMessageLogType logType, string message)
     {
         var json = JsonSerializer.Serialize(new ConsoleMessage
                                                      {

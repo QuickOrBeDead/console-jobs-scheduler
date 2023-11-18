@@ -19,7 +19,6 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IAsyncPublisher<JobConsoleLogMessageEvent> _jobConsoleLogMessagePublisher;
     private readonly IEmailSender _emailSender;
-    private static readonly IConsoleMessageReader _consoleMessageReader = new ConsoleMessageReader();
 
     private readonly string _tempRootPath;
 
@@ -129,7 +128,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
             }
             else
             {
-                var consoleMessage = _consoleMessageReader.ReadMessage(data);
+                var consoleMessage = ConsoleMessageReader.ReadMessage(data);
                 if (consoleMessage != null)
                 {
                     if (consoleMessage.MessageType == ConsoleMessageType.Email)
