@@ -183,7 +183,7 @@ public sealed class ServiceHost
                 {
                     if (_app.Environment.IsDevelopment())
                     {
-                        var baseUri = builder.Configuration["SpaDevelopmentServer"];
+                        var baseUri = _app.Configuration["SpaDevelopmentServer"];
                         if (string.IsNullOrWhiteSpace(baseUri))
                         {
                             throw new InvalidOperationException("'SpaDevelopmentServer' setting cannot be null in appsettings.json");
