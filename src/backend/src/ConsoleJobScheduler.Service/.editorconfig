@@ -74,5 +74,5 @@ dotnet_style_prefer_auto_properties = true:silent
 dotnet_style_object_initializer = true:suggestion
 
 # Default severity for analyzer diagnostics with id
-dotnet_analyzer_diagnostic.RCS1015.severity = none
-dotnet_analyzer_diagnostic.RCS1256.severity = none
+dotnet_diagnostic.RCS1015.severity = none
+dotnet_diagnostic.RCS1256.severity = none
