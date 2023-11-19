@@ -30,7 +30,34 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+     <PrivateAssets>all</PrivateAssets>
+     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+   </PackageReference>
+   <PackageReference Include="Roslyn.Diagnostics.Analyzers" Version="3.3.4">
+     <PrivateAssets>all</PrivateAssets>
+     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+   </PackageReference>
+   <PackageReference Include="Roslynator.Analyzers" Version="4.6.2">
+     <PrivateAssets>all</PrivateAssets>
+     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+   </PackageReference>
+   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.12.0.78982">
+     <PrivateAssets>all</PrivateAssets>
+     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+   </PackageReference>
+  </ItemGroup>
+        
+  <ItemGroup>
     <ProjectReference Include="..\ConsoleJobScheduler.Messaging\ConsoleJobScheduler.Messaging.csproj" />
+  </ItemGroup>
+        
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Projects\Github\console-jobs-scheduler\src\backend\src\ConsoleJobScheduler.Service\.editorconfig" />
+  </ItemGroup>
+        
+  <ItemGroup>
+    <None Include="C:\Projects\Github\console-jobs-scheduler\src\backend\src\ConsoleJobScheduler.Service\.editorconfig" />
   </ItemGroup>
 
 </Project>
