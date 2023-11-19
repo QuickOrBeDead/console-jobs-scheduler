@@ -1,5 +1,8 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Exceptions;
 
+using System.Diagnostics.CodeAnalysis;
+
+[SuppressMessage("Roslynator", "RCS1194:Implement exception constructors.", Justification = "<Pending>")]
 public sealed class ConsoleAppPackageRunFailException : Exception
 {
     public int ExitCode { get; }

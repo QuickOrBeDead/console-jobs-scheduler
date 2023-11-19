@@ -683,7 +683,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    private Task<int> InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    private async Task InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
         using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
         {
@@ -691,12 +691,12 @@ public class JobStoreDelegate : IJobStoreDelegate
             _dbAccessor.AddCommandParameter(command, "content", content);
             _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
 
-            return command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync();
         }
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    private Task<int> UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
+    private async Task UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
         using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
         {
@@ -704,7 +704,7 @@ public class JobStoreDelegate : IJobStoreDelegate
             _dbAccessor.AddCommandParameter(command, "content", content);
             _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
 
-            return command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
     }
 
