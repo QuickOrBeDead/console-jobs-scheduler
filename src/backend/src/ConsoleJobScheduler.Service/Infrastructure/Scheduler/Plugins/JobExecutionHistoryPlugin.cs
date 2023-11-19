@@ -17,7 +17,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
 
     private ILogger<JobExecutionHistoryPlugin>? _logger;
 
-    public string Name { get; private set; } = default!;
+    public string Name { get; private set; } = null!;
 
     public Task Initialize(string pluginName, IScheduler scheduler, CancellationToken cancellationToken = default)
     {

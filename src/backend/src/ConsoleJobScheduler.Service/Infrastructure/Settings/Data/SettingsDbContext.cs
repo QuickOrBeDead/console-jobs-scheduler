@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 public sealed class SettingsDbContext : DbContext
 {
-    public DbSet<SettingModel> Settings { get; set; } = default!;
+    public DbSet<SettingModel> Settings { get; set; } = null!;
 
     public SettingsDbContext(DbContextOptions<SettingsDbContext> options)
         : base(options)

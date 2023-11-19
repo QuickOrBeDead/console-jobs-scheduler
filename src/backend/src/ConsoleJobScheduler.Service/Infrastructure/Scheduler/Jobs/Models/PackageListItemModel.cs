@@ -2,5 +2,5 @@
 
 public sealed class PackageListItemModel
 {
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
 }

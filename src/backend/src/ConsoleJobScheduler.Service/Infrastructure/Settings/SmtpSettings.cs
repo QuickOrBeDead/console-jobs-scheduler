@@ -7,23 +7,23 @@ using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
 public sealed class SmtpSettings : ISettings
 {
     [Required]
-    public string Host { get; set; } = default!;
+    public string Host { get; set; } = null!;
 
     [Required, Range(1, 65535)]
     public int? Port { get; set; }
 
-    public string From { get; set; } = default!;
+    public string From { get; set; } = null!;
 
     [Display(Name = "From Name")]
-    public string FromName { get; set; } = default!;
+    public string FromName { get; set; } = null!;
 
     [Display(Name = "Enable Ssl")]
     public bool EnableSsl { get; set; }
 
     [Display(Name = "Username")]
-    public string UserName { get; set; } = default!;
+    public string UserName { get; set; } = null!;
 
-    public string Password { get; set; } = default!;
+    public string Password { get; set; } = null!;
 
     public string? Domain { get; set; }
 

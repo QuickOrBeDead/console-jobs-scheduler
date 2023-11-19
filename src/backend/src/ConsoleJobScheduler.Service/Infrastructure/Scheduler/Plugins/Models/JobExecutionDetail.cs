@@ -2,19 +2,19 @@
 
 public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
 {
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
 
-    public string InstanceName { get; set; } = default!;
+    public string InstanceName { get; set; } = null!;
 
-    public string JobName { get; set; } = default!;
+    public string JobName { get; set; } = null!;
 
-    public string JobGroup { get; set; } = default!;
+    public string JobGroup { get; set; } = null!;
 
-    public string TriggerName { get; set; } = default!;
+    public string TriggerName { get; set; } = null!;
 
-    public string TriggerGroup { get; set; } = default!;
+    public string TriggerGroup { get; set; } = null!;
 
-    public string PackageName { get; set; } = default!;
+    public string PackageName { get; set; } = null!;
 
     public DateTime ScheduledTime { get; set; }
 

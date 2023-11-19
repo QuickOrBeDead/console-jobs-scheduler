@@ -12,7 +12,6 @@ public interface IExtendedJobStore : IJobStore
     Task<IReadOnlyCollection<SchedulerStateRecord>> SelectSchedulerStateRecords(CancellationToken cancellationToken = default);
 
     IDbAccessor GetDbAccessor();
-
 }
 
 public sealed class CustomJobStoreTx : JobStoreTX, IExtendedJobStore

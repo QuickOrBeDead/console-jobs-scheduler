@@ -38,7 +38,7 @@ public sealed class UsersController : ControllerBase
     public async Task<PagedResult<UserListItemModel>> Get(int? pageNumber = null)
     {
         const int PageSize = 10;
-        var page = pageNumber.GetValueOrDefault(1);
+        var page = pageNumber ?? 1;
 
         var usersQuery = _context.Users;
         var totalCount = usersQuery.DeferredCount().FutureValue();

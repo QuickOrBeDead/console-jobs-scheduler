@@ -26,6 +26,6 @@ public sealed class JobHistoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<JobExecutionHistory>))]
     public Task<PagedResult<JobExecutionHistory>> Get([FromQuery]string jobName = "", int? pageNumber = null)
     {
-        return _schedulerService.ListJobExecutionHistory(jobName, page: pageNumber.GetValueOrDefault(1));
+        return _schedulerService.ListJobExecutionHistory(jobName, page: pageNumber ?? 1);
     }
 }

@@ -34,7 +34,7 @@ public sealed class PackagesController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
     {
-        return _schedulerService.ListPackages(pageNumber.GetValueOrDefault(1));
+        return _schedulerService.ListPackages(pageNumber ?? 1);
     }
 
     [HttpGet("Detail")]

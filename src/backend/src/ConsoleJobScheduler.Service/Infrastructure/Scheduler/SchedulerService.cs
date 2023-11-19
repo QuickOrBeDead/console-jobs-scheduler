@@ -246,6 +246,6 @@ public sealed class SchedulerService : ISchedulerService
 
     private async Task<int> GetPageSize()
     {
-        return (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize.GetValueOrDefault(10);
+        return (await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false)).PageSize ?? 10;
     }
 }
