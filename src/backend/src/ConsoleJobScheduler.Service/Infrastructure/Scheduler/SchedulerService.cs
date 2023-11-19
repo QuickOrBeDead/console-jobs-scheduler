@@ -114,15 +114,15 @@ public sealed class SchedulerService : ISchedulerService
         var cronExpression = await GetCronExpression(jobKey);
 
         return new JobDetailModel
-                   {
-                       JobName = jobDetail.Key.Name,
-                       JobGroup = jobDetail.Key.Group,
-                       Description = jobDetail.Description,
-                       CronExpression = cronExpression,
-                       CronExpressionDescription = GetCronExpressionDescription(cronExpression),
-                       Package = GetJobData(jobDetail, "package"),
-                       Parameters = GetJobData(jobDetail, "parameters")
-                   };
+        {
+            JobName = jobDetail.Key.Name,
+            JobGroup = jobDetail.Key.Group,
+            Description = jobDetail.Description,
+            CronExpression = cronExpression,
+            CronExpressionDescription = GetCronExpressionDescription(cronExpression),
+            Package = GetJobData(jobDetail, "package"),
+            Parameters = GetJobData(jobDetail, "parameters")
+        };
     }
 
     public Task<List<string>> ListPackageNames()
@@ -160,14 +160,14 @@ public sealed class SchedulerService : ISchedulerService
                 var lastFireTime = triggers.Select(x => x.GetPreviousFireTimeUtc()?.UtcDateTime).Where(x => x != null).OrderByDescending(x => x).FirstOrDefault()?.ToLocalTime();
 
                 result.Add(new JobListItemModel
-                                   {
-                                       JobName = jobDetail.Key.Name,
-                                       JobGroup = jobDetail.Key.Group,
-                                       JobType = jobDetail.JobType.Name,
-                                       TriggerDescription = GetCronExpressionDescription(triggers),
-                                       NextFireTime = nextFireTime,
-                                       LastFireTime = lastFireTime
-                                   });
+                {
+                    JobName = jobDetail.Key.Name,
+                    JobGroup = jobDetail.Key.Group,
+                    JobType = jobDetail.JobType.Name,
+                    TriggerDescription = GetCronExpressionDescription(triggers),
+                    NextFireTime = nextFireTime,
+                    LastFireTime = lastFireTime
+                });
             }
         }
 
@@ -177,7 +177,7 @@ public sealed class SchedulerService : ISchedulerService
     public async Task<(SchedulerMetaData, IReadOnlyCollection<SchedulerStateRecord>, JobExecutionStatistics)> GetStatistics()
     {
         return (
-                   await _scheduler.GetMetaData().ConfigureAwait(false), 
+                   await _scheduler.GetMetaData().ConfigureAwait(false),
                    await _scheduler.GetInstances().ConfigureAwait(false),
                    await _scheduler.GetJobStoreDelegate().GetJobExecutionStatistics().ConfigureAwait(false)
                    );

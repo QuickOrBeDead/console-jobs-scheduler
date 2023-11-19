@@ -20,7 +20,7 @@ public static class ConsoleMessageReader
         {
             return ConsoleLogMessage.CreateConsoleMessage(ConsoleMessageLogType.Info, message);
         }
-        
+
         JsonNode? messageNode;
         try
         {
@@ -44,19 +44,19 @@ public static class ConsoleMessageReader
         if (messageType == ConsoleMessageType.Log)
         {
             return new ConsoleMessage
-                       {
-                           MessageType = messageType.Value,
-                           Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<ConsoleLogMessage>()
-                       };
+            {
+                MessageType = messageType.Value,
+                Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<ConsoleLogMessage>()
+            };
         }
 
         if (messageType == ConsoleMessageType.Email)
         {
             return new ConsoleMessage
-                       {
-                           MessageType = messageType.Value,
-                           Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<EmailMessage>()
-                       };
+            {
+                MessageType = messageType.Value,
+                Message = messageNode[nameof(ConsoleMessage.Message)].Deserialize<EmailMessage>()
+            };
         }
 
         return null;

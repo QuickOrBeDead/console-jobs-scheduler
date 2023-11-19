@@ -51,13 +51,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ConsoleJobScheduler.Messaging\ConsoleJobScheduler.Messaging.csproj" />
   </ItemGroup>
-        
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\Projects\Github\console-jobs-scheduler\src\backend\src\ConsoleJobScheduler.Service\.editorconfig" />
-  </ItemGroup>
-        
-  <ItemGroup>
-    <None Include="C:\Projects\Github\console-jobs-scheduler\src\backend\src\ConsoleJobScheduler.Service\.editorconfig" />
-  </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
 </Project>

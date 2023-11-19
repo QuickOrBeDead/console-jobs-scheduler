@@ -1,4 +1,4 @@
-[*.cs]
+﻿[*.cs]
 dotnet_public_api_analyzer.require_api_files = true
 csharp_indent_labels = one_less_than_current
 csharp_using_directive_placement = outside_namespace:silent
@@ -73,6 +73,14 @@ dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggesti
 dotnet_style_prefer_auto_properties = true:silent
 dotnet_style_object_initializer = true:suggestion
 
-# Default severity for analyzer diagnostics with id
+# RCS1015: Use nameof operator.
 dotnet_diagnostic.RCS1015.severity = none
+
+# RCS1256: invalid argument null check
 dotnet_diagnostic.RCS1256.severity = none
+
+# RS0016: Add public types and members to the declared API
+dotnet_diagnostic.RS0016.severity = none
+
+# RCS1230: Unnecessary explicit use of enumerator.
+dotnet_diagnostic.RCS1230.severity = none

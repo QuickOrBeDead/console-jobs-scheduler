@@ -43,8 +43,8 @@ public sealed class ConsoleAppPackageJob : IJob
                     }
                     catch
                     {
-                       // Empty
-                       // TODO: log
+                        // Empty
+                        // TODO: log
                     }
 
                     try

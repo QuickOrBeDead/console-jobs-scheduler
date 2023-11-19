@@ -27,13 +27,13 @@ public class JobExecutionDetailsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string id)
     {
-       var jobDetail = await _schedulerService.GetJobExecutionDetail(id).ConfigureAwait(false);
-       if (jobDetail == null)
-       {
-           return NotFound();
-       }
+        var jobDetail = await _schedulerService.GetJobExecutionDetail(id).ConfigureAwait(false);
+        if (jobDetail == null)
+        {
+            return NotFound();
+        }
 
-       return Ok(jobDetail);
+        return Ok(jobDetail);
     }
 
     [HttpGet("GetErrorDetail/{id}")]
@@ -45,7 +45,7 @@ public class JobExecutionDetailsController : ControllerBase
 
     [HttpGet("GetAttachment/{id}")]
     [Produces(MediaTypeNames.Application.Octet)]
-    public async Task<IActionResult> GetAttachment(long id, [FromQuery]string attachmentName)
+    public async Task<IActionResult> GetAttachment(long id, [FromQuery] string attachmentName)
     {
         var fileContents = await _schedulerService.GetAttachmentBytes(id).ConfigureAwait(false);
         if (fileContents == null)

@@ -5,7 +5,12 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleJobScheduler.Service", "ConsoleJobScheduler.Service\ConsoleJobScheduler.Service.csproj", "{FE8029DB-9AC8-4805-B5E2-6881EBF8582B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleJobScheduler.Messaging", "ConsoleJobScheduler.Messaging\ConsoleJobScheduler.Messaging.csproj", "{5E784ACE-17C5-4B65-9E90-4C5C1D74C4C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleJobScheduler.Messaging", "ConsoleJobScheduler.Messaging\ConsoleJobScheduler.Messaging.csproj", "{5E784ACE-17C5-4B65-9E90-4C5C1D74C4C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EA5EEEB7-7151-44CF-BBAE-2438B0E0FA48}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

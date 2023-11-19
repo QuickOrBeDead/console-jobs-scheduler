@@ -18,7 +18,7 @@ public sealed class UserAddOrUpdateResultModel
 
     public static UserAddOrUpdateResultModel Success(int userId)
     {
-        return new UserAddOrUpdateResultModel {Succeeded = true, UserId = userId};
+        return new UserAddOrUpdateResultModel { Succeeded = true, UserId = userId };
     }
 
     public static UserAddOrUpdateResultModel Fail(IEnumerable<IdentityError> errors)

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 public class PagedResult<TModel>
 {
     public static readonly PagedResult<TModel> Empty = new(Enumerable.Empty<TModel>(), 0, 0, 0);
-    
+
     public int Page { get; }
 
     public int TotalCount { get; }
@@ -22,6 +22,6 @@ public class PagedResult<TModel>
         TotalCount = totalCount;
         Items = new ReadOnlyCollection<TModel>(new List<TModel>(items));
         PageSize = pageSize;
-        TotalPages = Convert.ToInt32(Math.Ceiling(totalCount / (decimal) pageSize));
+        TotalPages = Convert.ToInt32(Math.Ceiling(totalCount / (decimal)pageSize));
     }
 }

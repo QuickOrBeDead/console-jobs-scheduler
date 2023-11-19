@@ -26,13 +26,13 @@ public sealed class SmtpEmailSender : IEmailSender
             smtpClient.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password, smtpSettings.Domain);
 
             var mailMessage = new MailMessage
-                                  {
-                                      From = new MailAddress(smtpSettings.From, smtpSettings.FromName),
-                                      Subject = emailMessage.Subject,
-                                      Body = emailMessage.Body,
-                                      IsBodyHtml = true,
-                                      BodyEncoding = Encoding.UTF8
-                                  };
+            {
+                From = new MailAddress(smtpSettings.From, smtpSettings.FromName),
+                Subject = emailMessage.Subject,
+                Body = emailMessage.Body,
+                IsBodyHtml = true,
+                BodyEncoding = Encoding.UTF8
+            };
             if (!string.IsNullOrWhiteSpace(emailMessage.To))
             {
                 mailMessage.To.Add(emailMessage.To);

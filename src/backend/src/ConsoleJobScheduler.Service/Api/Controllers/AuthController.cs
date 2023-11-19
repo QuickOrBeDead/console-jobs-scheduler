@@ -48,10 +48,10 @@ public class AuthController : ControllerBase
         }
 
         return new UserModel
-                   {
-                       UserName = GetClaimValue(contextUser, ClaimTypes.Name),
-                       Roles = GetRoles(contextUser)
-                   };
+        {
+            UserName = GetClaimValue(contextUser, ClaimTypes.Name),
+            Roles = GetRoles(contextUser)
+        };
     }
 
     private static string? GetClaimValue(ClaimsPrincipal contextUser, string type)

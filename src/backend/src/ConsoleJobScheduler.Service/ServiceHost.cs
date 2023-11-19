@@ -60,11 +60,7 @@ public sealed class ServiceHost
     private async Task StartWebHost()
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = _contentRootPath });
-        builder.Services.Configure<HostOptions>(
-            option =>
-                {
-                    option.ShutdownTimeout = TimeSpan.FromSeconds(60);
-                });
+        builder.Services.Configure<HostOptions>(option => option.ShutdownTimeout = TimeSpan.FromSeconds(60));
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -76,7 +72,7 @@ public sealed class ServiceHost
         builder.Services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
 
         builder.Services.AddSingleton<JobConsoleLogMessageToHubHandler>();
-        builder.Services.AddSpaStaticFiles(configuration: options => { options.RootPath = "wwwroot"; });
+        builder.Services.AddSpaStaticFiles(configuration: options => options.RootPath = "wwwroot");
 
         builder.Services.AddDbContext<IdentityManagementDbContext>(o => o.UseNpgsql(builder.Configuration["ConnectionString"]));
         builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
@@ -175,8 +171,8 @@ public sealed class ServiceHost
             _app.UseSwaggerUI();
         }
 
-        _app.UseWhen(x => 
-                x.Request.Path.HasValue && 
+        _app.UseWhen(x =>
+                x.Request.Path.HasValue &&
                 !x.Request.Path.Value.StartsWith("/api", StringComparison.InvariantCultureIgnoreCase) &&
                 !x.Request.Path.Value.StartsWith("/jobRunConsoleHub", StringComparison.InvariantCultureIgnoreCase), app1 =>
             app1.UseSpa(spa =>
@@ -215,7 +211,7 @@ public sealed class ServiceHost
         using var scope = host.Services.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
         using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-        var roles = new[] {Roles.Admin, Roles.JobEditor, Roles.JobViewer};
+        var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
         for (var i = 0; i < roles.Length; i++)
         {
             var role = roles[i];
@@ -228,7 +224,7 @@ public sealed class ServiceHost
         var adminUser = await userManager.FindByNameAsync("admin");
         if (adminUser == null)
         {
-            adminUser = new IdentityUser<int>("admin") {Email = "admin@email.com"};
+            adminUser = new IdentityUser<int>("admin") { Email = "admin@email.com" };
 
             await userManager.CreateAsync(adminUser, "Password");
             await userManager.AddToRoleAsync(adminUser, Roles.Admin);

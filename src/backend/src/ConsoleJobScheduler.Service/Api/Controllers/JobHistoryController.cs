@@ -24,7 +24,7 @@ public sealed class JobHistoryController : ControllerBase
     [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<JobExecutionHistory>))]
-    public Task<PagedResult<JobExecutionHistory>> Get([FromQuery]string jobName = "", int? pageNumber = null)
+    public Task<PagedResult<JobExecutionHistory>> Get([FromQuery] string jobName = "", int? pageNumber = null)
     {
         return _schedulerService.ListJobExecutionHistory(jobName, page: pageNumber ?? 1);
     }

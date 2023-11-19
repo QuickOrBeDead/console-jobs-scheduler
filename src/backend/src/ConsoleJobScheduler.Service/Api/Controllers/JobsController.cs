@@ -52,14 +52,14 @@ public sealed class JobsController : ControllerBase
         return Ok(
             new JobDetailModel
             {
-                    JobName = jobDetail.JobName,
-                    JobGroup = jobDetail.JobGroup,
-                    Description = jobDetail.Description,
-                    CronExpression = jobDetail.CronExpression,
-                    CronExpressionDescription = jobDetail.CronExpressionDescription,
-                    Package = jobDetail.Package,
-                    Parameters = jobDetail.Parameters
-                });
+                JobName = jobDetail.JobName,
+                JobGroup = jobDetail.JobGroup,
+                Description = jobDetail.Description,
+                CronExpression = jobDetail.CronExpression,
+                CronExpressionDescription = jobDetail.CronExpressionDescription,
+                Package = jobDetail.Package,
+                Parameters = jobDetail.Parameters
+            });
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]

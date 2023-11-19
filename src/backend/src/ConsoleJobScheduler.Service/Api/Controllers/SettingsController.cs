@@ -46,7 +46,7 @@ public sealed class SettingsController : ControllerBase
     [HttpPost(nameof(SaveSmtpSettings))]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
-    public Task SaveSmtpSettings([FromBody]SmtpSettings settings)
+    public Task SaveSmtpSettings([FromBody] SmtpSettings settings)
     {
         return _settingsService.SaveSettings(settings);
     }

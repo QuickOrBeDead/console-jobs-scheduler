@@ -9,9 +9,9 @@ public sealed class ConsoleLogMessage
     public static ConsoleMessage CreateConsoleMessage(ConsoleMessageLogType logType, string messageText)
     {
         return new ConsoleMessage
-                   {
-                       MessageType = ConsoleMessageType.Log,
-                       Message = new ConsoleLogMessage {LogType = logType, Message = messageText}
-                   };
+        {
+            MessageType = ConsoleMessageType.Log,
+            Message = new ConsoleLogMessage { LogType = logType, Message = messageText }
+        };
     }
 }

@@ -44,16 +44,16 @@ public sealed class UsersController : ControllerBase
         var totalCount = usersQuery.DeferredCount().FutureValue();
         var items = usersQuery.Select(
             user => new UserListItemModel
-                        {
-                            Id = user.Id,
-                            UserName = user.UserName,
-                            Roles = string.Join(
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Roles = string.Join(
                                 ", ",
                                 from userRole in _context.UserRoles
                                 join role in _context.Roles on userRole.RoleId equals role.Id
                                 where userRole.UserId == user.Id
                                 select role.Name)
-                        }).OrderBy(x => x.UserName).Skip((page - 1) * PageSize).Take(PageSize).Future();
+            }).OrderBy(x => x.UserName).Skip((page - 1) * PageSize).Take(PageSize).Future();
 
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var result = new PagedResult<UserListItemModel>(await items.ToListAsync(), PageSize, page, await totalCount.ValueAsync());
@@ -71,13 +71,13 @@ public sealed class UsersController : ControllerBase
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var userDetail = await _context.Users.Where(x => x.Id == userId).Select(
                              user => new UserDetailModel
-                                         {
-                                             UserName = user.UserName,
-                                             Roles = (from userRole in _context.UserRoles
-                                                      join role in _context.Roles on userRole.RoleId equals role.Id
-                                                      where userRole.UserId == user.Id
-                                                      select role.Name).ToList()
-                                         }).SingleOrDefaultAsync();
+                             {
+                                 UserName = user.UserName,
+                                 Roles = (from userRole in _context.UserRoles
+                                          join role in _context.Roles on userRole.RoleId equals role.Id
+                                          where userRole.UserId == user.Id
+                                          select role.Name).ToList()
+                             }).SingleOrDefaultAsync();
         transactionScope.Complete();
         if (userDetail == null)
         {

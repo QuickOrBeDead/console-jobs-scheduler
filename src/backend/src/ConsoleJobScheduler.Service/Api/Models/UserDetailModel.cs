@@ -12,7 +12,7 @@ public sealed class UserDetailModel
         {
             _roles ??= new List<string?>();
 
-            return (List<string?>) _roles;
+            return (List<string?>)_roles;
         }
         set => _roles = value;
     }

@@ -126,13 +126,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     private const string SqlListJobRunLog = "SELECT CONTENT, IS_ERROR FROM {0}JOB_RUN_LOG WHERE JOB_RUN_ID = @id ORDER BY ID";
 
     private const string SqlInsertJobRunAttachment = "INSERT INTO {0}JOB_RUN_ATTACHMENT (JOB_RUN_ID, EMAIL_ID, NAME, CONTENT_TYPE, CONTENT, CREATE_TIME) VALUES (@jobRunId, @emailId, @name, @contentType, @content, @createTime)";
-    
+
     private const string SqlListJobRunAttachment = "SELECT ID, NAME FROM {0}JOB_RUN_ATTACHMENT WHERE JOB_RUN_ID = @jobRunId";
 
     private const string SqlGetJobRunAttachment = "SELECT CONTENT FROM {0}JOB_RUN_ATTACHMENT WHERE ID = @id";
 
     private const string SqlInsertJobRunEmail = "INSERT INTO {0}JOB_RUN_EMAIL (ID, JOB_RUN_ID, SUBJECT, BODY, MESSAGE_TO, MESSAGE_CC, MESSAGE_BCC, IS_SENT, CREATE_TIME) VALUES (@id, @jobRunId, @subject, @body, @to, @cc, @bcc, FALSE, @createTime)";
-    
+
     private const string SqlUpdateJobRunEmailIsSent = "UPDATE {0}JOB_RUN_EMAIL SET IS_SENT = @isSent WHERE ID = @id";
 
     private const string SqlGetPackageContent = "SELECT CONTENT FROM {0}PACKAGES WHERE NAME = @name";
@@ -257,20 +257,20 @@ public class JobStoreDelegate : IJobStoreDelegate
 
                         var scheduledTime = new DateTime(reader.GetInt64("SCHED_TIME"), DateTimeKind.Utc);
                         var jobExecutionHistory = new JobExecutionHistory
-                                                      {
-                                                          Id = reader.GetString("ID"),
-                                                          JobName = reader.GetString("JOB_NAME"),
-                                                          JobGroup = reader.GetString("JOB_GROUP"),
-                                                          TriggerName = reader.GetString("TRIGGER_NAME"),
-                                                          TriggerGroup = reader.GetString("TRIGGER_GROUP"),
-                                                          ScheduledTime = scheduledTime.ToLocalTime(),
-                                                          FiredTime = new DateTime(reader.GetInt64("FIRED_TIME"), DateTimeKind.Utc).ToLocalTime(),
-                                                          RunTime = GetNullableTimeSpanFromNullableInt64Column(reader, "RUN_TIME"),
-                                                          LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime(),
-                                                          Completed = reader.GetBoolean("COMPLETED"),
-                                                          Vetoed = reader.GetBoolean("VETOED"),
-                                                          HasError = reader.GetBoolean("HAS_ERROR")
-                                                      };
+                        {
+                            Id = reader.GetString("ID"),
+                            JobName = reader.GetString("JOB_NAME"),
+                            JobGroup = reader.GetString("JOB_GROUP"),
+                            TriggerName = reader.GetString("TRIGGER_NAME"),
+                            TriggerGroup = reader.GetString("TRIGGER_GROUP"),
+                            ScheduledTime = scheduledTime.ToLocalTime(),
+                            FiredTime = new DateTime(reader.GetInt64("FIRED_TIME"), DateTimeKind.Utc).ToLocalTime(),
+                            RunTime = GetNullableTimeSpanFromNullableInt64Column(reader, "RUN_TIME"),
+                            LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime(),
+                            Completed = reader.GetBoolean("COMPLETED"),
+                            Vetoed = reader.GetBoolean("VETOED"),
+                            HasError = reader.GetBoolean("HAS_ERROR")
+                        };
 
                         var triggerKey = new TriggerKey(jobExecutionHistory.TriggerName, jobExecutionHistory.TriggerGroup);
                         if (!triggers.TryGetValue(triggerKey, out var trigger))
@@ -312,22 +312,22 @@ public class JobStoreDelegate : IJobStoreDelegate
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         result = new JobExecutionDetail
-                                     {
-                                         Id = reader.GetString("ID"),
-                                         JobName = reader.GetString("JOB_NAME"),
-                                         InstanceName = reader.GetString("INSTANCE_NAME"),
-                                         JobGroup = reader.GetString("JOB_GROUP"),
-                                         PackageName = reader.GetString("PACKAGE_NAME"),
-                                         TriggerName = reader.GetString("TRIGGER_NAME"),
-                                         TriggerGroup = reader.GetString("TRIGGER_GROUP"),
-                                         ScheduledTime = new DateTime(reader.GetInt64("SCHED_TIME"), DateTimeKind.Utc).ToLocalTime(),
-                                         FiredTime = new DateTime(reader.GetInt64("FIRED_TIME"), DateTimeKind.Utc).ToLocalTime(),
-                                         RunTime = GetNullableTimeSpanFromNullableInt64Column(reader, "RUN_TIME"),
-                                         Completed = reader.GetBoolean("COMPLETED"),
-                                         Vetoed = reader.GetBoolean("VETOED"),
-                                         HasError = reader.GetBoolean("HAS_ERROR"),
-                                         ErrorMessage = reader.GetNullableString("ERROR_MESSAGE"),
-                                         LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime()
+                        {
+                            Id = reader.GetString("ID"),
+                            JobName = reader.GetString("JOB_NAME"),
+                            InstanceName = reader.GetString("INSTANCE_NAME"),
+                            JobGroup = reader.GetString("JOB_GROUP"),
+                            PackageName = reader.GetString("PACKAGE_NAME"),
+                            TriggerName = reader.GetString("TRIGGER_NAME"),
+                            TriggerGroup = reader.GetString("TRIGGER_GROUP"),
+                            ScheduledTime = new DateTime(reader.GetInt64("SCHED_TIME"), DateTimeKind.Utc).ToLocalTime(),
+                            FiredTime = new DateTime(reader.GetInt64("FIRED_TIME"), DateTimeKind.Utc).ToLocalTime(),
+                            RunTime = GetNullableTimeSpanFromNullableInt64Column(reader, "RUN_TIME"),
+                            Completed = reader.GetBoolean("COMPLETED"),
+                            Vetoed = reader.GetBoolean("VETOED"),
+                            HasError = reader.GetBoolean("HAS_ERROR"),
+                            ErrorMessage = reader.GetNullableString("ERROR_MESSAGE"),
+                            LastSignalTime = new DateTime(reader.GetInt64("LAST_SIGNAL_TIME"), DateTimeKind.Utc).ToLocalTime()
                         };
 
                         result.UpdateHasSignalTimeout();
@@ -410,10 +410,10 @@ public class JobStoreDelegate : IJobStoreDelegate
                     {
                         result.Add(
                             new LogLine
-                                {
-                                    Message = reader.GetString("CONTENT"), 
-                                    IsError = reader.GetBoolean("IS_ERROR")
-                                });
+                            {
+                                Message = reader.GetString("CONTENT"),
+                                IsError = reader.GetBoolean("IS_ERROR")
+                            });
                     }
                 }
 
@@ -455,9 +455,9 @@ public class JobStoreDelegate : IJobStoreDelegate
                         result.Add(
                             new AttachmentInfoModel
                             {
-                                    Id = reader.GetInt64("ID"),
-                                    FileName = reader.GetString("NAME")
-                                });
+                                Id = reader.GetInt64("ID"),
+                                FileName = reader.GetString("NAME")
+                            });
                     }
                 }
 
@@ -483,7 +483,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
-                        result = (byte[]) reader.GetValue("CONTENT");
+                        result = (byte[])reader.GetValue("CONTENT");
                     }
                 }
 
@@ -609,10 +609,10 @@ public class JobStoreDelegate : IJobStoreDelegate
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         result = new PackageDetailsModel
-                                     {
-                                         Name = reader.GetString("NAME"),
-                                         ModifyDate = new DateTime(reader.GetInt64("CREATE_TIME"), DateTimeKind.Utc).ToLocalTime()
-                                     };
+                        {
+                            Name = reader.GetString("NAME"),
+                            ModifyDate = new DateTime(reader.GetInt64("CREATE_TIME"), DateTimeKind.Utc).ToLocalTime()
+                        };
                     }
                 }
 
@@ -671,7 +671,7 @@ public class JobStoreDelegate : IJobStoreDelegate
 
                         counter++;
 
-                        result.Add(new PackageListItemModel {Name = reader.GetString("NAME")});
+                        result.Add(new PackageListItemModel { Name = reader.GetString("NAME") });
                     }
                 }
 
@@ -753,7 +753,7 @@ public class JobStoreDelegate : IJobStoreDelegate
             using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 var result = new JobExecutionStatistics();
-               
+
                 using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))

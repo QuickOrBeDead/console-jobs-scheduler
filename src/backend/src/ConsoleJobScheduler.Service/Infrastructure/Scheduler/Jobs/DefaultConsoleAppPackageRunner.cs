@@ -138,21 +138,21 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                         await jobStoreDelegate.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
                         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false), cancellationToken).ConfigureAwait(false);
                         var emailModel = new EmailModel
-                                             {
-                                                 Subject = emailMessage.Subject,
-                                                 Body = emailMessage.Body,
-                                                 To = emailMessage.To,
-                                                 CC = emailMessage.CC,
-                                                 Bcc = emailMessage.Bcc,
-                                                 JobRunId = jobRunId,
-                                                 Attachments = emailMessage.Attachments.Select(x => new AttachmentModel
-                                                     {
-                                                         JobRunId = jobRunId,
-                                                         FileName = x.FileName,
-                                                         ContentType = x.ContentType,
-                                                         FileContent = x.FileContent
-                                                     }).ToList()
-                                             };
+                        {
+                            Subject = emailMessage.Subject,
+                            Body = emailMessage.Body,
+                            To = emailMessage.To,
+                            CC = emailMessage.CC,
+                            Bcc = emailMessage.Bcc,
+                            JobRunId = jobRunId,
+                            Attachments = emailMessage.Attachments.Select(x => new AttachmentModel
+                            {
+                                JobRunId = jobRunId,
+                                FileName = x.FileName,
+                                ContentType = x.ContentType,
+                                FileContent = x.FileContent
+                            }).ToList()
+                        };
                         await jobStoreDelegate.InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
                         await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
                         await jobStoreDelegate.UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);

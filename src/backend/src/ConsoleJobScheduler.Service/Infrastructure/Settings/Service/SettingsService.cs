@@ -48,11 +48,11 @@ public sealed class SettingsService : ISettingsService
             while (dataEnumerator.MoveNext())
             {
                 settingModels.Add(new SettingModel
-                                      {
-                                          CategoryId = settings.GetCategory(),
-                                          Name = dataEnumerator.Current.Key,
-                                          Value = dataEnumerator.Current.Value
-                                      });
+                {
+                    CategoryId = settings.GetCategory(),
+                    Name = dataEnumerator.Current.Key,
+                    Value = dataEnumerator.Current.Value
+                });
             }
         }
 

@@ -15,6 +15,6 @@ public static class DataReaderExtensions
             return null;
         }
 
-        return (string) columnValue;
+        return (string)columnValue;
     }
 }
