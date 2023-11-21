@@ -1,19 +1,18 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
-using ConsoleJobScheduler.Service.Infrastructure.Data;
+using Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
+using Jobs;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
+using Models;
 
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.Matchers;
 
-using ConsoleJobScheduler.Service.Infrastructure.Settings;
+using Settings;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
-using System.Xml.Linq;
 
 public interface ISchedulerService
 {

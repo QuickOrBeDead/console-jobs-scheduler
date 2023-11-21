@@ -2,7 +2,7 @@
 
 using System.Web;
 
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
+using Infrastructure.Scheduler.Jobs.Events;
 
 using MessagePipe;
 

@@ -1,7 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Extensions;
 
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
+using Scheduler.Plugins;
+using Scheduler;
 
 using System.Diagnostics.CodeAnalysis;
 

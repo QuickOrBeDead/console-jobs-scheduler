@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Settings.Data;
 
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+using Models;
 using Microsoft.EntityFrameworkCore;
 
 public sealed class SettingsDbContext : DbContext

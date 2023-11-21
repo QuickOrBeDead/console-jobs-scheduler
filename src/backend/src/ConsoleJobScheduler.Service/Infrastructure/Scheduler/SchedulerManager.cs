@@ -1,7 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
-using ConsoleJobScheduler.Service.Infrastructure.Logging;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
+using Logging;
+using Jobs.Events;
 
 using MessagePipe;
 

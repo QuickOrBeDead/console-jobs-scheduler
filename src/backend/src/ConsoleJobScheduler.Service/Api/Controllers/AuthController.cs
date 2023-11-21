@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
-using ConsoleJobScheduler.Service.Api.Models;
+using Models;
 
 using Microsoft.AspNetCore.Authorization;
 

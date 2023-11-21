@@ -1,7 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Api.Controllers;
 
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
+using Infrastructure.Scheduler;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +9,8 @@ using Quartz;
 
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
-using ConsoleJobScheduler.Service.Api.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Data;
+using Models;
+using Infrastructure.Data;
 
 using JobDetailModel = Infrastructure.Scheduler.Models.JobDetailModel;
 

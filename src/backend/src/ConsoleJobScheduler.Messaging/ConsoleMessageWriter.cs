@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Messaging;
 
-using ConsoleJobScheduler.Messaging.Models;
+using Models;
 using System.Text.Json;
 
 public static class ConsoleMessageWriter

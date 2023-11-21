@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
-using ConsoleJobScheduler.Messaging;
+using Messaging;
 using ConsoleJobScheduler.Messaging.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
+using Plugins;
 
 using Events;
 using Exceptions;

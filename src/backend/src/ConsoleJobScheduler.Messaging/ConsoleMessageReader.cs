@@ -3,7 +3,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-using ConsoleJobScheduler.Messaging.Models;
+using Models;
 
 public static class ConsoleMessageReader
 {

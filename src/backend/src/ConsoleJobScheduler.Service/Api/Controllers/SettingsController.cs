@@ -1,13 +1,13 @@
 ﻿namespace ConsoleJobScheduler.Service.Api.Controllers;
 
-using ConsoleJobScheduler.Service.Api.Models;
+using Models;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
-using ConsoleJobScheduler.Service.Infrastructure.Settings;
+using Infrastructure.Settings;
 
 [Authorize(Roles = Roles.Admin)]
 [Route("api/[controller]")]

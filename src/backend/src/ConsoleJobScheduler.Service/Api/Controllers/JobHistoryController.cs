@@ -1,8 +1,8 @@
 ﻿namespace ConsoleJobScheduler.Service.Api.Controllers;
 
-using ConsoleJobScheduler.Service.Infrastructure.Data;
+using Infrastructure.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
+using Infrastructure.Scheduler;
 
 using Microsoft.AspNetCore.Mvc;
 

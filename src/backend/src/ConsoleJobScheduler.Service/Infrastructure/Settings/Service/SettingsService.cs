@@ -1,7 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Data;
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+using Data;
+using Models;
 
 using Microsoft.EntityFrameworkCore;
 

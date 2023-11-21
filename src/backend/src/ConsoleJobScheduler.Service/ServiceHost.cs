@@ -1,19 +1,19 @@
 ﻿namespace ConsoleJobScheduler.Service;
 
-using ConsoleJobScheduler.Service.Api.Hubs;
-using ConsoleJobScheduler.Service.Api.Hubs.Handlers;
-using ConsoleJobScheduler.Service.Api.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
+using Api.Hubs;
+using Api.Hubs.Handlers;
+using Api.Models;
+using Infrastructure.Scheduler;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using ConsoleJobScheduler.Service.Infrastructure.Identity;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Events;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Data;
+using Infrastructure.Identity;
+using Infrastructure.Scheduler.Jobs.Events;
+using Infrastructure.Scheduler.Jobs;
+using Infrastructure.Scheduler.Plugins;
+using Infrastructure.Settings.Data;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 using MessagePipe;
 using Quartz.Impl;

@@ -1,7 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
 
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
-using ConsoleJobScheduler.Service.Infrastructure.Logging;
+using Logging;
 
 using Quartz;
 using Quartz.Impl.Matchers;

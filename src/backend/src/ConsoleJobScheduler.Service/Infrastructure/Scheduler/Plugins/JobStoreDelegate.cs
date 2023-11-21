@@ -4,12 +4,12 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
-using ConsoleJobScheduler.Service.Infrastructure.Data;
+using Data;
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Extensions;
+using Extensions;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins.Models;
+using Models;
 
 using Quartz;
 using Quartz.Impl.AdoJobStore;

@@ -2,7 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-using ConsoleJobScheduler.Service.Infrastructure.Scheduler;
+using Infrastructure.Scheduler;
 
 public sealed class JobDetailModel
 {

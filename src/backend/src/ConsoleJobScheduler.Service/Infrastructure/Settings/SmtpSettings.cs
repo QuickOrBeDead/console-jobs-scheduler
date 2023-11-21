@@ -2,7 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-using ConsoleJobScheduler.Service.Infrastructure.Settings.Models;
+using Models;
 
 public sealed class SmtpSettings : ISettings
 {
