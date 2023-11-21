@@ -6,7 +6,7 @@ using System.Net.Mime;
 using System.Text;
 
 using ConsoleJobScheduler.Messaging.Models;
-using ConsoleJobScheduler.Service.Infrastructure.Settings;
+using Settings;
 using ConsoleJobScheduler.Service.Infrastructure.Settings.Service;
 
 public sealed class SmtpEmailSender : IEmailSender
@@ -21,8 +21,9 @@ public sealed class SmtpEmailSender : IEmailSender
     public async Task SendMailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
     {
         var smtpSettings = await _settingsService.GetSettings<SmtpSettings>().ConfigureAwait(false);
-        using (var smtpClient = new SmtpClient(smtpSettings.Host, smtpSettings.Port ?? 25) { EnableSsl = smtpSettings.EnableSsl })
+        using (var smtpClient = new SmtpClient(smtpSettings.Host, smtpSettings.Port ?? 25))
         {
+            smtpClient.EnableSsl = smtpSettings.EnableSsl;
             smtpClient.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password, smtpSettings.Domain);
 
             var mailMessage = new MailMessage
