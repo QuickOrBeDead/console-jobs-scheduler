@@ -185,3 +185,4 @@ exclude:
   - name: UseImplicitByValModifier
   - name: UseImplicitlyTypedVariableEvident
   - name: CppVolatileParameterInDeclaration
+  - name: UnusedAutoPropertyAccessor.Global
