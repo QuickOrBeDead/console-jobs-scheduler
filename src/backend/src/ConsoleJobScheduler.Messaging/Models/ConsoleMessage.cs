@@ -2,7 +2,7 @@
 
 public sealed class ConsoleMessage
 {
-    public ConsoleMessageType MessageType { get; set; }
+    public ConsoleMessageType MessageType { get; init; }
 
-    public object? Message { get; set; }
+    public object? Message { get; init; }
 }
