@@ -235,3 +235,4 @@ exclude:
   - name: UnusedTypeParameter
   - name: VirtualMemberNeverOverridden.Global
   - name: VirtualMemberNeverOverridden.Local
+  - name: ClassNeverInstantiated.Global
