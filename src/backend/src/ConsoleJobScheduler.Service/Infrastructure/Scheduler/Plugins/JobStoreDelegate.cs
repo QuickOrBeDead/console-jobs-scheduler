@@ -76,7 +76,7 @@ public interface IJobStoreDelegate
     Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1);
 }
 
-public class JobStoreDelegate : IJobStoreDelegate
+public sealed class JobStoreDelegate : IJobStoreDelegate
 {
     public const string JobStoreDelegateContextKey = "quartz.JobStoreDelegate";
 
@@ -796,7 +796,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     /// </summary>
     /// <param name="isolationLevel"></param>
     /// <returns></returns>
-    protected virtual ConnectionAndTransactionHolder GetConnection(IsolationLevel isolationLevel)
+    private ConnectionAndTransactionHolder GetConnection(IsolationLevel isolationLevel)
     {
         DbConnection conn;
         DbTransaction tx;
