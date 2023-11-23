@@ -170,7 +170,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobExecuted, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", context.FireInstanceId);
                 _dbAccessor.AddCommandParameter(command, "schedulerName", context.Scheduler.SchedulerName);
@@ -197,7 +197,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobExecuted, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", context.FireInstanceId);
                 _dbAccessor.AddCommandParameter(command, "runTime", _dbAccessor.GetDbTimeSpanValue(context.JobRunTime));
@@ -217,7 +217,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobLastSignalTime, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
                 _dbAccessor.AddCommandParameter(command, "lastSignalTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
@@ -233,7 +233,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionHistory, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionHistory, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "pageSize", pageSize);
                 _dbAccessor.AddCommandParameter(command, "offset", (page - 1) * pageSize);
@@ -242,7 +242,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                 var result = new List<JobExecutionHistory>();
                 var count = 0;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     var counter = 0;
                     var triggers = new Dictionary<TriggerKey, ITrigger?>();
@@ -301,13 +301,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionDetail, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionDetail, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
 
                 JobExecutionDetail? result = null;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -346,11 +346,11 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionErrorDetails, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionErrorDetails, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -381,7 +381,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunLog, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "jobRunId", jobRunId);
                 _dbAccessor.AddCommandParameter(command, "content", content);
@@ -398,13 +398,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunLog, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunLog, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
 
                 var result = new List<LogLine>();
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     while (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -442,13 +442,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunAttachment, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListJobRunAttachment, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "jobRunId", id);
 
                 var result = new List<AttachmentInfoModel>();
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     while (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -473,13 +473,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetJobRunAttachment, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetJobRunAttachment, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
 
                 byte[]? result = null;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -503,7 +503,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunEmail, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", email.Id);
                 _dbAccessor.AddCommandParameter(command, "jobRunId", email.JobRunId);
@@ -535,7 +535,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobRunEmailIsSent, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", id);
                 _dbAccessor.AddCommandParameter(command, "isSent", _dbAccessor.GetDbBooleanValue(isSent));
@@ -550,13 +550,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageContent, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageContent, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "name", name);
 
                 byte[]? result = null;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -575,11 +575,11 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetAllPackageNames, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetAllPackageNames, _tablePrefix)))
             {
                 var result = new List<string>();
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     while (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -598,13 +598,13 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageDetail, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlGetPackageDetail, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "name", packageName);
 
                 PackageDetailsModel? result = null;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -651,7 +651,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListPackages, _tablePrefix)))
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlListPackages, _tablePrefix)))
             {
                 _dbAccessor.AddCommandParameter(command, "pageSize", pageSize);
                 _dbAccessor.AddCommandParameter(command, "offset", (page - 1) * pageSize);
@@ -659,7 +659,7 @@ public class JobStoreDelegate : IJobStoreDelegate
                 var result = new List<PackageListItemModel>();
                 var count = 0;
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     var counter = 0;
                     while (await reader.ReadAsync().ConfigureAwait(false))
@@ -685,7 +685,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     private async Task InsertPackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
-        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
+        await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
         {
             _dbAccessor.AddCommandParameter(command, "name", packageName);
             _dbAccessor.AddCommandParameter(command, "content", content);
@@ -698,7 +698,7 @@ public class JobStoreDelegate : IJobStoreDelegate
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     private async Task UpdatePackage(ConnectionAndTransactionHolder connection, string packageName, byte[] content)
     {
-        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
+        await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
         {
             _dbAccessor.AddCommandParameter(command, "name", packageName);
             _dbAccessor.AddCommandParameter(command, "content", content);
@@ -710,11 +710,11 @@ public class JobStoreDelegate : IJobStoreDelegate
 
     private async Task<bool> PackageExists(ConnectionAndTransactionHolder connection, string packageName)
     {
-        using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageExists, _tablePrefix)))
+        await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageExists, _tablePrefix)))
         {
             _dbAccessor.AddCommandParameter(command, "name", packageName);
 
-            using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
                 return await reader.ReadAsync().ConfigureAwait(false);
             }
@@ -727,7 +727,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         CancellationToken cancellationToken)
     {
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlInsertJobRunAttachment, _tablePrefix);
-        using (var command = _dbAccessor.PrepareCommand(connection, sql))
+        await using (var command = _dbAccessor.PrepareCommand(connection, sql))
         {
             _dbAccessor.AddCommandParameter(command, "jobRunId", attachment.JobRunId);
             _dbAccessor.AddCommandParameter(command, "name", attachment.FileName);
@@ -750,11 +750,11 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlJobExecutionStatistics, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 var result = new JobExecutionStatistics();
 
-                using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
@@ -780,7 +780,7 @@ public class JobStoreDelegate : IJobStoreDelegate
         var sql = AdoJobStoreUtil.ReplaceTablePrefix(SqlUpdateJobVetoed, _tablePrefix);
         using (var connection = GetConnection(IsolationLevel.ReadCommitted))
         {
-            using (var command = _dbAccessor.PrepareCommand(connection, sql))
+            await using (var command = _dbAccessor.PrepareCommand(connection, sql))
             {
                 _dbAccessor.AddCommandParameter(command, "id", context.FireInstanceId);
                 _dbAccessor.AddCommandParameter(command, "vetoed", _dbAccessor.GetDbBooleanValue(true));
