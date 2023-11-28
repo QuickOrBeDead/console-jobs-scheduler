@@ -26,7 +26,7 @@
     <PackageReference Include="Quartz.Serialization.Json" Version="3.8.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Topshelf" Version="4.3.0" />
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="8.101.0" />
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="8.101.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,11 +38,11 @@
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="Roslynator.Analyzers" Version="4.6.2">
+   <PackageReference Include="Roslynator.Analyzers" Version="4.6.4">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.12.0.78982">
+   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.14.0.81108">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
