@@ -211,6 +211,10 @@ public sealed class ServiceHost
         using var scope = host.Services.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
         using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+        await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
+
+        await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
+
         var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
         for (var i = 0; i < roles.Length; i++)
         {
