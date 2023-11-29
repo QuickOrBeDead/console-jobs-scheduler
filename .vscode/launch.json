@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/backend/src/ConsoleJobScheduler.Service/bin/Debug/net7.0/ConsoleJobScheduler.Service.dll",
+            "program": "${workspaceFolder}/src/backend/src/ConsoleJobScheduler.Service/bin/Debug/net8.0/ConsoleJobScheduler.Service.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/backend/src/ConsoleJobScheduler.Service",
             "stopAtEntry": false,
