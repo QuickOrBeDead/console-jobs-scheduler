@@ -70,7 +70,7 @@ function getTotalCount() {
 
 <template>
     <div class="pagination-container">
-        <div class="float-start justify-content-start text-muted mb-2"><small class="align-bottom">Showing {{ ((currentPage - 1) * getPageSize()) + 1 }} to {{ Math.min(currentPage * getPageSize(), getTotalCount()) }} of {{ getTotalCount() }} rows</small></div>   
+        <div class="float-start justify-content-start text-muted mb-2"><small class="align-bottom">Showing {{ getTotalCount() ? ((currentPage - 1) * getPageSize()) + 1 : 0 }} to {{ Math.min(currentPage * getPageSize(), getTotalCount()) }} of {{ getTotalCount() }} rows</small></div>   
         <ul class="float-end pagination pagination-sm justify-content-end mb-2">
             <li :class="[currentPage == start ? 'disabled': '']" class="page-item">
                 <a class="page-link" href="javascript:void(0)" @click="setCurrentPage(previousPage)" aria-label="Previous">
