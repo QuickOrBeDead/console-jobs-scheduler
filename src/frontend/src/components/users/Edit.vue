@@ -88,40 +88,46 @@ async function save() {
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="display-6">{{ isInEditMode ? "Edit" : "Add" }} User</h1>
-                    <hr style="margin: 4px 0px;">
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-6">
-                    <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
-                        <div v-for="msg in errorMessages" class="d-flex align-items-center">
-                            <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
-                            <div>{{ msg }}</div>
+                    <div class="card flex-fill">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0 text-muted"><small>{{ isInEditMode ? "Edit" : "Add" }} User</small></h4>
+                            <router-link to="/users" v-slot="{ navigate }" custom>
+                                <button type="button" @click="navigate" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-backspace"></i> Back</button>
+                            </router-link>
                         </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="Username" class="form-label">Username</label>
-                            <input id="Username" type="text" class="form-control" :disabled="isInEditMode" v-model="user.userName" :class="errors && errors.UserName ? 'is-invalid' : ''"/>
-                            <div v-if="errors && errors.UserName" class="invalid-feedback" role="alert"><template v-for="msg in errors.UserName">{{ msg }}<br></template></div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="Password" class="form-label">Password</label>
-                            <input id="Password" type="password" class="form-control" v-model="user.password" :class="errors && errors.Password ? 'is-invalid' : ''"/>
-                            <div v-if="errors && errors.Password" class="invalid-feedback" role="alert"><template v-for="msg in errors.Password">{{ msg }}<br></template></div>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">Roles</label>
-                            <div>
-                                <div v-for="role in roles" class="form-check" :class="errors && errors.Roles ? 'is-invalid' : ''">
-                                    <input class="form-check-input" :value="role" :checked="user.roles?.some(x => x === role)" v-model="user.roles" :id="`cb-role-${role}`" :class="errors && errors.Roles ? 'is-invalid' : ''" type="checkbox" />
-                                    <label class="form-check-label" :for="`cb-role-${role}`">{{ role }}</label>
+                        <div class="card-body">
+                            <div v-if="user" class="col-12">
+                                <div v-if="errorMessages && errorMessages.length" class="alert alert-danger" role="alert">
+                                    <div v-for="msg in errorMessages" class="d-flex align-items-center">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>&nbsp;
+                                        <div>{{ msg }}</div>
+                                    </div>
                                 </div>
-                                <div v-if="errors && errors.Roles" class="invalid-feedback" role="alert"><template v-for="msg in errors.Roles">{{ msg }}<br></template></div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="Username" class="form-label">Username</label>
+                                        <input id="Username" type="text" class="form-control" :disabled="isInEditMode" v-model="user.userName" :class="errors && errors.UserName ? 'is-invalid' : ''"/>
+                                        <div v-if="errors && errors.UserName" class="invalid-feedback" role="alert"><template v-for="msg in errors.UserName">{{ msg }}<br></template></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="Password" class="form-label">Password</label>
+                                        <input id="Password" type="password" class="form-control" v-model="user.password" :class="errors && errors.Password ? 'is-invalid' : ''"/>
+                                        <div v-if="errors && errors.Password" class="invalid-feedback" role="alert"><template v-for="msg in errors.Password">{{ msg }}<br></template></div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Roles</label>
+                                        <div>
+                                            <div v-for="role in roles" class="form-check" :class="errors && errors.Roles ? 'is-invalid' : ''">
+                                                <input class="form-check-input" :value="role" :checked="user.roles?.some(x => x === role)" v-model="user.roles" :id="`cb-role-${role}`" :class="errors && errors.Roles ? 'is-invalid' : ''" type="checkbox" />
+                                                <label class="form-check-label" :for="`cb-role-${role}`">{{ role }}</label>
+                                            </div>
+                                            <div v-if="errors && errors.Roles" class="invalid-feedback" role="alert"><template v-for="msg in errors.Roles">{{ msg }}<br></template></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} User</button>
                             </div>
                         </div>
-                        <button class="btn btn-primary" @click="save">{{ isInEditMode ? "Edit" : "Add" }} User</button>
                     </div>
                 </div>
             </div>
