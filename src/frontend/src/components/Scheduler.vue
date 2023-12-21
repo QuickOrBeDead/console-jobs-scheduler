@@ -2,18 +2,65 @@
 import { ref, onMounted } from 'vue';
 import { createApi } from '../api'
 import { SchedulerApi, SchedulerJobExecutionStatisticsModel, SchedulerMetadataModel, SchedulerStateRecordModel } from '../metadata/console-jobs-scheduler-api'
+import { createTypedChart } from 'vue-chartjs'
+import { Chart as ChartJS, Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeScale, ChartData, ChartOptions, BarController } from 'chart.js'
+import 'chartjs-adapter-date-fns'
+
+ChartJS.register(Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeScale)
+
+const Bar = createTypedChart<'bar', {x: string, y: number} []>('bar', BarController)
 
 const statistics = ref<SchedulerJobExecutionStatisticsModel>()
 const metadata = ref<SchedulerMetadataModel>()
 const nodes = ref<SchedulerStateRecordModel[]>()
 
+const historyChartData = ref<ChartData<'bar', {x: string, y: number} []>>()
+
+const historyChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: false
+        }
+    },
+    scales: {
+      xAxis: {
+        type: "time",
+        min: new Date().setHours(0, 0, 0),
+        max: new Date().setHours(23, 59, 59),
+        time: {
+          unit: "hour",
+          displayFormats: {
+            hour: "HH:mm",
+          }
+        }
+      }
+    }
+}
+
+const schedulerApi = createApi(SchedulerApi)
+
 onMounted(async () => {
-    const schedulerApi = createApi(SchedulerApi)
     const { data } = await schedulerApi.apiSchedulerGet()
     statistics.value = data.statistics
     metadata.value = data.metadata
     nodes.value = data.nodes ? data.nodes : []
+
+    loadChart()
 })
+
+async function loadChart() {
+    const { data } = await schedulerApi.apiSchedulerGetJobHistoryChartDataGet()
+    historyChartData.value = {
+        datasets: [ 
+            { 
+                data: data as {x: string, y: number} [],
+                backgroundColor: '#4bc0c0' 
+            } 
+        ]
+    }
+}
 </script>
 
 <template>
@@ -51,6 +98,14 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="card mb-4">
+                    <div class="card-header"><h3 class="mb-0 mt-0">History</h3></div>
+                    <div class="card-body p-0"><Bar v-if="historyChartData" :options="historyChartOptions" :data="historyChartData">Chart couldn't be loaded.</Bar></div>
                 </div>
             </div>
         </div>
