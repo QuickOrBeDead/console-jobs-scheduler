@@ -39,6 +39,7 @@ public interface ISchedulerService
     Task SavePackage(string packageName, byte[] content);
 
     Task<PagedResult<PackageListItemModel>> ListPackages(int page = 1);
+    Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData();
 }
 
 public sealed class SchedulerService : ISchedulerService
@@ -190,6 +191,11 @@ public sealed class SchedulerService : ISchedulerService
     public Task SavePackage(string packageName, byte[] content)
     {
         return _scheduler.GetJobStoreDelegate().SavePackage(packageName, content);
+    }
+
+    public Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData()
+    {
+        return _scheduler.GetJobStoreDelegate().ListJobExecutionHistoryChartData();
     }
 
     private static string? GetJobData(IJobDetail jobDetail, string key)

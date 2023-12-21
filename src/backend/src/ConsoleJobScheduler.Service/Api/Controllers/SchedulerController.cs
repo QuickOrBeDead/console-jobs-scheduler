@@ -61,4 +61,16 @@ public sealed class SchedulerController : ControllerBase
                 TotalVetoedJobs = statistics.TotalVetoedJobs
             });
     }
+
+    [HttpGet("GetJobHistoryChartData")]
+    [Produces(MediaTypeNames.Application.Json)]
+    public async Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData()
+    {
+        return (await _schedulerService.ListJobExecutionHistoryChartData().ConfigureAwait(false))
+            .ConvertAll(x => new JobHistoryChartDataModel
+                                        {
+                                            X = x.Date,
+                                            Y = x.Count
+                                        });
+    }
 }

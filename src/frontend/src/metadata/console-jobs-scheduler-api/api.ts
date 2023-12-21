@@ -431,6 +431,25 @@ export interface JobExecutionHistoryPagedResult {
 /**
  * 
  * @export
+ * @interface JobHistoryChartDataModel
+ */
+export interface JobHistoryChartDataModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobHistoryChartDataModel
+     */
+    'x'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobHistoryChartDataModel
+     */
+    'y'?: number;
+}
+/**
+ * 
+ * @export
  * @interface JobListItemModel
  */
 export interface JobListItemModel {
@@ -2356,6 +2375,35 @@ export const SchedulerApiAxiosParamCreator = function (configuration?: Configura
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSchedulerGetJobHistoryChartDataGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/Scheduler/GetJobHistoryChartData`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2373,6 +2421,15 @@ export const SchedulerApiFp = function(configuration?: Configuration) {
          */
         async apiSchedulerGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SchedulerInfoModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiSchedulerGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobHistoryChartDataModel>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSchedulerGetJobHistoryChartDataGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -2393,6 +2450,14 @@ export const SchedulerApiFactory = function (configuration?: Configuration, base
         apiSchedulerGet(options?: any): AxiosPromise<SchedulerInfoModel> {
             return localVarFp.apiSchedulerGet(options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSchedulerGetJobHistoryChartDataGet(options?: any): AxiosPromise<Array<JobHistoryChartDataModel>> {
+            return localVarFp.apiSchedulerGetJobHistoryChartDataGet(options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -2411,6 +2476,16 @@ export class SchedulerApi extends BaseAPI {
      */
     public apiSchedulerGet(options?: AxiosRequestConfig) {
         return SchedulerApiFp(this.configuration).apiSchedulerGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SchedulerApi
+     */
+    public apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig) {
+        return SchedulerApiFp(this.configuration).apiSchedulerGetJobHistoryChartDataGet(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -74,6 +74,8 @@ public interface IJobStoreDelegate
     Task SavePackage(string packageName, byte[] content);
 
     Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1);
+ 
+    Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData();
 }
 
 public sealed class JobStoreDelegate : IJobStoreDelegate
@@ -154,6 +156,14 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
                                     ORDER BY NAME
                                     LIMIT @pageSize
                                     OFFSET @offset";
+
+    private const string SqlJobRunHistoryChart = @"
+        SELECT
+           DATE_BIN('15 minutes', TO_TIMESTAMP(((FIRED_TIME - 621355968000000000) / 10000000)), TIMESTAMP '2001-01-01') AS DATE,
+           COUNT(1)
+        FROM {0}JOB_HISTORY
+        WHERE FIRED_TIME >= @start AND FIRED_TIME < @end
+        GROUP BY DATE";
 
     public JobStoreDelegate(IScheduler scheduler, IDbAccessor dbAccessor, string dataSource, string tablePrefix)
     {
@@ -292,6 +302,33 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
                 connection.Commit(false);
 
                 return new PagedResult<JobExecutionHistory>(result, pageSize, page, count);
+            }
+        }
+    }
+    
+    public async Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData()
+    {
+        using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
+        {
+            await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlJobRunHistoryChart, _tablePrefix)))
+            {
+                var today = DateTime.UtcNow.Date;
+                _dbAccessor.AddCommandParameter(command, "start", today.Ticks);
+                _dbAccessor.AddCommandParameter(command, "end", today.AddDays(1).Ticks);
+
+                var result = new List<(DateTime, int)>();
+
+                await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        result.Add((reader.GetDateTime("DATE").ToLocalTime(), reader.GetInt32("COUNT")));
+                    }
+                }
+
+                connection.Commit(false);
+
+                return result;
             }
         }
     }
