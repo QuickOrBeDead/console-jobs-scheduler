@@ -13,22 +13,24 @@
     "@aspnet/signalr": "^1.0.27",
     "axios": "^1.6.2",
     "bootstrap": "^5.3.2",
-    "bootstrap-icons": "^1.11.1",
+    "bootstrap-icons": "^1.11.2",
     "chart.js": "^4.4.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^2.30.0",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.0",
     "vue": "^3.3.11",
-    "vue-chartjs": "^5.2.0",
+    "vue-chartjs": "^5.3.0",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.7.0",
-    "@types/bootstrap": "^5.2.9",
-    "@types/node": "^20.4.0",
-    "@vitejs/plugin-vue": "^4.4.0",
-    "typescript": "^5.2.2",
-    "vite": "^4.5.0",
+    "@types/bootstrap": "^5.2.10",
+    "@types/node": "^20.10.4",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
     "volar-service-vetur": "latest",
-    "vue-tsc": "^1.8.22"
+    "vue-tsc": "^1.8.25"
   }
 }
