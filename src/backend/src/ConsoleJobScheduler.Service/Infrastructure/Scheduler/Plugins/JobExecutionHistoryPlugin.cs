@@ -1,7 +1,8 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Plugins;
 
+using Microsoft.Extensions.Logging;
+
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
-using Logging;
 
 using Quartz;
 using Quartz.Impl.Matchers;
@@ -30,7 +31,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
 
     public Task Start(CancellationToken cancellationToken = default)
     {
-        _logger = LoggerFactory.CreateLogger<JobExecutionHistoryPlugin>();
+        _logger = Logging.LoggerFactory.CreateLogger<JobExecutionHistoryPlugin>();
 
         var scheduler = GetScheduler();
         var jobStore = scheduler.GetJobStore();

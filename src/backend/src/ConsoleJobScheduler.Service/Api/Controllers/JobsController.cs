@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Quartz;
 
 using System.Net.Mime;
+
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Models;
 using Infrastructure.Data;

@@ -8,6 +8,7 @@ using System.Net.Mime;
 
 using Models;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Infrastructure.Data;
 

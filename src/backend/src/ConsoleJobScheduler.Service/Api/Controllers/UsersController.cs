@@ -1,7 +1,9 @@
-﻿namespace ConsoleJobScheduler.Service.Api.Controllers;
+﻿
+namespace ConsoleJobScheduler.Service.Api.Controllers;
 
 using Models;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;

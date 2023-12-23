@@ -1,6 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler;
 
-using Logging;
+using Microsoft.Extensions.Logging;
+
 using Jobs.Events;
 
 using MessagePipe;
@@ -31,7 +32,7 @@ public sealed class SchedulerManager : ISchedulerManager
 
     public Task Start(ILoggerFactory loggerFactory)
     {
-        LoggerFactory.SetLoggerFactory(loggerFactory);
+        Logging.LoggerFactory.SetLoggerFactory(loggerFactory);
 
         return _scheduler.Start();
     }

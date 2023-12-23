@@ -1,5 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using ConsoleJobScheduler.Service.Infrastructure.Extensions;
 
 using Quartz;

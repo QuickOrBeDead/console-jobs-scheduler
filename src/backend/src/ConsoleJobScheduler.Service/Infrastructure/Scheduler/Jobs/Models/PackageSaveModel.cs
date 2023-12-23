@@ -1,5 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Scheduler.Jobs.Models;
 
+using Microsoft.AspNetCore.Http;
+
 using System.ComponentModel.DataAnnotations;
 
 public sealed class PackageSaveModel

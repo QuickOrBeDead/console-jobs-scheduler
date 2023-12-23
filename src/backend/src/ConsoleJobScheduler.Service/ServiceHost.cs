@@ -8,6 +8,10 @@ using Infrastructure.Scheduler;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Infrastructure.Identity;
 using Infrastructure.Scheduler.Jobs.Events;

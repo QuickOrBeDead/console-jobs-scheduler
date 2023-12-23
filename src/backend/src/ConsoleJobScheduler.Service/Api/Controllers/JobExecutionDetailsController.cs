@@ -6,6 +6,7 @@ using ConsoleJobScheduler.Service.Infrastructure.Scheduler.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 
 [Authorize]

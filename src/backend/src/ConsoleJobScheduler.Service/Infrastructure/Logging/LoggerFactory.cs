@@ -1,5 +1,7 @@
 ﻿namespace ConsoleJobScheduler.Service.Infrastructure.Logging;
 
+using Microsoft.Extensions.Logging;
+
 using Quartz.Logging;
 
 public static class LoggerFactory
