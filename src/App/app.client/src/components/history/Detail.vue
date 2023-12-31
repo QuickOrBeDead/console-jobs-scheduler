@@ -3,7 +3,7 @@ import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
 import { AttachmentInfoModel, JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
-import { HubConnectionBuilder } from '@aspnet/signalr'
+import { HubConnectionBuilder } from '@microsoft/signalr'
 
 const route = useRoute()
 const id = route.params.id as string
