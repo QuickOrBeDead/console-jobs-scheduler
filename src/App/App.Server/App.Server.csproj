@@ -8,8 +8,6 @@
     <SpaRoot>..\app.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>http://localhost:8080</SpaProxyServerUrl>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ConsoleJobScheduler.Service\ConsoleJobScheduler.Core.csproj" />
+    <ProjectReference Include="..\..\ConsoleJobScheduler.Core\ConsoleJobScheduler.Core.csproj" />
     <ProjectReference Include="..\app.client\app.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
