@@ -296,7 +296,12 @@ CREATE TABLE IF NOT EXISTS public.qrtz_packages
 (
     name character varying(256) COLLATE pg_catalog."default" NOT NULL,
     content bytea NOT NULL,
-    create_time bigint NOT NULL,
+    file_name character varying(1024) COLLATE pg_catalog."default" NOT NULL,
+    arguments character varying(1024) COLLATE pg_catalog."default" NOT NULL,
+    author character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    description character varying(1024) COLLATE pg_catalog."default" NOT NULL,
+    version character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	create_time bigint NOT NULL,
     CONSTRAINT qrtz_packages_pkey PRIMARY KEY (name)
 )
 
