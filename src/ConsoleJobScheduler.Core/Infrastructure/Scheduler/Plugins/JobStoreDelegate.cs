@@ -1,10 +1,13 @@
 ﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Compression;
+using System.Text.Json;
 
 using ConsoleJobScheduler.Core.Infrastructure.Data;
 using ConsoleJobScheduler.Core.Infrastructure.Extensions;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Extensions;
+using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Models;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Models;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins.Models;
@@ -12,6 +15,7 @@ using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins.Models;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Util;
+using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 
 namespace ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins;
 
@@ -65,7 +69,7 @@ public interface IJobStoreDelegate
 
     Task<byte[]?> GetJobRunAttachmentContent(long id);
 
-    Task<Stream?> GetPackageStream(string name);
+    Task<PackageRunModel?> GetPackageRun(string name);
 
     Task<List<string>> ListPackageNames();
 
@@ -89,6 +93,7 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
     private readonly string _dataSource;
 
     private readonly string _tablePrefix;
+    private static readonly JsonSerializerOptions PackageManifestJsonSerializerOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
 
     private const string SqlInsertJobExecuted =
         "INSERT INTO {0}JOB_HISTORY (ID, SCHED_NAME, INSTANCE_NAME, TRIGGER_NAME, TRIGGER_GROUP, JOB_NAME, JOB_GROUP, PACKAGE_NAME, SCHED_TIME, FIRED_TIME, LAST_SIGNAL_TIME, VETOED, HAS_ERROR, COMPLETED) VALUES (@id, @schedulerName, @instanceName, @triggerName, @triggerGroup, @jobName, @jobGroup, @packageName, @scheduledTime, @firedTime, @lastSignalTime, FALSE, FALSE, FALSE)";
@@ -137,7 +142,7 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
 
     private const string SqlUpdateJobRunEmailIsSent = "UPDATE {0}JOB_RUN_EMAIL SET IS_SENT = @isSent WHERE ID = @id";
 
-    private const string SqlGetPackageContent = "SELECT CONTENT FROM {0}PACKAGES WHERE NAME = @name";
+    private const string SqlGetPackageContent = "SELECT CONTENT, FILE_NAME, ARGUMENTS FROM {0}PACKAGES WHERE NAME = @name";
 
     private const string SqlGetAllPackageNames = "SELECT NAME FROM {0}PACKAGES ORDER BY NAME";
 
@@ -145,9 +150,9 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
 
     private const string SqlPackageExists = "SELECT NAME FROM {0}PACKAGES WHERE NAME = @name";
 
-    private const string SqlPackageUpdate = "UPDATE {0}PACKAGES SET CONTENT = @content, CREATE_TIME = @createTime WHERE NAME = @name";
+    private const string SqlPackageUpdate = "UPDATE {0}PACKAGES SET CONTENT = @content, AUTHOR = @author, DESCRIPTION = @description, VERSION = @version, FILE_NAME = @fileName, ARGUMENTS = @arguments, CREATE_TIME = @createTime WHERE NAME = @name";
 
-    private const string SqlPackageInsert = "INSERT INTO {0}PACKAGES (NAME, CONTENT, CREATE_TIME) VALUES (@name, @content, @createTime)";
+    private const string SqlPackageInsert = "INSERT INTO {0}PACKAGES (NAME, CONTENT, AUTHOR, DESCRIPTION, VERSION, FILE_NAME, ARGUMENTS, CREATE_TIME) VALUES (@name, @content, @author, @description, @version, @fileName, @arguments, @createTime)";
 
     private const string SqlListPackages = @"
                                     WITH CNT AS (SELECT COUNT(*) COUNT FROM {0}PACKAGES)
@@ -305,7 +310,7 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
             }
         }
     }
-    
+
     public async Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData()
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
@@ -583,7 +588,7 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    public async Task<Stream?> GetPackageStream(string name)
+    public async Task<PackageRunModel?> GetPackageRun(string name)
     {
         using (var connection = GetConnection(IsolationLevel.ReadUncommitted))
         {
@@ -591,19 +596,28 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
             {
                 _dbAccessor.AddCommandParameter(command, "name", name);
 
-                byte[]? result = null;
+                PackageRunModel? result;
 
                 await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
-                        result = (byte[])reader.GetValue("CONTENT");
+                        result = new PackageRunModel
+                        {
+                            Content = (byte[])reader.GetValue("CONTENT"),
+                            FileName = reader.GetString("FILE_NAME"),
+                            Arguments = reader.GetString("ARGUMENTS")
+                        };
+                    }
+                    else
+                    {
+                        result = null;
                     }
                 }
 
                 connection.Commit(false);
 
-                return result == null ? null : new MemoryStream(result);
+                return result;
             }
         }
     }
@@ -724,7 +738,14 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
     {
         await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageInsert, _tablePrefix)))
         {
+            var packageManifest = await GetPackageManifest(content).ConfigureAwait(false);
+
             _dbAccessor.AddCommandParameter(command, "name", packageName);
+            _dbAccessor.AddCommandParameter(command, "author", packageManifest.Author);
+            _dbAccessor.AddCommandParameter(command, "description", packageManifest.Description);
+            _dbAccessor.AddCommandParameter(command, "version", packageManifest.Version);
+            _dbAccessor.AddCommandParameter(command, "fileName", packageManifest.StartInfo.FileName);
+            _dbAccessor.AddCommandParameter(command, "arguments", packageManifest.StartInfo.Arguments);
             _dbAccessor.AddCommandParameter(command, "content", content);
             _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
 
@@ -737,12 +758,44 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
     {
         await using (var command = _dbAccessor.PrepareCommand(connection, AdoJobStoreUtil.ReplaceTablePrefix(SqlPackageUpdate, _tablePrefix)))
         {
+            var packageManifest = await GetPackageManifest(content).ConfigureAwait(false);
+
             _dbAccessor.AddCommandParameter(command, "name", packageName);
+            _dbAccessor.AddCommandParameter(command, "author", packageManifest.Author);
+            _dbAccessor.AddCommandParameter(command, "description", packageManifest.Description);
+            _dbAccessor.AddCommandParameter(command, "version", packageManifest.Version);
+            _dbAccessor.AddCommandParameter(command, "fileName", packageManifest.StartInfo.FileName);
+            _dbAccessor.AddCommandParameter(command, "arguments", packageManifest.StartInfo.Arguments);
             _dbAccessor.AddCommandParameter(command, "content", content);
             _dbAccessor.AddCommandParameter(command, "createTime", _dbAccessor.GetDbDateTimeValue(DateTimeOffset.UtcNow));
 
             await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
+    }
+
+    private static async Task<PackageManifest> GetPackageManifest(byte[] packageContent)
+    {
+        PackageManifest packageManifest;
+
+        using (var stream = new MemoryStream(packageContent))
+        using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
+        {
+            var manifestJsonEntry = zipArchive.GetEntry("manifest.json");
+            if (manifestJsonEntry != null)
+            {
+                using (var reader = new StreamReader(manifestJsonEntry.Open()))
+                {
+                    packageManifest = JsonSerializer.Deserialize<PackageManifest>(await reader.ReadToEndAsync().ConfigureAwait(false), PackageManifestJsonSerializerOptions) ?? throw new InvalidOperationException();
+                    packageManifest.Validate();
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("manifest.json not found in package zip file.");
+            }
+        }
+
+        return packageManifest;
     }
 
     private async Task<bool> PackageExists(ConnectionAndTransactionHolder connection, string packageName)

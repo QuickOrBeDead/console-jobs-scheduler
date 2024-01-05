@@ -47,7 +47,13 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 
         try
         {
-            using (var stream = await jobStoreDelegate.GetPackageStream(packageName).ConfigureAwait(false))
+            var packageRunModel = await jobStoreDelegate.GetPackageRun(packageName).ConfigureAwait(false);
+            if (packageRunModel == null)
+            {
+                throw new InvalidOperationException($"Console app package '{packageName}' not found");
+            }
+
+            using (var stream = new MemoryStream(packageRunModel.Content))
             {
                 using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
                 {
@@ -57,33 +63,36 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
 
             using (var process = new Process())
             {
-                var pathToExecutable = Path.Combine(runDirectory, $"{packageName}{(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? string.Empty : ".exe")}");
+                var startInfoArguments = string.IsNullOrWhiteSpace(packageRunModel.Arguments)
+                    ? arguments
+                    : $"{packageRunModel.Arguments} {arguments}";
 
                 process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.FileName = pathToExecutable;
+                process.StartInfo.WorkingDirectory = runDirectory;
+                process.StartInfo.FileName = packageRunModel.FileName.StartsWith("./", StringComparison.OrdinalIgnoreCase) ? Path.Combine(runDirectory, packageRunModel.FileName) : packageRunModel.FileName;
+                process.StartInfo.Arguments = startInfoArguments;
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.Arguments = arguments;
 
                 var processOutputTasks = new List<Task>();
 
                 process.StartInfo.RedirectStandardOutput = true;
                 process.OutputDataReceived += async (_, e) =>
-                    {
-                        var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, false, cancellationToken);
-                        processOutputTasks.Add(task);
-                        await task;
-                    };
+                {
+                    var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, false, cancellationToken);
+                    processOutputTasks.Add(task);
+                    await task;
+                };
                 process.StartInfo.RedirectStandardError = true;
                 process.ErrorDataReceived += async (_, e) =>
-                    {
-                        var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, true, cancellationToken);
-                        processOutputTasks.Add(task);
-                        await task;
-                    };
+                {
+                    var task = ProcessOutputDataHandler(jobStoreDelegate, jobRunId, e.Data, true, cancellationToken);
+                    processOutputTasks.Add(task);
+                    await task;
+                };
 
                 if (!process.Start())
                 {
-                    throw new InvalidOperationException($"Process couldn't be started: {pathToExecutable}");
+                    throw new InvalidOperationException($"Process couldn't be started: {packageRunModel.FileName}. Arguments: '{startInfoArguments}'.");
                 }
 
                 process.BeginOutputReadLine();
