@@ -2,17 +2,18 @@ version: '3.4'
 
 services:
   app.server:
+    image: 'boraakgn/console-jobs-scheduler'
     ports:
       - "8080"
     environment:
       - SchedulerInstanceId=Node1
       - ConsoleAppPackageRunTempPath=/app/.storage
       - ConnectionString=User ID=quartz;Password=quartz;Host=postgres;Port=5432;Database=quartz;Pooling=true;Minimum Pool Size=0;Maximum Pool Size=105;
+    depends_on:
+      - postgres
 
   postgres:
     image: 'postgres:15.5'
-    ports:
-      - "5432"
     deploy:
       mode: replicated
       replicas: 1
