@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Events;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Exceptions;
