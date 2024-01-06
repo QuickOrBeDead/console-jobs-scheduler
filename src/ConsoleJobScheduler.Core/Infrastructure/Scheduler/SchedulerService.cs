@@ -6,7 +6,8 @@ using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Models;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins.Models;
 using ConsoleJobScheduler.Core.Infrastructure.Settings;
 using ConsoleJobScheduler.Core.Infrastructure.Settings.Service;
-
+using CronExpressionDescriptor;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.Matchers;
@@ -45,11 +46,13 @@ public sealed class SchedulerService : ISchedulerService
 {
     private readonly IScheduler _scheduler;
     private readonly ISettingsService _settingsService;
+    private readonly ILogger<SchedulerService> _logger;
 
-    public SchedulerService(IScheduler scheduler, ISettingsService settingsService)
+    public SchedulerService(IScheduler scheduler, ISettingsService settingsService, ILogger<SchedulerService> logger)
     {
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
@@ -207,12 +210,6 @@ public sealed class SchedulerService : ISchedulerService
         return null;
     }
 
-    private async Task<string?> GetCronExpressionDescription(JobKey jobKey)
-    {
-        var cronExpression = await GetCronExpression(jobKey).ConfigureAwait(false);
-        return GetCronExpressionDescription(cronExpression);
-    }
-
     private async Task<string?> GetCronExpression(JobKey jobKey)
     {
         var triggers = await _scheduler.GetTriggersOfJob(jobKey);
@@ -225,13 +222,19 @@ public sealed class SchedulerService : ISchedulerService
         return trigger?.CronExpressionString;
     }
 
-    private static string GetCronExpressionDescription(IEnumerable<ITrigger> triggers)
+    private async Task<string?> GetCronExpressionDescription(JobKey jobKey)
+    {
+        var cronExpression = await GetCronExpression(jobKey).ConfigureAwait(false);
+        return GetCronExpressionDescription(cronExpression);
+    }
+
+    private string GetCronExpressionDescription(IEnumerable<ITrigger> triggers)
     {
         var cronExpression = GetCronExpression(triggers);
         return GetCronExpressionDescription(cronExpression);
     }
 
-    private static string GetCronExpressionDescription(string? cronExpression)
+    private string GetCronExpressionDescription(string? cronExpression)
     {
         if (string.IsNullOrWhiteSpace(cronExpression))
         {
@@ -240,10 +243,11 @@ public sealed class SchedulerService : ISchedulerService
 
         try
         {
-            return CronExpressionDescriptor.ExpressionDescriptor.GetDescription(cronExpression);
+            return ExpressionDescriptor.GetDescription(cronExpression);
         }
-        catch
+        catch(Exception ex)
         {
+            _logger.LogError(ex, "Cron expression '{cronExpression}' get description error.", cronExpression);
             return string.Empty;
         }
     }
