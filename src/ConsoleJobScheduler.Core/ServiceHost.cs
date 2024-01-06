@@ -39,7 +39,7 @@ public sealed class ServiceHost
         await StartWebHost().ConfigureAwait(false);
     }
 
-    public async Task Stop()
+    private async Task Stop()
     {
         _stopRequested = true;
 
@@ -167,13 +167,23 @@ public sealed class ServiceHost
             _app.UseSwaggerUI();
         }
 
-        _app.UseDefaultFiles();
-        _app.UseStaticFiles();
-        _app.UseRouting();
-        _app.UseAuthorization();
-        _app.MapControllers();
-
         _app.MapHub<JobRunConsoleHub>("/jobRunConsoleHub");
+
+        _app.MapWhen(c => c.Request.Path.StartsWithSegments("/api"), b =>
+        {
+            b.UseRouting();
+            b.UseAuthorization();
+            b.UseEndpoints(e => e.MapControllers());
+        });
+
+        _app.MapWhen(c => !c.Request.Path.StartsWithSegments("/api"), b =>
+        {
+            b.UseDefaultFiles();
+            b.UseStaticFiles();
+            b.UseRouting();
+            b.UseAuthorization();
+            b.UseEndpoints(e => e.MapFallbackToFile("index.html"));
+        });
 
         _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
