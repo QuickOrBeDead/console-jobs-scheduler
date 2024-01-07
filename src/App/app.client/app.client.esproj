@@ -11,9 +11,7 @@
 
   <ItemGroup>
     <SonarQubeSetting Include="sonar.exclusions">
-      <Value>
-        App/app.client/src/metadata/**
-        src/metadata/**
+      <Value>App/app.client/src/metadata/**,src/metadata/**
       </Value>
     </SonarQubeSetting>
   </ItemGroup>
