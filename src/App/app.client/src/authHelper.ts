@@ -26,7 +26,7 @@ export class AuthHelper {
         if (user && (!roles || isUserInRole(user, ...roles))) {
           next()
         } else {
-          next({ name: 'Login' })
+          next({ name: 'login' })
         }
       } else {
         next()
@@ -35,9 +35,13 @@ export class AuthHelper {
 
     axios.interceptors.response.use((r: any) => {
       return r
-    }, (error: any) => {
-      if (error.response.status === 401 || error.response.status === 403) {
-        router.push({ path: '/' })
+    }, async (error: any) => {
+      const status = error.response.status;
+      if (status === 401 || status === 403) {
+        if (status === 401) {
+          this.userStore.removeUser()
+        }
+        await router.push({ name: 'login' })
       }
       
       return Promise.reject(error)

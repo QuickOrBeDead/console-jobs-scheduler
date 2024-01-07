@@ -26,7 +26,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const routes = [
 { path: '/', component: Scheduler, meta: { requiresAuth: true } },
-{ path: '/login', component: Login, name: 'Login' },
+{ path: '/login', component: Login, name: 'login' },
 { path: '/jobs', component: JobsList, meta: { requiresAuth: true } },
 { path: '/jobs/edit/:jobName?/:jobGroup?', component: JobsEdit, name: 'EditJob', props: true, meta: { requiresAuth: true, roles: ["Admin", "JobEditor"] } },
 { path: '/history/:jobName?', component: HistoryList, name: 'JobHistory', meta: { requiresAuth: true } },
@@ -59,7 +59,7 @@ declare global {
 }
 
 String.prototype.toLocaleDateTimeString = function (this: string) {
-    var s = this
+    const s = this
     if (!s) {
         return ''
     }

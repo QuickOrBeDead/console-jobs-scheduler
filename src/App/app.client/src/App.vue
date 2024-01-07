@@ -15,9 +15,9 @@ const authApi = createApi(AuthApi)
 async function logout() {
   await authApi.apiAuthLogoutPost()
 
-  userStore.setUser(undefined)
+  userStore.removeUser()
 
-  router.push({ path: '/' })
+  await router.push({ name: 'login' })
 }
 </script>
 
