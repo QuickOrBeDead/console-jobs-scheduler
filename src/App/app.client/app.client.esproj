@@ -8,4 +8,12 @@
     <!-- Folder where production build objects will be placed -->
     <PublishAssetsDirectory>$(MSBuildProjectDirectory)\dist</PublishAssetsDirectory>
   </PropertyGroup>
+
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>
+        App/app.client/src/metadata/**
+      </Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>
