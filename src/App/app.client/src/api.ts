@@ -3,7 +3,7 @@ import { BaseAPI } from "./metadata/console-jobs-scheduler-api/base"
 import { ValidationProblemDetails } from "./metadata/console-jobs-scheduler-api"
 import { Ref } from "vue"
 
-export function createApi<T extends BaseAPI>(ctor: { new (): T }) : T {
+export function createApi<T extends BaseAPI>(ctor: new () => T) : T {
     const api = new ctor()
     api["basePath"] = ""
     return api

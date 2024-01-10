@@ -52,7 +52,7 @@ public sealed class DefaultConsoleAppPackageRunner : IConsoleAppPackageRunner
                 throw new InvalidOperationException($"Console app package '{packageName}' not found");
             }
 
-            using (var stream = new MemoryStream(packageRunModel.Content))
+            await using (var stream = new MemoryStream(packageRunModel.Content))
             {
                 using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
                 {

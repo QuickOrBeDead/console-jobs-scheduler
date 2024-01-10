@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { createApi } from '../api';
-import { LoginModel } from '../metadata/console-jobs-scheduler-api';
-import { AuthApi } from '../metadata/console-jobs-scheduler-api';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { createApi } from '../api'
+import { LoginModel, AuthApi } from '../metadata/console-jobs-scheduler-api'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 

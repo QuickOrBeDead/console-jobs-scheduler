@@ -777,21 +777,23 @@ public sealed class JobStoreDelegate : IJobStoreDelegate
     {
         PackageManifest packageManifest;
 
-        using (var stream = new MemoryStream(packageContent))
-        using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
+        await using (var stream = new MemoryStream(packageContent))
         {
-            var manifestJsonEntry = zipArchive.GetEntry("manifest.json");
-            if (manifestJsonEntry != null)
+            using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, false))
             {
-                using (var reader = new StreamReader(manifestJsonEntry.Open()))
+                var manifestJsonEntry = zipArchive.GetEntry("manifest.json");
+                if (manifestJsonEntry != null)
                 {
-                    packageManifest = JsonSerializer.Deserialize<PackageManifest>(await reader.ReadToEndAsync().ConfigureAwait(false), PackageManifestJsonSerializerOptions) ?? throw new InvalidOperationException();
-                    packageManifest.Validate();
+                    using (var reader = new StreamReader(manifestJsonEntry.Open()))
+                    {
+                        packageManifest = JsonSerializer.Deserialize<PackageManifest>(await reader.ReadToEndAsync().ConfigureAwait(false), PackageManifestJsonSerializerOptions) ?? throw new InvalidOperationException();
+                        packageManifest.Validate();
+                    }
                 }
-            }
-            else
-            {
-                throw new InvalidOperationException("manifest.json not found in package zip file.");
+                else
+                {
+                    throw new InvalidOperationException("manifest.json not found in package zip file.");
+                }
             }
         }
 

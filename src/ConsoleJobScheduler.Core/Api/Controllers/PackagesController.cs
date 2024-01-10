@@ -64,7 +64,7 @@ public sealed class PackagesController : ControllerBase
             return BadRequest();
         }
 
-        using MemoryStream ms = new();
+        await using MemoryStream ms = new();
         await model.File.CopyToAsync(ms).ConfigureAwait(false);
         await _schedulerService.SavePackage(model.Name, ms.ToArray()).ConfigureAwait(false);
         return Ok();
