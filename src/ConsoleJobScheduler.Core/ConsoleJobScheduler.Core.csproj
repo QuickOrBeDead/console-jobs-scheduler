@@ -12,6 +12,8 @@
   
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.32.0" />
+    <PackageReference Include="FluentMigrator" Version="5.0.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="5.0.0" />
     <PackageReference Include="MessagePipe" Version="1.7.4" />
     <PackageReference Include="MessagePipe.Analyzer" Version="1.7.4">
       <PrivateAssets>all</PrivateAssets>
