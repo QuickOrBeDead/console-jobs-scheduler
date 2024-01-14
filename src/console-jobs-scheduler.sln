@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleJobScheduler.Messagi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleJobScheduler.Core", "ConsoleJobScheduler.Core\ConsoleJobScheduler.Core.csproj", "{5B7A7D64-0B28-4D07-A04C-C170E9270312}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleJobScheduler.Core.Tests", "..\test\ConsoleJobScheduler.Core.Tests\ConsoleJobScheduler.Core.Tests.csproj", "{E1B28115-A3A0-40E2-9C45-045FBCD71C8D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5A6FB280-4931-432C-8E6B-8602B0B07D27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,10 @@ Global
 		{5B7A7D64-0B28-4D07-A04C-C170E9270312}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B7A7D64-0B28-4D07-A04C-C170E9270312}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B7A7D64-0B28-4D07-A04C-C170E9270312}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1B28115-A3A0-40E2-9C45-045FBCD71C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1B28115-A3A0-40E2-9C45-045FBCD71C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1B28115-A3A0-40E2-9C45-045FBCD71C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1B28115-A3A0-40E2-9C45-045FBCD71C8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +52,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0F3B4BB9-56CB-420A-8107-F1FA10BB6908} = {497F8579-511C-4E5D-83EB-414CB760C5F6}
 		{15CBC5AA-2C62-4382-8FB3-D572532DA445} = {497F8579-511C-4E5D-83EB-414CB760C5F6}
+		{E1B28115-A3A0-40E2-9C45-045FBCD71C8D} = {5A6FB280-4931-432C-8E6B-8602B0B07D27}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {17049AC0-2FC9-4B11-93DB-FC716336021A}
