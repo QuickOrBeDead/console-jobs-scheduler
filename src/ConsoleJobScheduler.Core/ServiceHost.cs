@@ -5,6 +5,7 @@ using ConsoleJobScheduler.Core.Infrastructure.Identity;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Events;
+using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins;
 using ConsoleJobScheduler.Core.Infrastructure.Settings.Data;
 using ConsoleJobScheduler.Core.Infrastructure.Settings.Service;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -188,15 +190,29 @@ public sealed class ServiceHost
         _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
-        await AddInitialData(_app).ConfigureAwait(false);
+        await InitDb(_app.Services).ConfigureAwait(false);
 
         await _schedulerManager.Start(_app.Services.GetRequiredService<ILoggerFactory>());
         await _app.RunAsync().ConfigureAwait(false);
     }
 
-    private static async Task AddInitialData(IHost host)
+    private static async Task InitDb(IServiceProvider serviceProvider)
     {
-        using var scope = host.Services.CreateScope();
+        MigrateDb(serviceProvider);
+        await AddDbInitialData(serviceProvider).ConfigureAwait(false);
+    }
+
+    private static void MigrateDb(IServiceProvider serviceProvider)
+    {
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+        var dbMigrationRunner = new DbMigrationRunner();
+        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!);
+    }
+
+    private static async Task AddDbInitialData(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
         using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
         using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
