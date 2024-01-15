@@ -1,3 +1,5 @@
+param ($apiKey)
+
 $currentFolder = $MyInvocation.MyCommand.Path
 $solutionFolder = $currentFolder.FullName
 $rootFolder = (get-item $currentFolder).Directory.Parent.FullName
@@ -17,7 +19,7 @@ Get-ChildItem $nugpkgOutputFolder -filter *.nupkg -recurse |
         Where-Object { -not ($_.PSIsContainer) } | 
         ForEach-Object {
             Try {
-			    dotnet nuget push $_.FullName --api-key oy2lqvoxuusa6bwgb4maychj77m7ygderjhz2mf5u7biqy --source https://api.nuget.org/v3/index.json 
+			    dotnet nuget push $_.FullName --api-key $apiKey --source https://api.nuget.org/v3/index.json 
             }
             Catch {
                 Write-Host("Nuget Push Error: " + $_.Exception.Message)
