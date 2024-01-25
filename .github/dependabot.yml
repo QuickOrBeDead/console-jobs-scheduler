@@ -13,7 +13,7 @@ updates:
     allow:
       - dependency-type: "production"
   - package-ecosystem: "npm"
-    directory: "/" # Location of package manifests
+    directory: "/src/App/app.client" # Location of package manifests
     schedule:
       interval: "weekly"
     allow:
