@@ -1,5 +1,7 @@
+using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core;
+using Quartz;
 
 namespace ConsoleJobScheduler.Core.Tests.Infrastructure.Scheduler.Migrations;
 
@@ -29,14 +31,53 @@ public class InitialSetupFixture
     }
 
     [Test]
-    public void Test()
+    public async Task Test()
     {
         // Arrange
         var migrationRunner = new DbMigrationRunner();
 
         // Act
         migrationRunner.Migrate(_postgresOptions.GetConnectionString(), "qrtz_", version: 1);
-
+        
         // Assert
+        var schedulerBuilder = SchedulerBuilder.Create()
+            .WithId("SchedulerInstanceId")
+            .WithName("ConsoleJobsSchedulerService")
+            .UsePersistentStore(
+                o =>
+                {
+                    o.UseClustering();
+                    o.UseProperties = true;
+                    o.UseNewtonsoftJsonSerializer();
+                    o.UsePostgres(
+                        p =>
+                        {
+                            p.TablePrefix = "qrtz_";
+                            p.ConnectionString = _postgresOptions.GetConnectionString();
+                        });
+                });
+        var scheduler = await schedulerBuilder.BuildScheduler();
+        var job = JobBuilder.Create<TestJob>()
+            .WithIdentity("job1", "group1")
+            .Build();
+        
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity("trigger1", "group1")
+            .StartNow()
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(100)
+                .WithRepeatCount(1))
+            .Build();
+        
+        await scheduler.ScheduleJob(job, trigger);
+        await scheduler.Start();
+    }
+    
+    public class TestJob : IJob
+    {
+        public Task Execute(IJobExecutionContext context)
+        {
+            return Task.CompletedTask;
+        }
     }
 }
