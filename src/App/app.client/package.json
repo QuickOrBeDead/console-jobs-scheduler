@@ -24,10 +24,10 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.7.0",
+    "@openapitools/openapi-generator-cli": "^2.9.0",
     "@types/bootstrap": "^5.2.10",
-    "@types/node": "^20.10.6",
-    "@vitejs/plugin-vue": "^5.0.2",
+    "@types/node": "^20.11.6",
+    "@vitejs/plugin-vue": "^5.0.3",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "volar-service-vetur": "latest",
