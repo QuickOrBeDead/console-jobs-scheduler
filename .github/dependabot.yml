@@ -11,3 +11,13 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-type: "production"
+  - package-ecosystem: "npm"
+    # Raise pull requests to update vendored dependencies that are checked in to the repository
+    vendor: true
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "production"
