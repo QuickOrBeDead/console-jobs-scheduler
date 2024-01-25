@@ -2,7 +2,6 @@ using FluentMigrator.Runner.VersionTableInfo;
 
 namespace ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core.Conventions;
 
-[VersionTableMetaData]
 public sealed class CustomVersionTableMetadataTable : DefaultVersionTableMetaData
 {
     public override string SchemaName => string.Empty;
