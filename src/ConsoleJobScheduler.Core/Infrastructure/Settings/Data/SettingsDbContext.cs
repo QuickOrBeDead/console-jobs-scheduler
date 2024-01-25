@@ -22,9 +22,9 @@ public sealed class SettingsDbContext : DbContext
                 {
                     b.HasKey(x => new { x.CategoryId, x.Name });
                     b.ToTable("qrtz_settings");
-                    b.Property(x => x.CategoryId).IsRequired();
-                    b.Property(x => x.Name).HasMaxLength(255).IsRequired();
-                    b.Property(x => x.Value);
+                    b.Property(x => x.CategoryId).HasColumnName("category_id").IsRequired();
+                    b.Property(x => x.Name).HasColumnName("name").HasMaxLength(255).IsRequired();
+                    b.Property(x => x.Value).HasColumnName("value");
                 });
     }
 }
