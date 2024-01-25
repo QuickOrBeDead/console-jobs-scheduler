@@ -4,17 +4,15 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 version: 2
 updates:
-  - package-ecosystem: "bundler"
-    # Raise pull requests to update vendored dependencies that are checked in to the repository
-    vendor: true
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    allow:
-      - dependency-type: "production"
   - package-ecosystem: "npm"
     directory: "/src/App/app.client" # Location of package manifests
     schedule:
       interval: "weekly"
     allow:
       - dependency-type: "production"
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
