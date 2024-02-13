@@ -39,6 +39,7 @@ public interface ISchedulerService
     Task SavePackage(string packageName, byte[] content);
 
     Task<PagedResult<PackageListItemModel>> ListPackages(int page = 1);
+
     Task<List<(DateTime Date, int Count)>> ListJobExecutionHistoryChartData();
 }
 
