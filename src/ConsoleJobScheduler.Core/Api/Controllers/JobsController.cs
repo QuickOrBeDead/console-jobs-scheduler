@@ -1,19 +1,16 @@
 ﻿using System.Net.Mime;
-
-using ConsoleJobScheduler.Core.Api.Models;
-using ConsoleJobScheduler.Core.Infrastructure.Data;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Models;
-
+using ConsoleJobScheduler.Core.Domain.Scheduler;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+using ConsoleJobScheduler.Core.Domain.Settings.Model;
+using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Quartz;
+using JobDetailModel = ConsoleJobScheduler.Core.Domain.Scheduler.Models.JobDetailModel;
 
 namespace ConsoleJobScheduler.Core.Api.Controllers;
-
-using JobDetailModel = Infrastructure.Scheduler.Models.JobDetailModel;
 
 [Authorize]
 [Route("api/[controller]")]

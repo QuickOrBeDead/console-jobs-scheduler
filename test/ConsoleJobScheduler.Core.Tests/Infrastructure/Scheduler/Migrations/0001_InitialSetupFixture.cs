@@ -1,6 +1,6 @@
+using ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core;
 using Quartz;
 
 namespace ConsoleJobScheduler.Core.Tests.Infrastructure.Scheduler.Migrations;

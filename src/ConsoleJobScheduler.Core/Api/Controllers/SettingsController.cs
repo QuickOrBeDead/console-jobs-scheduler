@@ -1,9 +1,6 @@
 ﻿using System.Net.Mime;
-
-using ConsoleJobScheduler.Core.Api.Models;
-using ConsoleJobScheduler.Core.Infrastructure.Settings;
-using ConsoleJobScheduler.Core.Infrastructure.Settings.Service;
-
+using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,18 +11,18 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class SettingsController : ControllerBase
 {
-    private readonly ISettingsService _settingsService;
+    private readonly ISettingsApplicationService _settingsApplicationService;
 
-    public SettingsController(ISettingsService settingsService)
+    public SettingsController(ISettingsApplicationService settingsService)
     {
-        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _settingsApplicationService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
     }
 
     [HttpGet(nameof(GetGeneralSettings))]
     [Produces(MediaTypeNames.Application.Json)]
     public Task<GeneralSettings> GetGeneralSettings()
     {
-        return _settingsService.GetSettings<GeneralSettings>();
+        return _settingsApplicationService.GetSettings<GeneralSettings>();
     }
 
     [HttpPost(nameof(SaveGeneralSettings))]
@@ -33,14 +30,14 @@ public sealed class SettingsController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     public Task SaveGeneralSettings([FromBody] GeneralSettings settings)
     {
-        return _settingsService.SaveSettings(settings);
+        return _settingsApplicationService.SaveSettings(settings);
     }
 
     [HttpGet(nameof(GetSmtpSettings))]
     [Produces(MediaTypeNames.Application.Json)]
     public Task<SmtpSettings> GetSmtpSettings()
     {
-        return _settingsService.GetSettings<SmtpSettings>();
+        return _settingsApplicationService.GetSettings<SmtpSettings>();
     }
 
     [HttpPost(nameof(SaveSmtpSettings))]
@@ -48,6 +45,6 @@ public sealed class SettingsController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     public Task SaveSmtpSettings([FromBody] SmtpSettings settings)
     {
-        return _settingsService.SaveSettings(settings);
+        return _settingsApplicationService.SaveSettings(settings);
     }
 }
