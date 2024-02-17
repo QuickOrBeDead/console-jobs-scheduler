@@ -3,7 +3,6 @@ using ConsoleJobScheduler.Core.Api.Model;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
-using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

@@ -3,7 +3,6 @@ using System.Net.Mime;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Model;
 using ConsoleJobScheduler.Core.Domain.Identity.Model;
-using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

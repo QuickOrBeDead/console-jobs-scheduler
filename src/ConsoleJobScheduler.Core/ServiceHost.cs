@@ -111,7 +111,7 @@ public sealed class ServiceHost
                         Stop().GetAwaiter().GetResult();
                     }
                 });
-        
+
         if (!_app.Environment.IsDevelopment())
         {
             _app.UseExceptionHandler("/Error");

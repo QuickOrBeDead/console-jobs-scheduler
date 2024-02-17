@@ -1,5 +1,4 @@
-﻿using ConsoleJobScheduler.Core.Domain.Settings.Model;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleJobScheduler.Core.Domain.Settings.Infra;
 

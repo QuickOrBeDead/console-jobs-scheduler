@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ConsoleJobScheduler.Core.Domain.Runner.Exceptions;
+using ConsoleJobScheduler.Messaging;
 using Microsoft.Extensions.Configuration;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
@@ -7,11 +8,13 @@ namespace ConsoleJobScheduler.Core.Domain.Runner;
 public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IJobRunService _jobRunService;
+    private readonly IConsoleMessageProcessorManager _consoleMessageProcessorManager;
     private readonly IConfiguration _configuration;
 
-    public ConsoleAppPackageRunner(IJobRunService jobRunService, IConfiguration configuration)
+    public ConsoleAppPackageRunner(IJobRunService jobRunService, IConsoleMessageProcessorManager consoleMessageProcessorManager, IConfiguration configuration)
     {
         _jobRunService = jobRunService ?? throw new ArgumentNullException(nameof(jobRunService));
+        _consoleMessageProcessorManager = consoleMessageProcessorManager;
         _configuration = configuration;
     }
 
@@ -86,8 +89,25 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
         }
     }
 
-    private Task ProcessOutputDataHandler(string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
+    private async Task ProcessOutputDataHandler(string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
     {
-        return _jobRunService.ProcessJobRunConsoleMessage(jobRunId, data, isError, cancellationToken);
+        if (string.IsNullOrEmpty(data))
+        {
+            return;
+        }
+
+        if (isError)
+        {
+            await _jobRunService.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+            return;
+        }
+
+        var consoleMessage = ConsoleMessageReader.ReadMessage(data);
+        if (consoleMessage == null)
+        {
+            return;
+        }
+
+        await _consoleMessageProcessorManager.ProcessMessage(jobRunId, consoleMessage, cancellationToken);
     }
 }

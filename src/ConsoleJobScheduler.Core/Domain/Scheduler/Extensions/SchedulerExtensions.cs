@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
 using Quartz;
-using Quartz.Impl.AdoJobStore;
 
 namespace ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
 
