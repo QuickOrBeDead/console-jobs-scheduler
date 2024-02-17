@@ -25,7 +25,7 @@ public sealed class SmtpSettings : ISettings
 
     public string? Domain { get; set; }
 
-    public SettingCategory GetCategory() => SettingCategory.Smtp;
+    public SettingsCategory GetCategory() => SettingsCategory.Smtp;
 
     public void Map(SettingsData data)
     {

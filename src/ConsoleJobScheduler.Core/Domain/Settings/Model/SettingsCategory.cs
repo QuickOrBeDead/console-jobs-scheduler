@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Domain.Settings.Model;
 
-public enum SettingCategory
+public enum SettingsCategory
 {
     General = 1,
     Smtp = 2

@@ -56,7 +56,7 @@ public static class PostgresDatabase
         cmd.ExecuteNonQuery();
     }
 
-    public static void Delete(PostgresOptions options)
+    private static void Delete(PostgresOptions options)
     {
         using var conn = new NpgsqlConnection(options.GetDbCreateConnectionString());
         conn.Open();

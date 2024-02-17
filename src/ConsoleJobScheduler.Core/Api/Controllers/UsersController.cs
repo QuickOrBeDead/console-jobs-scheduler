@@ -2,6 +2,7 @@
 using System.Net.Mime;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Model;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,7 @@ public sealed class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(int userId)
     {
-        var userDetail = await _identityApplicationService.GetUserDetail(userId);
+        var userDetail = await _identityApplicationService.GetUserForEdit(userId);
         return userDetail == null ? NotFound() : Ok(userDetail);
     }
 
@@ -44,7 +45,7 @@ public sealed class UsersController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     public Task<List<string>> GetRoles()
     {
-        return _identityApplicationService.GetRoles();
+        return _identityApplicationService.GetAllRoles();
     }
 
     [HttpPost]

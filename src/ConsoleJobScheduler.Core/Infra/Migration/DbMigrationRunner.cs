@@ -1,21 +1,22 @@
-using ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Conventions;
+using ConsoleJobScheduler.Core.Infra.Migration.Conventions;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
 using FluentMigrator.Runner.Generators;
+using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.Processors;
 using FluentMigrator.Runner.VersionTableInfo;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core;
+namespace ConsoleJobScheduler.Core.Infra.Migration;
 
 public interface IDbMigrationRunner
 {
-    void Migrate(string connectionString, string tablePrefix, string dbType = "PostgreSQL", long? version = null);
+    void Migrate(string connectionString, string tablePrefix, string migrationGroup, string dbType = "PostgreSQL", long? version = null);
 }
 
 public sealed class DbMigrationRunner : IDbMigrationRunner
 {
-    public void Migrate(string connectionString, string tablePrefix, string dbType = "PostgreSQL", long? version = null)
+    public void Migrate(string connectionString, string tablePrefix, string migrationGroup, string dbType = "PostgreSQL", long? version = null)
     {
         using var serviceProvider = new ServiceCollection()
             .AddFluentMigratorCore()
@@ -39,6 +40,10 @@ public sealed class DbMigrationRunner : IDbMigrationRunner
             .Configure<SelectingGeneratorAccessorOptions>(cfg =>
             {
                 cfg.GeneratorId = dbType;
+            })
+            .Configure<RunnerOptions>(opt =>
+            {
+                opt.Tags = [migrationGroup];
             })
             .BuildServiceProvider(false);
 

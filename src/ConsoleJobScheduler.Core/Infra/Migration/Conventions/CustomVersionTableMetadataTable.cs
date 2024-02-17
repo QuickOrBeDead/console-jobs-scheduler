@@ -1,6 +1,6 @@
 using FluentMigrator.Runner.VersionTableInfo;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Conventions;
+namespace ConsoleJobScheduler.Core.Infra.Migration.Conventions;
 
 public sealed class CustomVersionTableMetadataTable : DefaultVersionTableMetaData
 {

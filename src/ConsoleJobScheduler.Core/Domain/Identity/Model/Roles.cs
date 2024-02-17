@@ -1,4 +1,4 @@
-﻿namespace ConsoleJobScheduler.Core.Domain.Settings.Model;
+﻿namespace ConsoleJobScheduler.Core.Domain.Identity.Model;
 
 public static class Roles
 {

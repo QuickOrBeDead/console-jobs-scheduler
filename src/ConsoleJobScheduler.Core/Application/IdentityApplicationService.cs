@@ -3,6 +3,7 @@ using System.Transactions;
 using ConsoleJobScheduler.Core.Application.Model;
 using ConsoleJobScheduler.Core.Domain.Identity;
 using ConsoleJobScheduler.Core.Domain.Identity.Infra;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Identity;
@@ -13,9 +14,9 @@ public interface IIdentityApplicationService
 {
     Task<PagedResult<UserListItemModel>> ListUsers(int? pageNumber = null);
 
-    Task<UserDetailModel?> GetUserDetail(int userId);
+    Task<UserDetailModel?> GetUserForEdit(int userId);
 
-    Task<List<string>> GetRoles();
+    Task<List<string>> GetAllRoles();
 
     Task<UserAddOrUpdateResultModel?> SaveUser(UserAddOrUpdateModel model);
 
@@ -23,10 +24,9 @@ public interface IIdentityApplicationService
 
     Task Logout();
 
-    UserModel? GetUser(ClaimsPrincipal user);
+    UserContext? GetUserContext(ClaimsPrincipal user);
 
-    Task AddRole(string roleName);
-    Task SaveInitialData();
+    Task AddInitialRolesAndUsers();
 }
 
 public sealed class IdentityApplicationService : IIdentityApplicationService
@@ -54,14 +54,14 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         return _signInManager.SignOutAsync();
     }
 
-    public UserModel? GetUser(ClaimsPrincipal user)
+    public UserContext? GetUserContext(ClaimsPrincipal user)
     {
         if (!_signInManager.IsSignedIn(user))
         {
             return null;
         }
 
-        return new UserModel
+        return new UserContext
         {
             UserName = GetClaimValue(user, ClaimTypes.Name),
             Roles = GetRoles(user)
@@ -76,7 +76,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         return result;
     }
 
-    public async Task<UserDetailModel?> GetUserDetail(int userId)
+    public async Task<UserDetailModel?> GetUserForEdit(int userId)
     {
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var user = await _userRepository.FindByIdAsync(userId);
@@ -88,7 +88,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         };
     }
 
-    public async Task<List<string>> GetRoles()
+    public async Task<List<string>> GetAllRoles()
     {
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var result = await _roleRepository.GetRoles().ConfigureAwait(false);
@@ -105,14 +105,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         return result;
     }
 
-    public async Task AddRole(string roleName)
-    {
-        using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-        await _roleRepository.AddRole(roleName);
-        transactionScope.Complete();
-    }
-
-    public async Task SaveInitialData()
+    public async Task AddInitialRolesAndUsers()
     {
         using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
@@ -124,7 +117,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
         if (!await _userRepository.UserExists("admin").ConfigureAwait(false))
         {
-            await SaveUser(new UserAddOrUpdateModel { UserName = "admin", Password = "Password", Roles = new List<string> { Roles.Admin } })
+            await _identityService.SaveUser(new UserAddOrUpdateModel { UserName = "admin", Password = "Password", Roles = new List<string> { Roles.Admin } })
                 .ConfigureAwait(false);
         }
 
@@ -133,11 +126,18 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     private static string? GetClaimValue(ClaimsPrincipal contextUser, string type)
     {
-        return contextUser.Claims.FirstOrDefault(x => x.Type == type)?.Value;
+        return contextUser.FindFirstValue(type);
     }
 
     private static List<string> GetRoles(ClaimsPrincipal contextUser)
     {
-        return contextUser.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+        return contextUser.FindAll(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+    }
+
+    private async Task AddRole(string roleName)
+    {
+        using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        await _roleRepository.AddRole(roleName);
+        transactionScope.Complete();
     }
 }

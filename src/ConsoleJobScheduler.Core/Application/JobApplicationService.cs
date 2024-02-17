@@ -6,7 +6,7 @@ using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
 using ConsoleJobScheduler.Core.Domain.Scheduler;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Quartz;
 
@@ -14,20 +14,20 @@ namespace ConsoleJobScheduler.Core.Application;
 
 public interface IJobApplicationService
 {
-    Task InsertJobHistoryEntry(IJobExecutionContext context, CancellationToken cancellationToken = default);
     Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id);
     Task<string?> GetJobExecutionErrorDetail(string id);
     Task<byte[]?> GetJobRunAttachmentContent(long id);
     Task<PagedResult<JobExecutionHistoryListItem>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
     Task SavePackage(string packageName, byte[] content);
     Task<List<string>> GetAllPackageNames();
-    Task<PackageDetailsModel?> GetPackageDetails(string name);
-    Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1);
+    Task<PackageDetails?> GetPackageDetails(string name);
+    Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1);
+    Task InsertJobHistoryEntry(IJobExecutionContext context, CancellationToken cancellationToken = default);
     Task UpdateJobHistoryEntryCompleted(string id, TimeSpan runTime, JobExecutionException? jobException, CancellationToken cancellationToken = default);
     Task UpdateJobHistoryEntryVetoed(string id, CancellationToken cancellationToken = default);
     Task UpdateJobHistoryEntryLastSignalTime(string id, DateTime signalTime, CancellationToken cancellationToken = default);
-    Task<PagedResult<JobListItemModel>> ListJobs(int? pageNumber = null);
-    Task<JobDetailModel?> GetJobDetail(string group, string name);
+    Task<PagedResult<JobListItem>> ListJobs(int? pageNumber = null);
+    Task<JobDetail?> GetJobDetail(string group, string name);
     Task AddOrUpdateJob(JobAddOrUpdateModel model);
 }
 
@@ -134,12 +134,12 @@ public sealed class JobApplicationService : IJobApplicationService
         return _jobPackageRepository.GetAllPackageNames();
     }
 
-    public Task<PackageDetailsModel?> GetPackageDetails(string name)
+    public Task<PackageDetails?> GetPackageDetails(string name)
     {
         return _jobPackageRepository.GetPackageDetails(name);
     }
 
-    public Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1)
+    public Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1)
     {
         return _jobPackageRepository.ListPackages(pageSize, page);
     }
@@ -159,12 +159,12 @@ public sealed class JobApplicationService : IJobApplicationService
         return _jobHistoryRepository.UpdateJobHistoryEntryLastSignalTime(id, signalTime, cancellationToken);
     }
 
-    public Task<PagedResult<JobListItemModel>> ListJobs(int? pageNumber = null)
+    public Task<PagedResult<JobListItem>> ListJobs(int? pageNumber = null)
     {
         return _schedulerService.ListJobs(pageNumber ?? 1);
     }
 
-    public async Task<JobDetailModel?> GetJobDetail(string group, string name)
+    public async Task<JobDetail?> GetJobDetail(string group, string name)
     {
         var jobKey = new JobKey(name, group);
         var jobDetail = await _schedulerService.GetJobDetail(jobKey);
@@ -174,7 +174,7 @@ public sealed class JobApplicationService : IJobApplicationService
         }
 
         return
-            new JobDetailModel
+            new JobDetail
             {
                 JobName = jobDetail.JobName,
                 JobGroup = jobDetail.JobGroup,

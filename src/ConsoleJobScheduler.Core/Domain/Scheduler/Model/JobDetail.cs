@@ -1,6 +1,6 @@
-﻿namespace ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+﻿namespace ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 
-public sealed class JobDetailModel
+public sealed class JobDetail
 {
     public string JobName { get; set; }
 

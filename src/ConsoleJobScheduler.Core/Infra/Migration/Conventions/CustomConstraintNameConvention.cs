@@ -3,7 +3,7 @@ using FluentMigrator.Expressions;
 using FluentMigrator.Model;
 using FluentMigrator.Runner.Conventions;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Conventions;
+namespace ConsoleJobScheduler.Core.Infra.Migration.Conventions;
 
 public sealed class CustomConstraintNameConvention : IConstraintConvention
 {

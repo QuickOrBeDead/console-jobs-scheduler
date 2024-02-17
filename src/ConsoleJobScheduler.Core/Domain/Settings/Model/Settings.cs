@@ -1,8 +1,8 @@
 ﻿namespace ConsoleJobScheduler.Core.Domain.Settings.Model;
 
-public sealed class SettingModel
+public sealed class Settings
 {
-    public SettingCategory CategoryId { get; set; }
+    public SettingsCategory CategoryId { get; set; }
 
     public required string Name { get; init; }
 

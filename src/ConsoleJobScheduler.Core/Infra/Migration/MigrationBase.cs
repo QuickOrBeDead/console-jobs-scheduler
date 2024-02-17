@@ -1,8 +1,6 @@
-using FluentMigrator;
+namespace ConsoleJobScheduler.Core.Infra.Migration;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core;
-
-public abstract class MigrationBase(IMigrationContext migrationContext) : Migration
+public abstract class MigrationBase(IMigrationContext migrationContext) : FluentMigrator.Migration
 {
     private readonly IMigrationContext _migrationContext = migrationContext ?? throw new ArgumentNullException(nameof(migrationContext));
 

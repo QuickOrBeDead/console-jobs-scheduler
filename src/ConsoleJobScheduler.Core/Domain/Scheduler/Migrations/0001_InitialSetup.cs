@@ -1,23 +1,97 @@
 using System.Data;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Extensions;
+using ConsoleJobScheduler.Core.Infra.Migration;
+using ConsoleJobScheduler.Core.Infra.Migration.Extensions;
 using FluentMigrator;
 using FluentMigrator.Model;
-using Core_MigrationBase = ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.MigrationBase;
-using MigrationBase = ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.MigrationBase;
-using Migrations_Core_MigrationBase = ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.MigrationBase;
-using Scheduler_Migrations_Core_MigrationBase = ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.MigrationBase;
+using MigrationBase = ConsoleJobScheduler.Core.Infra.Migration.MigrationBase;
 
 namespace ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations;
 
+[Tags("Scheduler")]
 [Migration(1, TransactionBehavior.Default)]
-public class InitialSetup : Scheduler_Migrations_Core_MigrationBase
+public class InitialSetup : MigrationBase
 {
     public InitialSetup(IMigrationContext migrationContext) : base(migrationContext)
     {
     }
 
     public override void Up()
+    {
+        CreateScheduler();
+        CreateHistory();
+        CreateRunner();
+        CreateSettings();
+    }
+
+    private void CreateSettings()
+    {
+        // ------------------------------ settings ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("settings"))
+            .WithColumn("category_id").AsInt32().NotNullable().PrimaryKey()
+            .WithColumn("name").AsString(255).NotNullable().PrimaryKey()
+            .WithColumn("value").AsString().Nullable();
+    }
+
+    private void CreateRunner()
+    {
+        // ------------------------------ job_run_attachment ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("job_run_attachment"))
+            .WithColumn("id").AsInt64().NotNullable().Identity().PrimaryKey()
+            .WithColumn("job_run_id").AsString(30).NotNullable()
+            .WithColumn("email_id").AsGuid().Nullable()
+            .WithColumn("name").AsString(256).NotNullable()
+            .WithColumn("content_type").AsString(128).NotNullable()
+            .WithColumn("content").AsBytea().NotNullable()
+            .WithColumn("create_time").AsInt64().NotNullable();
+
+        Create.Index(GetIndexNameWithTablePrefix("job_run_attachment_job_run_id"))
+            .OnTable(GetNameWithTablePrefix("job_run_attachment"))
+            .OnColumn("job_run_id").Ascending()
+            .WithOptions().NonClustered();
+
+        // ------------------------------ job_run_email ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("job_run_email"))
+            .WithColumn("id").AsGuid().NotNullable().PrimaryKey()
+            .WithColumn("job_run_id").AsString(30).NotNullable()
+            .WithColumn("subject").AsString(256).NotNullable()
+            .WithColumn("body").AsString().NotNullable()
+            .WithColumn("message_to").AsString().NotNullable()
+            .WithColumn("message_cc").AsString().NotNullable()
+            .WithColumn("message_bcc").AsString().NotNullable()
+            .WithColumn("is_sent").AsBoolean().NotNullable()
+            .WithColumn("create_time").AsInt64().NotNullable();
+
+        Create.Index(GetIndexNameWithTablePrefix("job_run_email_job_run_id"))
+            .OnTable(GetNameWithTablePrefix("job_run_email"))
+            .OnColumn("job_run_id").Ascending()
+            .WithOptions().NonClustered();
+
+        // ------------------------------ job_run_log ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("job_run_log"))
+            .WithColumn("id").AsInt64().NotNullable().Identity().PrimaryKey()
+            .WithColumn("job_run_id").AsString(30).NotNullable()
+            .WithColumn("content").AsString().Nullable()
+            .WithColumn("is_error").AsBoolean().NotNullable()
+            .WithColumn("create_time").AsInt64().NotNullable();
+
+        Create.Index(GetIndexNameWithTablePrefix("job_run_log_job_run_id"))
+            .OnTable(GetNameWithTablePrefix("job_run_log"))
+            .OnColumn("job_run_id").Ascending()
+            .WithOptions().NonClustered();
+
+        // ------------------------------ packages ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("packages"))
+            .WithColumn("name").AsString(256).NotNullable().PrimaryKey()
+            .WithColumn("content").AsBytea().NotNullable()
+            .WithColumn("create_time").AsInt64().NotNullable()
+            .WithColumn("file_name").AsString(1024).NotNullable()
+            .WithColumn("arguments").AsString(1024).NotNullable()
+            .WithColumn("author").AsString(50).NotNullable()
+            .WithColumn("description").AsString(1024).NotNullable()
+            .WithColumn("version").AsString(50).NotNullable();
+    }
+
+    private void CreateScheduler()
     {
         // ------------------------------ blob_triggers ----------------------------------------------
         Create.Table(GetNameWithTablePrefix("blob_triggers"))
@@ -163,86 +237,10 @@ public class InitialSetup : Scheduler_Migrations_Core_MigrationBase
             .OnColumn("trigger_group").Ascending()
             .WithOptions().NonClustered();
 
-        // ------------------------------ job_history ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("job_history"))
-            .WithColumn("id").AsString(30).NotNullable().PrimaryKey()
-            .WithColumn("sched_name").AsString().NotNullable()
-            .WithColumn("instance_name").AsString().NotNullable()
-            .WithColumn("job_name").AsString().NotNullable()
-            .WithColumn("job_group").AsString().NotNullable()
-            .WithColumn("package_name").AsString().Nullable()
-            .WithColumn("trigger_name").AsString().NotNullable()
-            .WithColumn("trigger_group").AsString().NotNullable()
-            .WithColumn("fired_time").AsInt64().NotNullable()
-            .WithColumn("sched_time").AsInt64().NotNullable()
-            .WithColumn("last_signal_time").AsInt64().NotNullable()
-            .WithColumn("run_time").AsInt64().Nullable()
-            .WithColumn("has_error").AsBoolean().NotNullable()
-            .WithColumn("error_message").AsString().Nullable()
-            .WithColumn("error_details").AsString().Nullable()
-            .WithColumn("vetoed").AsBoolean().NotNullable()
-            .WithColumn("completed").AsBoolean().NotNullable();
-
-        // ------------------------------ job_run_attachment ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("job_run_attachment"))
-            .WithColumn("id").AsInt64().NotNullable().Identity().PrimaryKey()
-            .WithColumn("job_run_id").AsString(30).NotNullable()
-            .WithColumn("email_id").AsGuid().Nullable()
-            .WithColumn("name").AsString(256).NotNullable()
-            .WithColumn("content_type").AsString(128).NotNullable()
-            .WithColumn("content").AsBytea().NotNullable()
-            .WithColumn("create_time").AsInt64().NotNullable();
-
-        Create.Index(GetIndexNameWithTablePrefix("job_run_attachment_job_run_id"))
-            .OnTable(GetNameWithTablePrefix("job_run_attachment"))
-            .OnColumn("job_run_id").Ascending()
-            .WithOptions().NonClustered();
-
-        // ------------------------------ job_run_email ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("job_run_email"))
-            .WithColumn("id").AsGuid().NotNullable().PrimaryKey()
-            .WithColumn("job_run_id").AsString(30).NotNullable()
-            .WithColumn("subject").AsString(256).NotNullable()
-            .WithColumn("body").AsString().NotNullable()
-            .WithColumn("message_to").AsString().NotNullable()
-            .WithColumn("message_cc").AsString().NotNullable()
-            .WithColumn("message_bcc").AsString().NotNullable()
-            .WithColumn("is_sent").AsBoolean().NotNullable()
-            .WithColumn("create_time").AsInt64().NotNullable();
-
-        Create.Index(GetIndexNameWithTablePrefix("job_run_email_job_run_id"))
-            .OnTable(GetNameWithTablePrefix("job_run_email"))
-            .OnColumn("job_run_id").Ascending()
-            .WithOptions().NonClustered();
-
-        // ------------------------------ job_run_log ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("job_run_log"))
-            .WithColumn("id").AsInt64().NotNullable().Identity().PrimaryKey()
-            .WithColumn("job_run_id").AsString(30).NotNullable()
-            .WithColumn("content").AsString().Nullable()
-            .WithColumn("is_error").AsBoolean().NotNullable()
-            .WithColumn("create_time").AsInt64().NotNullable();
-
-        Create.Index(GetIndexNameWithTablePrefix("job_run_log_job_run_id"))
-            .OnTable(GetNameWithTablePrefix("job_run_log"))
-            .OnColumn("job_run_id").Ascending()
-            .WithOptions().NonClustered();
-
         // ------------------------------ locks ----------------------------------------------
         Create.Table(GetNameWithTablePrefix("locks"))
             .WithColumn("sched_name").AsString().NotNullable().PrimaryKey()
             .WithColumn("lock_name").AsString().NotNullable().PrimaryKey();
-
-        // ------------------------------ packages ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("packages"))
-            .WithColumn("name").AsString(256).NotNullable().PrimaryKey()
-            .WithColumn("content").AsBytea().NotNullable()
-            .WithColumn("create_time").AsInt64().NotNullable()
-            .WithColumn("file_name").AsString(1024).NotNullable()
-            .WithColumn("arguments").AsString(1024).NotNullable()
-            .WithColumn("author").AsString(50).NotNullable()
-            .WithColumn("description").AsString(1024).NotNullable()
-            .WithColumn("version").AsString(50).NotNullable();
 
         // ------------------------------ paused_trigger_grps ----------------------------------------------
         Create.Table(GetNameWithTablePrefix("paused_trigger_grps"))
@@ -255,12 +253,6 @@ public class InitialSetup : Scheduler_Migrations_Core_MigrationBase
             .WithColumn("instance_name").AsString().NotNullable().PrimaryKey()
             .WithColumn("last_checkin_time").AsInt64().NotNullable()
             .WithColumn("checkin_interval").AsInt64().NotNullable();
-
-        // ------------------------------ settings ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("settings"))
-            .WithColumn("CategoryId").AsInt32().NotNullable().PrimaryKey()
-            .WithColumn("Name").AsString(255).NotNullable().PrimaryKey()
-            .WithColumn("Value").AsString().Nullable();
 
         // ------------------------------ simple_triggers ----------------------------------------------
         Create.Table(GetNameWithTablePrefix("simple_triggers"))
@@ -277,7 +269,7 @@ public class InitialSetup : Scheduler_Migrations_Core_MigrationBase
             .OnUpdate(Rule.None)
             .OnDelete(Rule.Cascade);
 
-        // ------------------------------ job_history ----------------------------------------------
+        // ------------------------------ simprop_triggers ----------------------------------------------
         Create.Table(GetNameWithTablePrefix("simprop_triggers"))
             .WithColumn("sched_name").AsString().NotNullable().PrimaryKey()
             .WithColumn("trigger_name").AsString().NotNullable().PrimaryKey()
@@ -300,6 +292,29 @@ public class InitialSetup : Scheduler_Migrations_Core_MigrationBase
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)
             .OnDelete(Rule.Cascade);
+    }
+
+    private void CreateHistory()
+    {
+        // ------------------------------ job_history ----------------------------------------------
+        Create.Table(GetNameWithTablePrefix("job_history"))
+            .WithColumn("id").AsString(30).NotNullable().PrimaryKey()
+            .WithColumn("sched_name").AsString().NotNullable()
+            .WithColumn("instance_name").AsString().NotNullable()
+            .WithColumn("job_name").AsString().NotNullable()
+            .WithColumn("job_group").AsString().NotNullable()
+            .WithColumn("package_name").AsString().Nullable()
+            .WithColumn("trigger_name").AsString().NotNullable()
+            .WithColumn("trigger_group").AsString().NotNullable()
+            .WithColumn("fired_time").AsInt64().NotNullable()
+            .WithColumn("sched_time").AsInt64().NotNullable()
+            .WithColumn("last_signal_time").AsInt64().NotNullable()
+            .WithColumn("run_time").AsInt64().Nullable()
+            .WithColumn("has_error").AsBoolean().NotNullable()
+            .WithColumn("error_message").AsString().Nullable()
+            .WithColumn("error_details").AsString().Nullable()
+            .WithColumn("vetoed").AsBoolean().NotNullable()
+            .WithColumn("completed").AsBoolean().NotNullable();
     }
 
     public override void Down()

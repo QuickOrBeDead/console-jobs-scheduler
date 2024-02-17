@@ -47,7 +47,7 @@ onMounted(async () => {
     metadata.value = data.metadata
     nodes.value = data.nodes ? data.nodes : []
 
-    loadChart()
+    await loadChart()
 })
 
 async function loadChart() {

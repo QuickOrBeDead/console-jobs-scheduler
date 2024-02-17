@@ -1,6 +1,8 @@
 ﻿using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Domain.Runner;
+using ConsoleJobScheduler.Core.Domain.Runner.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Quartz;
 
 namespace ConsoleJobScheduler.Core.Jobs;
@@ -9,22 +11,23 @@ namespace ConsoleJobScheduler.Core.Jobs;
 public sealed class ConsoleAppPackageJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<ConsoleAppPackageJob> _logger;
 
-    public ConsoleAppPackageJob(IServiceProvider serviceProvider)
+    public ConsoleAppPackageJob(IServiceProvider serviceProvider, ILogger<ConsoleAppPackageJob> logger)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var jobData = context.JobDetail.JobDataMap;
-        var package = jobData.GetString("package");
+        var package = context.JobDetail.GetPackageName();
         if (package == null)
         {
             throw new InvalidOperationException("jobData.GetString(\"package\") is null");
         }
 
-        var parameters = jobData.GetString("parameters");
+        var parameters = context.JobDetail.GetParameters();
         if (parameters == null)
         {
             throw new InvalidOperationException("jobData.GetString(\"parameters\") is null");
@@ -41,10 +44,9 @@ public sealed class ConsoleAppPackageJob : IJob
                     {
                         await jobApplicationService.UpdateJobHistoryEntryLastSignalTime(jobRunId, DateTime.UtcNow, c);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Empty
-                        // TODO: log
+                        _logger.LogError(ex, "Error updating job history last signal time. Job run id: {jobRunId}", jobRunId);
                     }
 
                     try
@@ -76,15 +78,15 @@ public sealed class ConsoleAppPackageJob : IJob
             {
                 // Empty
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Empty
-                // TODO: log
+                _logger.LogError(ex, "Error updating job history last signal time.");
             }
         }
         finally
         {
             await cancellationTokenSource.CancelAsync();
+            cancellationTokenSource.Dispose();
         }
     }
 }

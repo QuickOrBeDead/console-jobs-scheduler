@@ -2,7 +2,7 @@
 
 public interface ISettings
 {
-    SettingCategory GetCategory();
+    SettingsCategory GetCategory();
 
     void Map(SettingsData data);
 

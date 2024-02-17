@@ -20,20 +20,15 @@ public sealed class IdentityService : IIdentityService
 
     public async Task<UserAddOrUpdateResultModel?> SaveUser(UserAddOrUpdateModel model)
     {
-        if (model.Id == 0)
+        if (model.Id > 0)
         {
             var result = await _userRepository.UpdateAsync(new User(model.Id, model.UserName!, model.Roles), model.Password);
             return result.Succeeded ? UserAddOrUpdateResultModel.Success(model.Id) : UserAddOrUpdateResultModel.Fail(result.Errors);
         }
         else
         {
-            return await CreateUser(model);
+            var result = await _userRepository.CreateAsync(new User(model.Id, model.UserName!, model.Roles), model.Password!);
+            return result.Succeeded ? UserAddOrUpdateResultModel.Success(model.Id) : UserAddOrUpdateResultModel.Fail(result.Errors);
         }
-    }
-
-    public async Task<UserAddOrUpdateResultModel?> CreateUser(UserAddOrUpdateModel model)
-    {
-        var result = await _userRepository.CreateAsync(new User(model.Id, model.UserName!, model.Roles), model.Password!);
-        return result.Succeeded ? UserAddOrUpdateResultModel.Success(model.Id) : UserAddOrUpdateResultModel.Fail(result.Errors);
     }
 }

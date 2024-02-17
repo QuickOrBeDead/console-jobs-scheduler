@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+namespace ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 
 public sealed class JobAddOrUpdateModel
 {

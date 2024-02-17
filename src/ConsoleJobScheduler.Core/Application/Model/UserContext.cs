@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Application.Model;
 
-public sealed class UserModel
+public sealed class UserContext
 {
     private IList<string>? _roles;
 

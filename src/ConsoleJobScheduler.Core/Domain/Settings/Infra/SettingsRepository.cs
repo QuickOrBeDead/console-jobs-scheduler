@@ -5,9 +5,9 @@ namespace ConsoleJobScheduler.Core.Domain.Settings.Infra;
 
 public interface ISettingsRepository
 {
-    Task<List<SettingModel>> GetSettings(SettingCategory category);
+    Task<List<Model.Settings>> GetSettings(SettingsCategory category);
 
-    Task SaveSettings(SettingCategory category, IEnumerable<SettingModel> settings);
+    Task SaveSettings(SettingsCategory category, IEnumerable<Model.Settings> settings);
 }
 
 public sealed class SettingsRepository : ISettingsRepository
@@ -19,12 +19,12 @@ public sealed class SettingsRepository : ISettingsRepository
         _settingsDbContext = settingsDbContext ?? throw new ArgumentNullException(nameof(settingsDbContext));
     }
 
-    public Task<List<SettingModel>> GetSettings(SettingCategory category)
+    public Task<List<Model.Settings>> GetSettings(SettingsCategory category)
     {
         return _settingsDbContext.Settings.Where(x => x.CategoryId == category).ToListAsync();
     }
 
-    public Task SaveSettings(SettingCategory category, IEnumerable<SettingModel> settings)
+    public Task SaveSettings(SettingsCategory category, IEnumerable<Model.Settings> settings)
     {
         return _settingsDbContext.Settings.BulkMergeAsync(settings, x => x.ColumnPrimaryKeyExpression = c => new { c.CategoryId, c.Name });
     }

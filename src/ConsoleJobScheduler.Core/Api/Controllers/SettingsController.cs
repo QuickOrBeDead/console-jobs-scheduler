@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

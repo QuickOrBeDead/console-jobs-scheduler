@@ -7,9 +7,9 @@ using ConsoleJobScheduler.Core.Domain.Identity.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Scheduler;
 using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core;
 using ConsoleJobScheduler.Core.Domain.Settings;
 using ConsoleJobScheduler.Core.Infra.EMail;
+using ConsoleJobScheduler.Core.Infra.Migration;
 using MessagePipe;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -55,9 +55,7 @@ public sealed class ServiceHost
         var builder = WebApplication.CreateBuilder();
         builder.Services.Configure<HostOptions>(option => option.ShutdownTimeout = TimeSpan.FromSeconds(60));
 
-        // Add services to the container.
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -79,7 +77,7 @@ public sealed class ServiceHost
         var identityModule = new IdentityModule(builder.Configuration);
         var schedulerModule = new SchedulerModule(builder.Configuration);
         var historyModule = new JobHistoryModule();
-        var jobRunModule = new JobRunModule(builder.Configuration);
+        var jobRunModule = new JobRunModule();
         var settingsModule = new SettingsModule(builder.Configuration);
 
         identityModule.Register(builder.Services);
@@ -113,8 +111,7 @@ public sealed class ServiceHost
                         Stop().GetAwaiter().GetResult();
                     }
                 });
-
-        // Configure the HTTP request pipeline.
+        
         if (!_app.Environment.IsDevelopment())
         {
             _app.UseExceptionHandler("/Error");
@@ -154,7 +151,7 @@ public sealed class ServiceHost
 
     private static async Task InitDb(IServiceProvider serviceProvider)
     {
-        // MigrateDb(serviceProvider);
+        MigrateDb(serviceProvider);
         await AddDbInitialData(serviceProvider).ConfigureAwait(false);
     }
 
@@ -163,7 +160,7 @@ public sealed class ServiceHost
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
         var dbMigrationRunner = new DbMigrationRunner();
-        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!);
+        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!, "Scheduler");
     }
 
     private static async Task AddDbInitialData(IServiceProvider serviceProvider)
@@ -173,6 +170,6 @@ public sealed class ServiceHost
         await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
 
         await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
-        await identityApplicationService.SaveInitialData().ConfigureAwait(false);
+        await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
     }
 }

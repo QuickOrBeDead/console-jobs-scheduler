@@ -101,49 +101,49 @@ export interface JobAddOrUpdateModel {
 /**
  * 
  * @export
- * @interface JobDetailModel
+ * @interface JobDetail
  */
-export interface JobDetailModel {
+export interface JobDetail {
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'jobName'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'jobGroup'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'description'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'cronExpression'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'package'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'parameters'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobDetailModel
+     * @memberof JobDetail
      */
     'cronExpressionDescription'?: string | null;
 }
@@ -431,80 +431,80 @@ export interface JobHistoryChartDataModel {
 /**
  * 
  * @export
- * @interface JobListItemModel
+ * @interface JobListItem
  */
-export interface JobListItemModel {
+export interface JobListItem {
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'jobName'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'jobGroup'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'jobType'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'lastFireTime'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'nextFireTime'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof JobListItemModel
+     * @memberof JobListItem
      */
     'triggerDescription'?: string | null;
 }
 /**
  * 
  * @export
- * @interface JobListItemModelPagedResult
+ * @interface JobListItemPagedResult
  */
-export interface JobListItemModelPagedResult {
+export interface JobListItemPagedResult {
     /**
      * 
      * @type {number}
-     * @memberof JobListItemModelPagedResult
+     * @memberof JobListItemPagedResult
      */
     'page'?: number;
     /**
      * 
      * @type {number}
-     * @memberof JobListItemModelPagedResult
+     * @memberof JobListItemPagedResult
      */
     'totalCount'?: number;
     /**
      * 
-     * @type {Array<JobListItemModel>}
-     * @memberof JobListItemModelPagedResult
+     * @type {Array<JobListItem>}
+     * @memberof JobListItemPagedResult
      */
-    'items'?: Array<JobListItemModel> | null;
+    'items'?: Array<JobListItem> | null;
     /**
      * 
      * @type {number}
-     * @memberof JobListItemModelPagedResult
+     * @memberof JobListItemPagedResult
      */
     'pageSize'?: number;
     /**
      * 
      * @type {number}
-     * @memberof JobListItemModelPagedResult
+     * @memberof JobListItemPagedResult
      */
     'totalPages'?: number;
 }
@@ -586,69 +586,69 @@ export interface LoginModel {
 /**
  * 
  * @export
- * @interface PackageDetailsModel
+ * @interface PackageDetails
  */
-export interface PackageDetailsModel {
+export interface PackageDetails {
     /**
      * 
      * @type {string}
-     * @memberof PackageDetailsModel
+     * @memberof PackageDetails
      */
     'name'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof PackageDetailsModel
+     * @memberof PackageDetails
      */
     'modifyDate'?: string | null;
 }
 /**
  * 
  * @export
- * @interface PackageListItemModel
+ * @interface PackageListItem
  */
-export interface PackageListItemModel {
+export interface PackageListItem {
     /**
      * 
      * @type {string}
-     * @memberof PackageListItemModel
+     * @memberof PackageListItem
      */
     'name'?: string | null;
 }
 /**
  * 
  * @export
- * @interface PackageListItemModelPagedResult
+ * @interface PackageListItemPagedResult
  */
-export interface PackageListItemModelPagedResult {
+export interface PackageListItemPagedResult {
     /**
      * 
      * @type {number}
-     * @memberof PackageListItemModelPagedResult
+     * @memberof PackageListItemPagedResult
      */
     'page'?: number;
     /**
      * 
      * @type {number}
-     * @memberof PackageListItemModelPagedResult
+     * @memberof PackageListItemPagedResult
      */
     'totalCount'?: number;
     /**
      * 
-     * @type {Array<PackageListItemModel>}
-     * @memberof PackageListItemModelPagedResult
+     * @type {Array<PackageListItem>}
+     * @memberof PackageListItemPagedResult
      */
-    'items'?: Array<PackageListItemModel> | null;
+    'items'?: Array<PackageListItem> | null;
     /**
      * 
      * @type {number}
-     * @memberof PackageListItemModelPagedResult
+     * @memberof PackageListItemPagedResult
      */
     'pageSize'?: number;
     /**
      * 
      * @type {number}
-     * @memberof PackageListItemModelPagedResult
+     * @memberof PackageListItemPagedResult
      */
     'totalPages'?: number;
 }
@@ -1117,6 +1117,25 @@ export interface UserAddOrUpdateResultModel {
 /**
  * 
  * @export
+ * @interface UserContext
+ */
+export interface UserContext {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserContext
+     */
+    'userName'?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserContext
+     */
+    'roles'?: Array<string> | null;
+}
+/**
+ * 
+ * @export
  * @interface UserDetailModel
  */
 export interface UserDetailModel {
@@ -1194,25 +1213,6 @@ export interface UserListItemModelPagedResult {
      * @memberof UserListItemModelPagedResult
      */
     'totalPages'?: number;
-}
-/**
- * 
- * @export
- * @interface UserModel
- */
-export interface UserModel {
-    /**
-     * 
-     * @type {string}
-     * @memberof UserModel
-     */
-    'userName'?: string | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof UserModel
-     */
-    'roles'?: Array<string> | null;
 }
 /**
  * 
@@ -1372,7 +1372,7 @@ export const AuthApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiAuthGetUserGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserModel>> {
+        async apiAuthGetUserGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserContext>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiAuthGetUserGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1410,7 +1410,7 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiAuthGetUserGet(options?: any): AxiosPromise<UserModel> {
+        apiAuthGetUserGet(options?: any): AxiosPromise<UserContext> {
             return localVarFp.apiAuthGetUserGet(options).then((request) => request(axios, basePath));
         },
         /**
@@ -1943,7 +1943,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobDetailModel>> {
+        async apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobDetail>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGroupNameGet(group, name, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1953,7 +1953,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobsPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobListItemModelPagedResult>> {
+        async apiJobsPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobListItemPagedResult>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1984,7 +1984,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobsGroupNameGet(group: string, name: string, options?: any): AxiosPromise<JobDetailModel> {
+        apiJobsGroupNameGet(group: string, name: string, options?: any): AxiosPromise<JobDetail> {
             return localVarFp.apiJobsGroupNameGet(group, name, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1993,7 +1993,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobsPageNumberGet(pageNumber: number, options?: any): AxiosPromise<JobListItemModelPagedResult> {
+        apiJobsPageNumberGet(pageNumber: number, options?: any): AxiosPromise<JobListItemPagedResult> {
             return localVarFp.apiJobsPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2216,7 +2216,7 @@ export const PackagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageDetailsModel>> {
+        async apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageDetails>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesDetailGet(packageName, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2235,7 +2235,7 @@ export const PackagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageListItemModelPagedResult>> {
+        async apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageListItemPagedResult>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesListPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2266,7 +2266,7 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesDetailGet(packageName?: string, options?: any): AxiosPromise<PackageDetailsModel> {
+        apiPackagesDetailGet(packageName?: string, options?: any): AxiosPromise<PackageDetails> {
             return localVarFp.apiPackagesDetailGet(packageName, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2283,7 +2283,7 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesListPageNumberGet(pageNumber: number, options?: any): AxiosPromise<PackageListItemModelPagedResult> {
+        apiPackagesListPageNumberGet(pageNumber: number, options?: any): AxiosPromise<PackageListItemPagedResult> {
             return localVarFp.apiPackagesListPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**

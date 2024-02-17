@@ -120,7 +120,7 @@ public sealed class JobPackageRepository : IJobPackageRepository
         }
     }
 
-    public async Task<PackageDetailsModel?> GetPackageDetails(string name)
+    public async Task<PackageDetails?> GetPackageDetails(string name)
     {
         using (var connection = ConnectionUtility.GetConnection(IsolationLevel.ReadUncommitted, _dataSource))
         {
@@ -128,13 +128,13 @@ public sealed class JobPackageRepository : IJobPackageRepository
             {
                 _dbAccessor.AddCommandParameter(command, "name", name);
 
-                PackageDetailsModel? result = null;
+                PackageDetails? result = null;
 
                 await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                 {
                     if (await reader.ReadAsync().ConfigureAwait(false))
                     {
-                        result = new PackageDetailsModel
+                        result = new PackageDetails
                         {
                             Name = reader.GetString("NAME"),
                             ModifyDate = new DateTime(reader.GetInt64("CREATE_TIME"), DateTimeKind.Utc).ToLocalTime()
@@ -150,7 +150,7 @@ public sealed class JobPackageRepository : IJobPackageRepository
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    public async Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1)
+    public async Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1)
     {
         using (var connection = ConnectionUtility.GetConnection(IsolationLevel.ReadUncommitted, _dataSource))
         {
@@ -159,7 +159,7 @@ public sealed class JobPackageRepository : IJobPackageRepository
                 _dbAccessor.AddCommandParameter(command, "pageSize", pageSize);
                 _dbAccessor.AddCommandParameter(command, "offset", (page - 1) * pageSize);
 
-                var result = new List<PackageListItemModel>();
+                var result = new List<PackageListItem>();
                 var count = 0;
 
                 await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -174,13 +174,13 @@ public sealed class JobPackageRepository : IJobPackageRepository
 
                         counter++;
 
-                        result.Add(new PackageListItemModel { Name = reader.GetString("NAME") });
+                        result.Add(new PackageListItem { Name = reader.GetString("NAME") });
                     }
                 }
 
                 connection.Commit(false);
 
-                return new PagedResult<PackageListItemModel>(result, pageSize, page, count);
+                return new PagedResult<PackageListItem>(result, pageSize, page, count);
             }
         }
     }

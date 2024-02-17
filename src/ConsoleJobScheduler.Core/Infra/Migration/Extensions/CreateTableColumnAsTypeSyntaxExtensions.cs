@@ -2,7 +2,7 @@ using System.Data;
 using FluentMigrator.Builders.Create.Table;
 using FluentMigrator.Model;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Extensions;
+namespace ConsoleJobScheduler.Core.Infra.Migration.Extensions;
 
 public static class CreateTableColumnAsTypeSyntaxExtensions
 {

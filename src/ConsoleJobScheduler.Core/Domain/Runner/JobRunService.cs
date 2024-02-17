@@ -58,7 +58,7 @@ public sealed class JobRunService : IJobRunService
         ArgumentNullException.ThrowIfNull(email);
 
         var jobRunEmail = new JobRunEmail(email.JobRunId, email.Subject, email.Body, email.To, email.CC, email.Bcc);
-        foreach (var attachment in email.Attachments)
+        foreach (var attachment in email.GetAttachments())
         {
             jobRunEmail.AddAttachment(attachment.FileName, attachment.FileContent, attachment.ContentType);
         }
@@ -108,31 +108,31 @@ public sealed class JobRunService : IJobRunService
                 var consoleMessage = ConsoleMessageReader.ReadMessage(data);
                 if (consoleMessage != null)
                 {
-                    if (consoleMessage.MessageType == ConsoleMessageType.Email)
+                    switch (consoleMessage)
                     {
-                        var emailMessage = (EmailMessage)consoleMessage.Message;
-
-                        await InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false), cancellationToken).ConfigureAwait(false);
-                        var emailModel = EmailModel.Create(jobRunId, emailMessage.Subject, emailMessage.Body, emailMessage.To, emailMessage.CC, emailMessage.Bcc);
-                        var emailMessageAttachments = emailMessage.Attachments;
-                        for (var i = 0; i < emailMessageAttachments.Count; i++)
+                        case { MessageType: ConsoleMessageType.Email, Message: EmailMessage emailMessage }:
                         {
-                            var attachment = emailMessageAttachments[i];
-                            emailModel.AddAttachment(attachment.FileName, attachment.FileContent, attachment.ContentType);
-                        }
+                            await InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                            await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Sending email to {emailMessage.To}", false), cancellationToken).ConfigureAwait(false);
+                            var emailModel = EmailModel.Create(jobRunId, emailMessage.Subject, emailMessage.Body, emailMessage.To, emailMessage.CC, emailMessage.Bcc);
+                            var emailMessageAttachments = emailMessage.Attachments;
+                            for (var i = 0; i < emailMessageAttachments.Count; i++)
+                            {
+                                var attachment = emailMessageAttachments[i];
+                                emailModel.AddAttachment(attachment.FileName, attachment.FileContent, attachment.ContentType);
+                            }
 
-                        await InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
-                        await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
-                        await UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
-                        await InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false), cancellationToken);
-                    }
-                    else if (consoleMessage.MessageType == ConsoleMessageType.Log)
-                    {
-                        var logMessage = (ConsoleLogMessage)consoleMessage.Message;
-                        await InsertJobRunLog(jobRunId, logMessage.Message, false, cancellationToken).ConfigureAwait(false);
-                        await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError), cancellationToken).ConfigureAwait(false);
+                            await InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
+                            await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
+                            await UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
+                            await InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+                            await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, $"Email is sent to {emailMessage.To}", false), cancellationToken);
+                            break;
+                        }
+                        case { MessageType: ConsoleMessageType.Log, Message: ConsoleLogMessage logMessage }:
+                            await InsertJobRunLog(jobRunId, logMessage.Message, false, cancellationToken).ConfigureAwait(false);
+                            await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, logMessage.Message, isError), cancellationToken).ConfigureAwait(false);
+                            break;
                     }
                 }
             }

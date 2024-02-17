@@ -1,7 +1,7 @@
 using FluentMigrator.Expressions;
 using FluentMigrator.Runner.Conventions;
 
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core.Conventions
+namespace ConsoleJobScheduler.Core.Infra.Migration.Conventions
 {
     public sealed class CustomPrimaryKeyNameConvention : IColumnsConvention
     {

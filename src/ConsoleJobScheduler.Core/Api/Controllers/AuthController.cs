@@ -35,8 +35,8 @@ public class AuthController : ControllerBase
 
     [HttpGet("GetUser")]
     [Produces(MediaTypeNames.Application.Json)]
-    public UserModel? GetUser()
+    public UserContext? GetUser()
     {
-        return _identityApplicationService.GetUser(HttpContext.User);
+        return _identityApplicationService.GetUserContext(HttpContext.User);
     }
 }

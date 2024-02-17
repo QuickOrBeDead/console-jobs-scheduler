@@ -40,12 +40,12 @@ public sealed class SettingsService : ISettingsService
         }
 
         var data = settings.GetData();
-        var settingModels = new List<SettingModel>(data.Count);
+        var settingModels = new List<Model.Settings>(data.Count);
         using (var dataEnumerator = data.GetEnumerator())
         {
             while (dataEnumerator.MoveNext())
             {
-                settingModels.Add(new SettingModel
+                settingModels.Add(new Model.Settings
                 {
                     CategoryId = settings.GetCategory(),
                     Name = dataEnumerator.Current.Key,

@@ -11,7 +11,7 @@ public interface IJobPackageRepository
 
     Task<List<string>> GetAllPackageNames();
 
-    Task<PackageDetailsModel?> GetPackageDetails(string name);
+    Task<PackageDetails?> GetPackageDetails(string name);
 
-    Task<PagedResult<PackageListItemModel>> ListPackages(int pageSize = 10, int page = 1);
+    Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1);
 }

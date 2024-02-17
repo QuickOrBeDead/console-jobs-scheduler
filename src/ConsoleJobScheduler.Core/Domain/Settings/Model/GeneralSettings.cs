@@ -8,7 +8,7 @@ public sealed class GeneralSettings : ISettings
     [Range(10, 50)]
     public int? PageSize { get; set; }
 
-    public SettingCategory GetCategory() => SettingCategory.General;
+    public SettingsCategory GetCategory() => SettingsCategory.General;
 
     public void Map(SettingsData data)
     {

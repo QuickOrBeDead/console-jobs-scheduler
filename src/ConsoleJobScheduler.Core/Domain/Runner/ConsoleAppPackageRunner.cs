@@ -1,27 +1,23 @@
 ﻿using System.Diagnostics;
 using ConsoleJobScheduler.Core.Domain.Runner.Exceptions;
+using Microsoft.Extensions.Configuration;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
 
 public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IJobRunService _jobRunService;
-    private readonly string _tempRootPath;
+    private readonly IConfiguration _configuration;
 
-    public ConsoleAppPackageRunner(IJobRunService jobRunService, string tempRootPath)
+    public ConsoleAppPackageRunner(IJobRunService jobRunService, IConfiguration configuration)
     {
-        if (string.IsNullOrWhiteSpace(tempRootPath))
-        {
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(tempRootPath));
-        }
-
         _jobRunService = jobRunService ?? throw new ArgumentNullException(nameof(jobRunService));
-        _tempRootPath = tempRootPath;
+        _configuration = configuration;
     }
 
     public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
-        var packageRunModel = await _jobRunService.GetPackageRun(packageName, _tempRootPath).ConfigureAwait(false);
+        var packageRunModel = await _jobRunService.GetPackageRun(packageName, _configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory).ConfigureAwait(false);
         if (packageRunModel == null)
         {
             throw new InvalidOperationException($"Console app package '{packageName}' not found");

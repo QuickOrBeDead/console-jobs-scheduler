@@ -12,8 +12,6 @@ public sealed class CustomSchedulerFactory : StdSchedulerFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public const string JobStoreContextKey = "quartz.JobStore";
-
     public CustomSchedulerFactory(IServiceProvider serviceProvider, NameValueCollection props)
         : base(props)
     {
@@ -22,7 +20,7 @@ public sealed class CustomSchedulerFactory : StdSchedulerFactory
 
     protected override IScheduler Instantiate(QuartzSchedulerResources rsrcs, global::Quartz.Core.QuartzScheduler qs)
     {
-        IScheduler scheduler = new StdScheduler(qs);
+        var scheduler = new StdScheduler(qs);
         scheduler.AddJobStore(rsrcs.JobStore as IExtendedJobStore);
         return scheduler;
     }

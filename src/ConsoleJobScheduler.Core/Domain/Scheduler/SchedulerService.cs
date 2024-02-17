@@ -1,5 +1,6 @@
-﻿using ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+﻿using ConsoleJobScheduler.Core.Domain.Runner.Extensions;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 using ConsoleJobScheduler.Core.Domain.Settings;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
@@ -16,9 +17,9 @@ public interface ISchedulerService
 {
     Task AddOrUpdateJob(JobAddOrUpdateModel jobModel);
 
-    Task<JobDetailModel?> GetJobDetail(JobKey jobKey);
+    Task<JobDetail?> GetJobDetail(JobKey jobKey);
 
-    Task<PagedResult<JobListItemModel>> ListJobs(int page = 1);
+    Task<PagedResult<JobListItem>> ListJobs(int page = 1);
 
     Task<ITrigger?> GetTrigger(TriggerKey triggerKey);
 
@@ -66,7 +67,7 @@ public sealed class SchedulerService : ISchedulerService
         await _scheduler.ScheduleJob(job, trigger);
     }
 
-    public async Task<JobDetailModel?> GetJobDetail(JobKey jobKey)
+    public async Task<JobDetail?> GetJobDetail(JobKey jobKey)
     {
         var jobDetail = await _scheduler.GetJobDetail(jobKey);
         if (jobDetail == null)
@@ -76,19 +77,19 @@ public sealed class SchedulerService : ISchedulerService
 
         var cronExpression = await GetCronExpression(jobKey).ConfigureAwait(false);
 
-        return new JobDetailModel
+        return new JobDetail
         {
             JobName = jobDetail.Key.Name,
             JobGroup = jobDetail.Key.Group,
             Description = jobDetail.Description,
             CronExpression = cronExpression?.Expression,
             CronExpressionDescription = cronExpression?.Description,
-            Package = GetJobData(jobDetail, "package"),
-            Parameters = GetJobData(jobDetail, "parameters")
+            Package = jobDetail.GetPackageName(),
+            Parameters = jobDetail.GetParameters()
         };
     }
 
-    public async Task<PagedResult<JobListItemModel>> ListJobs(int page = 1)
+    public async Task<PagedResult<JobListItem>> ListJobs(int page = 1)
     {
         var allJobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup()).ConfigureAwait(false);
         var pageSize = await GetPageSize().ConfigureAwait(false);
@@ -97,7 +98,7 @@ public sealed class SchedulerService : ISchedulerService
                                                  .ThenBy(x => x.Group)
                                                  .Skip((page - 1) * pageSize)
                                                  .Take(pageSize);
-        var result = new List<JobListItemModel>();
+        var result = new List<JobListItem>();
         foreach (var jobKey in jobKeys)
         {
             var jobDetail = await _scheduler.GetJobDetail(jobKey).ConfigureAwait(false);
@@ -107,7 +108,7 @@ public sealed class SchedulerService : ISchedulerService
                 var nextFireTime = triggers.Select(x => x.GetNextFireTimeUtc()?.UtcDateTime).Where(x => x != null).OrderBy(x => x).FirstOrDefault()?.ToLocalTime();
                 var lastFireTime = triggers.Select(x => x.GetPreviousFireTimeUtc()?.UtcDateTime).Where(x => x != null).OrderByDescending(x => x).FirstOrDefault()?.ToLocalTime();
 
-                result.Add(new JobListItemModel
+                result.Add(new JobListItem
                 {
                     JobName = jobDetail.Key.Name,
                     JobGroup = jobDetail.Key.Group,
@@ -119,7 +120,7 @@ public sealed class SchedulerService : ISchedulerService
             }
         }
 
-        return new PagedResult<JobListItemModel>(result, pageSize, page, totalCount);
+        return new PagedResult<JobListItem>(result, pageSize, page, totalCount);
     }
 
     public Task<ITrigger?> GetTrigger(TriggerKey triggerKey)
@@ -134,7 +135,7 @@ public sealed class SchedulerService : ISchedulerService
 
     public Task<IReadOnlyCollection<SchedulerStateRecord>> GetInstances()
     {
-        return _scheduler.GetInstances();
+        return _scheduler.GetJobStore().SelectSchedulerStateRecords();
     }
 
     public async Task<JobCronExpression?> GetCronExpression(JobKey jobKey)
@@ -144,15 +145,7 @@ public sealed class SchedulerService : ISchedulerService
         return string.IsNullOrWhiteSpace(cronExpression) ? null : new JobCronExpression(cronExpression, GetCronExpressionDescription(cronExpression));
     }
 
-    private static string? GetJobData(IJobDetail jobDetail, string key)
-    {
-        if (jobDetail.JobDataMap.TryGetValue(key, out var value))
-        {
-            return value as string;
-        }
-
-        return null;
-    }
+   
 
     private async Task<int> GetPageSize()
     {

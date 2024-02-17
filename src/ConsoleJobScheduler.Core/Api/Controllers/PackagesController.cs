@@ -1,5 +1,7 @@
 ﻿using System.Net.Mime;
+using ConsoleJobScheduler.Core.Api.Model;
 using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
@@ -30,15 +32,15 @@ public sealed class PackagesController : ControllerBase
 
     [HttpGet("List/{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
+    public Task<PagedResult<PackageListItem>> Get(int? pageNumber = null)
     {
-        return _jobApplicationService.ListPackages(pageNumber ?? 1);
+        return _jobApplicationService.ListPackages(10, pageNumber ?? 1);
     }
 
     [HttpGet("Detail")]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetailsModel))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDetail([FromQuery] string packageName)
     {

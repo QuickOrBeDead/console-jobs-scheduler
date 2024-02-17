@@ -1,14 +1,12 @@
 ﻿using System.Net.Mime;
-using ConsoleJobScheduler.Core.Domain.Scheduler;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Models;
+using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
-using Quartz;
-using JobDetailModel = ConsoleJobScheduler.Core.Domain.Scheduler.Models.JobDetailModel;
 
 namespace ConsoleJobScheduler.Core.Api.Controllers;
 
@@ -17,9 +15,9 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class JobsController : ControllerBase
 {
-    private readonly ISchedulerService _schedulerService;
+    private readonly IJobApplicationService _schedulerService;
 
-    public JobsController(ISchedulerService schedulerService)
+    public JobsController(IJobApplicationService schedulerService)
     {
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
     }
@@ -27,7 +25,7 @@ public sealed class JobsController : ControllerBase
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor},{Roles.JobViewer}")]
     [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<PagedResult<JobListItemModel>> Get(int? pageNumber = null)
+    public Task<PagedResult<JobListItem>> Get(int? pageNumber = null)
     {
         return _schedulerService.ListJobs(pageNumber ?? 1);
     }
@@ -36,28 +34,17 @@ public sealed class JobsController : ControllerBase
     [HttpGet("{group}/{name}")]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobDetailModel))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobDetail))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string group, string name)
     {
-        var jobKey = new JobKey(name, group);
-        var jobDetail = await _schedulerService.GetJobDetail(jobKey);
+        var jobDetail = await _schedulerService.GetJobDetail(group, name);
         if (jobDetail == null)
         {
             return NotFound();
         }
 
-        return Ok(
-            new JobDetailModel
-            {
-                JobName = jobDetail.JobName,
-                JobGroup = jobDetail.JobGroup,
-                Description = jobDetail.Description,
-                CronExpression = jobDetail.CronExpression,
-                CronExpressionDescription = jobDetail.CronExpressionDescription,
-                Package = jobDetail.Package,
-                Parameters = jobDetail.Parameters
-            });
+        return Ok(jobDetail);
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]

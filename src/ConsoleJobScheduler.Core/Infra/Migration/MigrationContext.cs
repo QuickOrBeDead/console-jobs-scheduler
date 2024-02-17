@@ -1,4 +1,4 @@
-namespace ConsoleJobScheduler.Core.Domain.Scheduler.Migrations.Core
+namespace ConsoleJobScheduler.Core.Infra.Migration
 {
     public interface IMigrationContext
     {

@@ -6,7 +6,7 @@ public static class JobExecutionHasLastSignalTimeoutExtensions
 {
     public static void UpdateHasSignalTimeout(this IJobExecutionHasLastSignalTimeout item)
     {
-        TimeSpan timeout = TimeSpan.FromMinutes(1);
+        var timeout = TimeSpan.FromMinutes(1);
         if (item.Completed || item.Vetoed)
         {
             item.HasSignalTimeout = false;

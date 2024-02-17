@@ -7,13 +7,21 @@ namespace ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
 
 public static class SchedulerExtensions
 {
-    public static Task<IReadOnlyCollection<SchedulerStateRecord>> GetInstances(this IScheduler scheduler)
+    private const string JobStoreContextKey = "quartz.JobStore";
+
+    public static void AddJobStore(this IScheduler scheduler, IExtendedJobStore? jobStore)
     {
-        var jobStore = GetJobStore(scheduler);
-        return jobStore.SelectSchedulerStateRecords();
+        ArgumentNullException.ThrowIfNull(jobStore);
+
+        scheduler.AddToContext(JobStoreContextKey, jobStore);
     }
 
-    public static void AddToContext<TValue>(this IScheduler scheduler, string key, [DisallowNull] TValue value)
+    public static IExtendedJobStore GetJobStore(this IScheduler scheduler)
+    {
+        return GetContextValue<IExtendedJobStore>(scheduler, JobStoreContextKey);
+    }
+
+    private static void AddToContext<TValue>(this IScheduler scheduler, string key, [DisallowNull] TValue value)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(value);
@@ -21,19 +29,7 @@ public static class SchedulerExtensions
         scheduler.Context.Add(key, value);
     }
 
-    public static void AddJobStore(this IScheduler scheduler, IExtendedJobStore? jobStore)
-    {
-        ArgumentNullException.ThrowIfNull(jobStore);
-
-        scheduler.AddToContext(CustomSchedulerFactory.JobStoreContextKey, jobStore);
-    }
-
-    public static IExtendedJobStore GetJobStore(this IScheduler scheduler)
-    {
-        return GetContextValue<IExtendedJobStore>(scheduler, CustomSchedulerFactory.JobStoreContextKey);
-    }
-
-    public static TValue GetContextValue<TValue>(this IScheduler scheduler, string key)
+    private static TValue GetContextValue<TValue>(this IScheduler scheduler, string key)
         where TValue : class
     {
         if (!scheduler.Context.TryGetValue(key, out var valueObject))

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace ConsoleJobScheduler.Core.Domain.Runner.Model;
+namespace ConsoleJobScheduler.Core.Api.Model;
 
 public sealed class PackageSaveModel
 {

@@ -17,6 +17,7 @@ public interface IUserRepository
     Task<IdentityResult> CreateAsync(User user, string password);
 
     Task<PagedResult<UserListItemModel>> ListUsers(int pageSize = 10, int? pageNumber = null);
+
     Task<bool> UserExists(string userName);
 }
 
