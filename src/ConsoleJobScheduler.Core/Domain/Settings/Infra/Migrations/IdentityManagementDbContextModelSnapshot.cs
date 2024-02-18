@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ConsoleJobScheduler.Service.Migrations
+namespace ConsoleJobScheduler.Core.Domain.Settings.Infra.Migrations
 {
     [DbContext(typeof(IdentityManagementDbContext))]
     partial class IdentityManagementDbContextModelSnapshot : ModelSnapshot

@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Application.Model;
 
-public sealed class UserListItemModel
+public sealed class UserListItem
 {
     public int Id { get; set; }
 

@@ -16,7 +16,7 @@ public interface IUserRepository
 
     Task<IdentityResult> CreateAsync(User user, string password);
 
-    Task<PagedResult<UserListItemModel>> ListUsers(int pageSize = 10, int? pageNumber = null);
+    Task<PagedResult<UserListItem>> ListUsers(int pageSize = 10, int? pageNumber = null);
 
     Task<bool> UserExists(string userName);
 }
@@ -52,25 +52,25 @@ public sealed class UserRepository : IUserRepository
 
     public async Task<IdentityResult> UpdateAsync(User user, string? password)
     {
-        var identityUser = new IdentityUser<int>(user.UserName);
-        var result = await _userManager.UpdateAsync(identityUser).ConfigureAwait(false);
-        if (!result.Succeeded)
+        var identityUser = await _userManager.FindByIdAsync(user.Id.ToString());
+        if (identityUser == null)
         {
-            return result;
+            return IdentityResult.Failed(new IdentityError { Description = "user not found"});
         }
 
         if (!string.IsNullOrWhiteSpace(password))
         {
             identityUser.PasswordHash = _userManager.PasswordHasher.HashPassword(identityUser, password);
 
-            result = await _userManager.UpdateAsync(identityUser);
-            if (!result.Succeeded)
+            var updateResult = await _userManager.UpdateAsync(identityUser).ConfigureAwait(false);
+            if (!updateResult.Succeeded)
             {
-                return result;
+                return updateResult;
             }
         }
 
-        result = await _userManager.RemoveFromRolesAsync(identityUser, user.Roles).ConfigureAwait(false);
+        var roles = await _userManager.GetRolesAsync(identityUser);
+        var result = await _userManager.RemoveFromRolesAsync(identityUser, roles).ConfigureAwait(false);
         if (!result.Succeeded)
         {
             return result;
@@ -88,17 +88,19 @@ public sealed class UserRepository : IUserRepository
             return result;
         }
 
+        user.SetUserId(identityUser.Id);
+
         return await _userManager.AddToRolesAsync(identityUser, user.Roles).ConfigureAwait(false);
     }
 
-    public async Task<PagedResult<UserListItemModel>> ListUsers(int pageSize = 10, int? pageNumber = null)
+    public async Task<PagedResult<UserListItem>> ListUsers(int pageSize = 10, int? pageNumber = null)
     {
         var page = pageNumber ?? 1;
 
         var usersQuery = _dbContext.Users;
         var totalCount = usersQuery.DeferredCount().FutureValue();
         var items = usersQuery.Select(
-            user => new UserListItemModel
+            user => new UserListItem
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -110,6 +112,6 @@ public sealed class UserRepository : IUserRepository
                     select role.Name)
             }).OrderBy(x => x.UserName).Skip((page - 1) * pageSize).Take(pageSize).Future();
 
-        return new PagedResult<UserListItemModel>(await items.ToListAsync(), pageSize, page, await totalCount.ValueAsync());
+        return new PagedResult<UserListItem>(await items.ToListAsync(), pageSize, page, await totalCount.ValueAsync());
     }
 }

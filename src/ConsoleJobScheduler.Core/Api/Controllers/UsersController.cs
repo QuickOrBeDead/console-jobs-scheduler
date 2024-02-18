@@ -24,7 +24,7 @@ public sealed class UsersController : ControllerBase
 
     [HttpGet("{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<PagedResult<UserListItemModel>> Get(int? pageNumber = null)
+    public Task<PagedResult<UserListItem>> Get(int? pageNumber = null)
     {
         return _identityApplicationService.ListUsers(pageNumber);
     }

@@ -143,6 +143,7 @@ public sealed class ServiceHost
         _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
+        await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await InitDb(_app.Services).ConfigureAwait(false);
 
         await _schedulerManager.Start();
@@ -167,9 +168,6 @@ public sealed class ServiceHost
     {
         using var scope = serviceProvider.CreateScope();
         var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
-        await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
-
-        await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
         await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
     }
 }

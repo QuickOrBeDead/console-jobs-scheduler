@@ -24,5 +24,10 @@ namespace ConsoleJobScheduler.Core.Domain.Identity.Model
             UserName = userName;
             _roles = roles;
         }
+
+        public void SetUserId(int id)
+        {
+            Id = id;
+        }
     }
 }

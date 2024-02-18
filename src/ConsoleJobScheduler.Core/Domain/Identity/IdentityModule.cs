@@ -15,9 +15,19 @@ public sealed class IdentityModule
         _configuration = configuration;
     }
 
-    public void Register(IServiceCollection services)
+    public void Register(IServiceCollection services, Action<DbContextOptionsBuilder>? dbContextOptionsBuilderAction = null)
     {
-        services.AddDbContext<IdentityManagementDbContext>(o => o.UseNpgsql(_configuration["ConnectionString"]));
+        services.AddDbContext<IdentityManagementDbContext>(o =>
+        {
+            if (dbContextOptionsBuilderAction == null)
+            {
+                o.UseNpgsql(_configuration["ConnectionString"]);
+            }
+            else
+            {
+                dbContextOptionsBuilderAction(o);
+            }
+        });
         services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
             (options =>
             {
@@ -33,5 +43,12 @@ public sealed class IdentityModule
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IIdentityService, IdentityService>();
+    }
+
+    public async Task MigrateDb(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
+        await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
     }
 }

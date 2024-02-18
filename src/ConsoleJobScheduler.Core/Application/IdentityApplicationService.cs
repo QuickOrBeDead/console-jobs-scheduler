@@ -11,13 +11,13 @@ namespace ConsoleJobScheduler.Core.Application;
 
 public interface IIdentityApplicationService
 {
-    Task<PagedResult<UserListItemModel>> ListUsers(int? pageNumber = null);
+    Task<PagedResult<UserListItem>> ListUsers(int? pageNumber = null);
 
     Task<UserDetailModel?> GetUserForEdit(int userId);
 
     Task<List<string>> GetAllRoles();
 
-    Task<UserAddOrUpdateResultModel?> SaveUser(UserAddOrUpdateModel model);
+    Task<UserAddOrUpdateResultModel> SaveUser(UserAddOrUpdateModel model);
 
     Task<SignInResult> Login(LoginModel loginModel);
 
@@ -30,12 +30,19 @@ public interface IIdentityApplicationService
 
 public sealed class IdentityApplicationService : IIdentityApplicationService
 {
+    public const string DefaultAdminUserName = "admin";
+    public const string DefaultAdminPassword = "Password";
+
     private readonly IIdentityService _identityService;
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
     private readonly SignInManager<IdentityUser<int>> _signInManager;
 
-    public IdentityApplicationService(IIdentityService identityService, IUserRepository userRepository, IRoleRepository roleRepository, SignInManager<IdentityUser<int>> signInManager)
+    public IdentityApplicationService(
+        IIdentityService identityService,
+        IUserRepository userRepository,
+        IRoleRepository roleRepository,
+        SignInManager<IdentityUser<int>> signInManager)
     {
         _identityService = identityService;
         _userRepository = userRepository;
@@ -67,7 +74,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         };
     }
 
-    public async Task<PagedResult<UserListItemModel>> ListUsers(int? pageNumber = null)
+    public async Task<PagedResult<UserListItem>> ListUsers(int? pageNumber = null)
     {
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var result = await _userRepository.ListUsers(10, pageNumber);
@@ -82,6 +89,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         transactionScope.Complete();
         return user == null ? null : new UserDetailModel
         {
+            Id = user.Id,
             UserName = user.UserName,
             Roles = user.Roles
         };
@@ -95,7 +103,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         return result;
     }
 
-    public async Task<UserAddOrUpdateResultModel?> SaveUser(UserAddOrUpdateModel model)
+    public async Task<UserAddOrUpdateResultModel> SaveUser(UserAddOrUpdateModel model)
     {
         using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var result = await _identityService.SaveUser(model);
@@ -114,10 +122,9 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
             await AddRole(role).ConfigureAwait(false);
         }
 
-        if (!await _userRepository.UserExists("admin").ConfigureAwait(false))
+        if (!await _userRepository.UserExists(DefaultAdminUserName).ConfigureAwait(false))
         {
-            await _identityService.SaveUser(new UserAddOrUpdateModel { UserName = "admin", Password = "Password", Roles = new List<string> { Roles.Admin } })
-                .ConfigureAwait(false);
+            await SaveUser(new UserAddOrUpdateModel { UserName = DefaultAdminUserName, Password = DefaultAdminPassword, Roles = new List<string> { Roles.Admin } }).ConfigureAwait(false);
         }
 
         transactionScope.Complete();
