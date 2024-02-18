@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { createApi } from '../../api'
-import { JobListItemModelPagedResult, JobsApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobListItemPagedResult, JobsApi } from '../../metadata/console-jobs-scheduler-api'
 
-const jobs = ref<JobListItemModelPagedResult>()
+const jobs = ref<JobListItemPagedResult>()
 const jobsApi = createApi(JobsApi)
 
 async function loadPage(page: number)  {

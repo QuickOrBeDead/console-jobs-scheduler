@@ -1,6 +1,6 @@
+using ConsoleJobScheduler.Core.Infra.Migration;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
 using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core;
 using Quartz;
 
 namespace ConsoleJobScheduler.Core.Tests.Infrastructure.Scheduler.Migrations;
@@ -37,7 +37,7 @@ public class InitialSetupFixture
         var migrationRunner = new DbMigrationRunner();
 
         // Act
-        migrationRunner.Migrate(_postgresOptions.GetConnectionString(), "qrtz_", version: 1);
+        migrationRunner.Migrate(_postgresOptions.GetConnectionString(), "qrtz_", "Scheduler", version: 1);
         
         // Assert
         var schedulerBuilder = SchedulerBuilder.Create()
@@ -71,6 +71,7 @@ public class InitialSetupFixture
         
         await scheduler.ScheduleJob(job, trigger);
         await scheduler.Start();
+        await scheduler.Shutdown();
     }
     
     public class TestJob : IJob

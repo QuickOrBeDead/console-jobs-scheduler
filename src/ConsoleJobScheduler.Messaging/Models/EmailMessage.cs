@@ -1,6 +1,5 @@
 ﻿namespace ConsoleJobScheduler.Messaging.Models;
 
-
 public sealed class EmailMessage
 {
     private IList<EmailAttachment>? _attachments;

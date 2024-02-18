@@ -2,12 +2,12 @@
 import { ref, onMounted, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createApi } from '../../api'
-import { JobDetailModel, JobsApi, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobDetail, JobsApi, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
 const route = useRoute()
 const router = useRouter()
 
-const job = ref<JobDetailModel>() as Ref<JobDetailModel>
+const job = ref<JobDetail>() as Ref<JobDetail>
 const packages = ref<string[]>() as Ref<string[]>
 
 let jobGroup: string

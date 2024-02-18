@@ -2,22 +2,22 @@
 import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
-import { AttachmentInfoModel, JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
+import { JobRunAttachmentInfo, JobExecutionDetail, JobExecutionDetailsApi, JobRunLog } from '../../metadata/console-jobs-scheduler-api'
 import { HubConnectionBuilder } from '@microsoft/signalr'
 
 const route = useRoute()
 const id = route.params.id as string
 
 const job = ref<JobExecutionDetail>()
-const logs = reactive<LogLine[]>([])
-const attachments = ref<AttachmentInfoModel[]>()
+const logs = reactive<JobRunLog[]>([])
+const attachments = ref<JobRunAttachmentInfo[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
 
 onMounted(async () => {
     const { data } = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
     job.value = data.details
-    logs.push(...data.logs as LogLine[])
-    attachments.value = data.attachments as AttachmentInfoModel[]
+    logs.push(...data.logs as JobRunLog[])
+    attachments.value = data.attachments as JobRunAttachmentInfo[]
 
     const $console = document.getElementById('console')
 
@@ -25,7 +25,7 @@ onMounted(async () => {
 
     connection.on('ReceiveJobConsoleLogMessage', function (data, isError) {
         logs.push({
-            message: data,
+            content: data,
             isError: isError
         })
 
@@ -42,7 +42,7 @@ onUpdated(() => {
     $console!.scrollTop = $console!.scrollHeight
 })
 
-function getAttachmentUrl(attachment: AttachmentInfoModel): string {
+function getAttachmentUrl(attachment: JobRunAttachmentInfo): string {
     const basePath = jobExecutionDetailsApi["basePath"]
     return `${basePath}/api/JobExecutionDetails/GetAttachment/${attachment.id}?attachmentName=${encodeURIComponent(attachment.fileName as string)}`
 }
@@ -96,7 +96,7 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
                                 <p>
                                     <div id="console">
                                         <template v-for="jobLog in logs">
-                                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.message }}</div>
+                                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.content }}</div>
                                         </template>
                                     </div>
                                 </p>

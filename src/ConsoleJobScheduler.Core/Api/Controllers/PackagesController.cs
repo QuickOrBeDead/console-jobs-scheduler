@@ -1,10 +1,9 @@
 ﻿using System.Net.Mime;
-
-using ConsoleJobScheduler.Core.Api.Models;
-using ConsoleJobScheduler.Core.Infrastructure.Data;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Models;
-
+using ConsoleJobScheduler.Core.Api.Model;
+using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.Identity.Model;
+using ConsoleJobScheduler.Core.Domain.Runner.Model;
+using ConsoleJobScheduler.Core.Infra.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,42 +15,36 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class PackagesController : ControllerBase
 {
-    private readonly ISchedulerService _schedulerService;
+    private readonly IJobApplicationService _jobApplicationService;
 
-    public PackagesController(ISchedulerService schedulerService)
+    public PackagesController(IJobApplicationService jobApplicationService)
     {
-        _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
+        _jobApplicationService = jobApplicationService ?? throw new ArgumentNullException(nameof(jobApplicationService));
     }
 
     [HttpGet("GetPackageNames")]
     [Produces(MediaTypeNames.Application.Json)]
     public Task<List<string>> GetPackageNames()
     {
-        return _schedulerService.ListPackageNames();
+        return _jobApplicationService.GetAllPackageNames();
     }
 
     [HttpGet("List/{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<PagedResult<PackageListItemModel>> Get(int? pageNumber = null)
+    public Task<PagedResult<PackageListItem>> Get(int? pageNumber = null)
     {
-        return _schedulerService.ListPackages(pageNumber ?? 1);
+        return _jobApplicationService.ListPackages(10, pageNumber ?? 1);
     }
 
     [HttpGet("Detail")]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetailsModel))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDetail([FromQuery] string packageName)
     {
-        var result = await _schedulerService.GetPackageDetails(packageName).ConfigureAwait(false);
-
-        if (result == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(result);
+        var result = await _jobApplicationService.GetPackageDetails(packageName).ConfigureAwait(false);
+        return result == null ? NotFound() : Ok(result);
     }
 
     [HttpPost("Save")]
@@ -66,7 +59,7 @@ public sealed class PackagesController : ControllerBase
 
         await using MemoryStream ms = new();
         await model.File.CopyToAsync(ms).ConfigureAwait(false);
-        await _schedulerService.SavePackage(model.Name, ms.ToArray()).ConfigureAwait(false);
+        await _jobApplicationService.SavePackage(model.Name, ms.ToArray()).ConfigureAwait(false);
         return Ok();
     }
 }
