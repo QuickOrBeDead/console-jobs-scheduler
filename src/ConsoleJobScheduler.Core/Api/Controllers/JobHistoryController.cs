@@ -13,11 +13,11 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class JobHistoryController : ControllerBase
 {
-    private readonly IJobApplicationService _jobApplicationService;
+    private readonly IJobHistoryApplicationService _jobApplicationService;
 
-    public JobHistoryController(IJobApplicationService jobApplicationService)
+    public JobHistoryController(IJobHistoryApplicationService jobHistoryApplicationService)
     {
-        _jobApplicationService = jobApplicationService ?? throw new ArgumentNullException(nameof(jobApplicationService));
+        _jobApplicationService = jobHistoryApplicationService ?? throw new ArgumentNullException(nameof(jobHistoryApplicationService));
     }
 
     [HttpGet("{pageNumber:int?}")]

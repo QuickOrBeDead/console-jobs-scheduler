@@ -14,9 +14,19 @@ public sealed class SettingsModule
         _configuration = configuration;
     }
 
-    public void Register(IServiceCollection services)
+    public void Register(IServiceCollection services, Action<DbContextOptionsBuilder>? dbContextOptionsBuilderAction = null)
     {
-        services.AddDbContext<SettingsDbContext>(o => o.UseNpgsql(_configuration["ConnectionString"]));
+        services.AddDbContext<SettingsDbContext>(o =>
+        {
+            if (dbContextOptionsBuilderAction == null)
+            {
+                o.UseNpgsql(_configuration["ConnectionString"]);
+            }
+            else
+            {
+                dbContextOptionsBuilderAction(o);
+            }
+        });
         services.AddScoped<ISettingsRepository, SettingsRepository>();
         services.AddScoped<ISettingsService, SettingsService>();
     }

@@ -13,10 +13,12 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 public class JobExecutionDetailsController : ControllerBase
 {
     private readonly IJobApplicationService _jobApplicationService;
+    private readonly IJobHistoryApplicationService _jobHistoryApplicationService;
 
-    public JobExecutionDetailsController(IJobApplicationService jobApplicationService)
+    public JobExecutionDetailsController(IJobApplicationService jobApplicationService, IJobHistoryApplicationService jobHistoryApplicationService)
     {
-        _jobApplicationService = jobApplicationService ?? throw new ArgumentNullException(nameof(jobApplicationService));
+        _jobApplicationService = jobApplicationService;
+        _jobHistoryApplicationService = jobHistoryApplicationService;
     }
 
     [HttpGet("{id}")]
@@ -39,7 +41,7 @@ public class JobExecutionDetailsController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     public Task<string?> GetErrorDetail(string id)
     {
-        return _jobApplicationService.GetJobExecutionErrorDetail(id);
+        return _jobHistoryApplicationService.GetJobExecutionErrorDetail(id);
     }
 
     [HttpGet("GetAttachment/{id}")]

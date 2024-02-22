@@ -3,7 +3,6 @@ using ConsoleJobScheduler.Core.Api.Hubs.Handlers;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Domain.History;
 using ConsoleJobScheduler.Core.Domain.Identity;
-using ConsoleJobScheduler.Core.Domain.Identity.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Scheduler;
 using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
@@ -16,7 +15,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -76,7 +74,7 @@ public sealed class ServiceHost
 
         var identityModule = new IdentityModule(builder.Configuration);
         var schedulerModule = new SchedulerModule(builder.Configuration);
-        var historyModule = new JobHistoryModule();
+        var historyModule = new JobHistoryModule(builder.Configuration);
         var jobRunModule = new JobRunModule();
         var settingsModule = new SettingsModule(builder.Configuration);
 
@@ -90,6 +88,7 @@ public sealed class ServiceHost
         builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
         builder.Services.AddScoped<ISchedulerApplicationService, SchedulerApplicationService>();
         builder.Services.AddScoped<ISettingsApplicationService, SettingsApplicationService>();
+        builder.Services.AddScoped<IJobHistoryApplicationService, JobHistoryApplicationService>();
 
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
@@ -144,6 +143,7 @@ public sealed class ServiceHost
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
         await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await InitDb(_app.Services).ConfigureAwait(false);
 
         await _schedulerManager.Start();

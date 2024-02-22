@@ -1,4 +1,6 @@
 ﻿using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Domain.History.Model;
+using ConsoleJobScheduler.Core.Domain.Runner.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -44,8 +46,23 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
+            var jobExecutionHistory = new JobExecutionHistory(
+                context.FireInstanceId,
+                context.Scheduler.SchedulerName,
+                context.Scheduler.SchedulerInstanceId,
+                context.JobDetail.GetPackageName(),
+                context.JobDetail.Key.Name,
+                context.JobDetail.Key.Group,
+                context.Trigger.Key.Name,
+                context.Trigger.Key.Group,
+                context.ScheduledFireTimeUtc?.UtcDateTime,
+                context.FireTimeUtc.UtcDateTime,
+                context.ScheduledFireTimeUtc?.UtcDateTime ?? context.FireTimeUtc.UtcDateTime,
+                context.Trigger.GetFireTimeAfter(context.ScheduledFireTimeUtc)?.UtcDateTime,
+                (context.Trigger as ICronTrigger)?.CronExpressionString);
+
             using var scope = _serviceProvider.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<IJobApplicationService>().InsertJobHistoryEntry(context, cancellationToken).ConfigureAwait(false);
+            await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().InsertJobHistoryEntry(jobExecutionHistory, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -58,7 +75,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<IJobApplicationService>().UpdateJobHistoryEntryVetoed(context.FireInstanceId, cancellationToken).ConfigureAwait(false);
+            await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().UpdateJobHistoryEntryVetoed(context.FireInstanceId, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -74,7 +91,7 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<IJobApplicationService>().UpdateJobHistoryEntryCompleted(context.FireInstanceId, context.JobRunTime, jobException, cancellationToken).ConfigureAwait(false);
+            await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().UpdateJobHistoryEntryCompleted(context.FireInstanceId, context.JobRunTime, jobException, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {

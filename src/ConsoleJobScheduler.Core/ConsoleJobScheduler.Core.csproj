@@ -12,8 +12,8 @@
   
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.32.0" />
-    <PackageReference Include="FluentMigrator" Version="5.0.0" />
-    <PackageReference Include="FluentMigrator.Runner" Version="5.0.0" />
+    <PackageReference Include="FluentMigrator" Version="5.1.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="5.1.0" />
     <PackageReference Include="MessagePipe" Version="1.7.4" />
     <PackageReference Include="MessagePipe.Analyzer" Version="1.7.4">
       <PrivateAssets>all</PrivateAssets>
@@ -42,11 +42,11 @@
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="Roslynator.Analyzers" Version="4.10.0">
+   <PackageReference Include="Roslynator.Analyzers" Version="4.11.0">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.19.0.84025">
+   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.20.0.85982">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>

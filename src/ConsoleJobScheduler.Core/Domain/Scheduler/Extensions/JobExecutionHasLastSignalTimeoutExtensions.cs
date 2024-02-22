@@ -4,16 +4,16 @@ namespace ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
 
 public static class JobExecutionHasLastSignalTimeoutExtensions
 {
-    public static void UpdateHasSignalTimeout(this IJobExecutionHasLastSignalTimeout item)
+    public static void UpdateHasSignalTimeout(this IJobExecutionHasLastSignalTimeout item, DateTimeOffset now)
     {
         var timeout = TimeSpan.FromMinutes(1);
         if (item.Completed || item.Vetoed)
         {
-            item.HasSignalTimeout = false;
+            item.SetHasSignalTimeout(false);
         }
         else
         {
-            item.HasSignalTimeout = DateTime.UtcNow.Subtract(item.LastSignalTime.ToUniversalTime()) > timeout;
+            item.SetHasSignalTimeout(now.Subtract(item.LastSignalTime.ToUniversalTime()) > timeout);
         }
     }
 }

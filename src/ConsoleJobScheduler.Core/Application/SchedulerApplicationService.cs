@@ -1,5 +1,6 @@
 using ConsoleJobScheduler.Core.Application.Model;
-using ConsoleJobScheduler.Core.Domain.History.Infra;
+using ConsoleJobScheduler.Core.Domain.History;
+using ConsoleJobScheduler.Core.Domain.History.Model;
 using ConsoleJobScheduler.Core.Domain.Scheduler;
 
 namespace ConsoleJobScheduler.Core.Application;
@@ -8,18 +9,20 @@ public interface ISchedulerApplicationService
 {
     Task<SchedulerInfoModel> GetStatistics();
 
-    Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData();
+    Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData();
 }
 
 public sealed class SchedulerApplicationService : ISchedulerApplicationService
 {
     private readonly ISchedulerService _schedulerService;
-    private readonly IJobHistoryRepository _jobHistoryRepository;
+    private readonly IJobHistoryService _jobHistoryService;
 
-    public SchedulerApplicationService(ISchedulerService schedulerService, IJobHistoryRepository jobHistoryRepository)
+    public SchedulerApplicationService(
+        ISchedulerService schedulerService,
+        IJobHistoryService jobHistoryService)
     {
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
-        _jobHistoryRepository = jobHistoryRepository ?? throw new ArgumentNullException(nameof(jobHistoryRepository));
+        _jobHistoryService = jobHistoryService ?? throw new ArgumentNullException(nameof(jobHistoryService));
     }
 
     public async Task<SchedulerInfoModel> GetStatistics()
@@ -27,7 +30,7 @@ public sealed class SchedulerApplicationService : ISchedulerApplicationService
         var (metaData, nodes, statistics) =  (
             await _schedulerService.GetMetaData().ConfigureAwait(false),
             await _schedulerService.GetInstances().ConfigureAwait(false),
-            await _jobHistoryRepository.GetJobExecutionStatistics().ConfigureAwait(false)
+            await _jobHistoryService.GetJobExecutionStatistics().ConfigureAwait(false)
         );
 
         return new SchedulerInfoModel(
@@ -66,13 +69,8 @@ public sealed class SchedulerApplicationService : ISchedulerApplicationService
             });
     }
 
-    public async Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData()
+    public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
     {
-        return (await _jobHistoryRepository.ListJobExecutionHistoryChartData().ConfigureAwait(false))
-            .ConvertAll(x => new JobHistoryChartDataModel
-            {
-                X = x.Date,
-                Y = x.Count
-            });
+        return _jobHistoryService.ListJobExecutionHistoryChartData();
     }
 }

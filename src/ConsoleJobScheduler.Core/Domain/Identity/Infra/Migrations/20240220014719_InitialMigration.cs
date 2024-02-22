@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ConsoleJobScheduler.Core.Domain.Settings.Infra.Migrations
+namespace ConsoleJobScheduler.Core.Domain.Identity.Infra.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMigration : Migration

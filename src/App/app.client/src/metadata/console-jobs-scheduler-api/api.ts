@@ -200,7 +200,7 @@ export interface JobExecutionDetail {
      * @type {string}
      * @memberof JobExecutionDetail
      */
-    'scheduledTime'?: string;
+    'scheduledTime'?: string | null;
     /**
      * 
      * @type {string}
@@ -284,6 +284,25 @@ export interface JobExecutionDetailModel {
 /**
  * 
  * @export
+ * @interface JobExecutionHistoryChartData
+ */
+export interface JobExecutionHistoryChartData {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryChartData
+     */
+    'x'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionHistoryChartData
+     */
+    'y'?: number;
+}
+/**
+ * 
+ * @export
  * @interface JobExecutionHistoryListItem
  */
 export interface JobExecutionHistoryListItem {
@@ -322,7 +341,7 @@ export interface JobExecutionHistoryListItem {
      * @type {string}
      * @memberof JobExecutionHistoryListItem
      */
-    'scheduledTime'?: string;
+    'scheduledTime'?: string | null;
     /**
      * 
      * @type {string}
@@ -408,25 +427,6 @@ export interface JobExecutionHistoryListItemPagedResult {
      * @memberof JobExecutionHistoryListItemPagedResult
      */
     'totalPages'?: number;
-}
-/**
- * 
- * @export
- * @interface JobHistoryChartDataModel
- */
-export interface JobHistoryChartDataModel {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobHistoryChartDataModel
-     */
-    'x'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof JobHistoryChartDataModel
-     */
-    'y'?: number;
 }
 /**
  * 
@@ -1141,6 +1141,12 @@ export interface UserContext {
 export interface UserDetailModel {
     /**
      * 
+     * @type {number}
+     * @memberof UserDetailModel
+     */
+    'id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof UserDetailModel
      */
@@ -1155,62 +1161,62 @@ export interface UserDetailModel {
 /**
  * 
  * @export
- * @interface UserListItemModel
+ * @interface UserListItem
  */
-export interface UserListItemModel {
+export interface UserListItem {
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'id'?: number;
     /**
      * 
      * @type {string}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'userName'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'roles'?: string | null;
 }
 /**
  * 
  * @export
- * @interface UserListItemModelPagedResult
+ * @interface UserListItemPagedResult
  */
-export interface UserListItemModelPagedResult {
+export interface UserListItemPagedResult {
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'page'?: number;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'totalCount'?: number;
     /**
      * 
-     * @type {Array<UserListItemModel>}
-     * @memberof UserListItemModelPagedResult
+     * @type {Array<UserListItem>}
+     * @memberof UserListItemPagedResult
      */
-    'items'?: Array<UserListItemModel> | null;
+    'items'?: Array<UserListItem> | null;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'pageSize'?: number;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'totalPages'?: number;
 }
@@ -2440,7 +2446,7 @@ export const SchedulerApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobHistoryChartDataModel>>> {
+        async apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobExecutionHistoryChartData>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiSchedulerGetJobHistoryChartDataGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2467,7 +2473,7 @@ export const SchedulerApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiSchedulerGetJobHistoryChartDataGet(options?: any): AxiosPromise<Array<JobHistoryChartDataModel>> {
+        apiSchedulerGetJobHistoryChartDataGet(options?: any): AxiosPromise<Array<JobExecutionHistoryChartData>> {
             return localVarFp.apiSchedulerGetJobHistoryChartDataGet(options).then((request) => request(axios, basePath));
         },
     };
@@ -2947,7 +2953,7 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserListItemModelPagedResult>> {
+        async apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserListItemPagedResult>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2994,7 +3000,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiUsersPageNumberGet(pageNumber: number, options?: any): AxiosPromise<UserListItemModelPagedResult> {
+        apiUsersPageNumberGet(pageNumber: number, options?: any): AxiosPromise<UserListItemPagedResult> {
             return localVarFp.apiUsersPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**
