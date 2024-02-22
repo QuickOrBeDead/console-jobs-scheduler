@@ -25,11 +25,4 @@ public sealed class SchedulerController : ControllerBase
     {
         return _schedulerService.GetStatistics();
     }
-
-    [HttpGet("GetJobHistoryChartData")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
-    {
-        return _schedulerService.ListJobExecutionHistoryChartData();
-    }
 }

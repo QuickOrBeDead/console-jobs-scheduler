@@ -19,6 +19,10 @@ public interface IJobHistoryApplicationService
     Task UpdateJobHistoryEntryLastSignalTime(string id, DateTime signalTime, CancellationToken cancellationToken = default);
 
     Task<string?> GetJobExecutionErrorDetail(string id);
+
+    Task<JobExecutionStatistics> GetJobExecutionStatistics();
+
+    Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData();
 }
 
 public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
@@ -75,5 +79,21 @@ public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
         transactionScope.Complete();
 
         return result;
+    }
+
+    public async Task<JobExecutionStatistics> GetJobExecutionStatistics()
+    {
+        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+
+        var result = await _jobHistoryService.GetJobExecutionStatistics().ConfigureAwait(false);
+
+        transactionScope.Complete();
+
+        return result;
+    }
+
+    public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
+    {
+        return _jobHistoryService.ListJobExecutionHistoryChartData();
     }
 }

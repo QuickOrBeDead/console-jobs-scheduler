@@ -13,11 +13,11 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class JobHistoryController : ControllerBase
 {
-    private readonly IJobHistoryApplicationService _jobApplicationService;
+    private readonly IJobHistoryApplicationService _jobHistoryApplicationService;
 
     public JobHistoryController(IJobHistoryApplicationService jobHistoryApplicationService)
     {
-        _jobApplicationService = jobHistoryApplicationService ?? throw new ArgumentNullException(nameof(jobHistoryApplicationService));
+        _jobHistoryApplicationService = jobHistoryApplicationService ?? throw new ArgumentNullException(nameof(jobHistoryApplicationService));
     }
 
     [HttpGet("{pageNumber:int?}")]
@@ -25,6 +25,20 @@ public sealed class JobHistoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<JobExecutionHistoryListItem>))]
     public Task<PagedResult<JobExecutionHistoryListItem>> Get([FromQuery] string jobName = "", int? pageNumber = null)
     {
-        return _jobApplicationService.ListJobExecutionHistory(jobName, page: pageNumber ?? 1);
+        return _jobHistoryApplicationService.ListJobExecutionHistory(jobName, page: pageNumber ?? 1);
+    }
+
+    [HttpGet("GetJobHistoryChartData")]
+    [Produces(MediaTypeNames.Application.Json)]
+    public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
+    {
+        return _jobHistoryApplicationService.ListJobExecutionHistoryChartData();
+    }
+
+    [HttpGet("GetJobExecutionStatistics")]
+    [Produces(MediaTypeNames.Application.Json)]
+    public Task<JobExecutionStatistics> GetJobExecutionStatistics()
+    {
+        return _jobHistoryApplicationService.GetJobExecutionStatistics();
     }
 }
