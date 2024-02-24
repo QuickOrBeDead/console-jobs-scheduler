@@ -24,8 +24,16 @@ public sealed class SettingsRepository : ISettingsRepository
         return _settingsDbContext.Settings.Where(x => x.CategoryId == category).ToListAsync();
     }
 
-    public Task SaveSettings(SettingsCategory category, IEnumerable<Model.Settings> settings)
+    public async Task SaveSettings(SettingsCategory category, IEnumerable<Model.Settings> settings)
     {
-        return _settingsDbContext.Settings.BulkMergeAsync(settings, x => x.ColumnPrimaryKeyExpression = c => new { c.CategoryId, c.Name });
+        foreach (var setting in settings)
+        {
+            await _settingsDbContext.Settings.Upsert(setting)
+                .On(v => new { v.CategoryId, v.Name })
+                .WhenMatched(v => new Model.Settings
+                {
+                    Value = v.Value
+                }).RunAsync();
+        }
     }
 }

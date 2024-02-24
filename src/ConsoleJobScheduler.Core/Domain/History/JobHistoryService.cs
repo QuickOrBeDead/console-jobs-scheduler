@@ -21,10 +21,6 @@ public interface IJobHistoryService
 
     Task UpdateJobHistoryEntryCompleted(string id, TimeSpan runTime, Exception? jobException, CancellationToken cancellationToken = default);
 
-    Task UpdateJobHistoryEntryVetoed(string id, CancellationToken cancellationToken = default);
-
-    Task UpdateJobHistoryEntryLastSignalTime(string id, DateTime signalTime, CancellationToken cancellationToken = default);
-
     Task<JobExecutionStatistics> GetJobExecutionStatistics();
 
     Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData();
@@ -80,7 +76,7 @@ public sealed class JobHistoryService : IJobHistoryService
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id)
     {
-        var result = await _jobHistoryRepository.FindExecutionHistory<JobExecutionHistoryDetail>(id, x => new JobExecutionHistoryDetail
+        var result = await _jobHistoryRepository.FindExecutionHistoryAsNoTracking<JobExecutionHistoryDetail>(id, x => new JobExecutionHistoryDetail
         {
             Id = x.Id,
             InstanceName = x.InstanceName,
@@ -110,51 +106,17 @@ public sealed class JobHistoryService : IJobHistoryService
 
     public Task<string?> GetJobExecutionErrorDetail(string id)
     {
-        return _jobHistoryRepository.FindExecutionHistory(id, x => x.ErrorDetails);
+        return _jobHistoryRepository.FindExecutionHistoryAsNoTracking(id, x => x.ErrorDetails);
     }
 
-    public async Task UpdateJobHistoryEntryCompleted(string id, TimeSpan runTime, Exception? jobException, CancellationToken cancellationToken = default)
+    public Task UpdateJobHistoryEntryCompleted(string id, TimeSpan runTime, Exception? jobException, CancellationToken cancellationToken = default)
     {
-        var history = await _jobHistoryRepository.FindExecutionHistory(id, cancellationToken).ConfigureAwait(false);
-        if (history == null)
+        if (jobException == null)
         {
-            return;
+            return _jobHistoryRepository.SetCompleted(id, runTime, cancellationToken);
         }
 
-        history.SetCompleted(runTime);
-
-        if (jobException != null)
-        {
-            history.SetException(jobException);
-        }
-
-        await _jobHistoryRepository.SaveChanges(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task UpdateJobHistoryEntryVetoed(string id, CancellationToken cancellationToken = default)
-    {
-        var history = await _jobHistoryRepository.FindExecutionHistory(id, cancellationToken).ConfigureAwait(false);
-        if (history == null)
-        {
-            return;
-        }
-
-        history.SetVetoed();
-
-        await _jobHistoryRepository.SaveChanges(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task UpdateJobHistoryEntryLastSignalTime(string id, DateTime signalTime, CancellationToken cancellationToken = default)
-    {
-        var history = await _jobHistoryRepository.FindExecutionHistory(id, cancellationToken).ConfigureAwait(false);
-        if (history == null)
-        {
-            return;
-        }
-
-        history.SetLastSignalTime(signalTime);
-
-        await _jobHistoryRepository.SaveChanges(cancellationToken).ConfigureAwait(false);
+        return _jobHistoryRepository.SetCompleted(id, runTime, jobException.Message, jobException.ToString(), cancellationToken);
     }
 
     public async Task<JobExecutionStatistics> GetJobExecutionStatistics()

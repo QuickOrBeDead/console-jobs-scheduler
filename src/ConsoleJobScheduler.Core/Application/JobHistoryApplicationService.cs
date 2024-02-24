@@ -64,12 +64,12 @@ public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
 
     public Task UpdateJobHistoryEntryVetoed(string id, CancellationToken cancellationToken = default)
     {
-        return _jobHistoryService.UpdateJobHistoryEntryVetoed(id, cancellationToken);
+        return _jobHistoryRepository.SetVetoed(id, cancellationToken);
     }
 
     public Task UpdateJobHistoryEntryLastSignalTime(string id, DateTime signalTime, CancellationToken cancellationToken = default)
     {
-        return _jobHistoryService.UpdateJobHistoryEntryLastSignalTime(id, signalTime, cancellationToken);
+        return _jobHistoryRepository.SetLastSignalTime(id, signalTime, cancellationToken);
     }
 
     public async Task<string?> GetJobExecutionErrorDetail(string id)

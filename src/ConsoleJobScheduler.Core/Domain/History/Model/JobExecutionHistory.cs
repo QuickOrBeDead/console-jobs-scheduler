@@ -21,24 +21,28 @@ public sealed class JobExecutionHistory
     public DateTime? ScheduledTime { get; private set; }
 
     public DateTime FiredTime { get; private set; }
-
-    public DateTime LastSignalTime { get; private set; }
+    
+    public DateTime LastSignalTime { get; internal set; }
 
     public DateTime? NextFireTime { get; private set; }
 
     public string? CronExpressionString { get; private set; }
 
-    public TimeSpan? RunTime { get; private set; }
+    public TimeSpan? RunTime { get; internal set; }
 
-    public bool HasError { get; private set; }
+    public bool HasError { get; internal set; }
 
-    public string? ErrorMessage { get; private set; }
+    public string? ErrorMessage { get; internal set; }
 
-    public string? ErrorDetails { get; private set; }
+    public string? ErrorDetails { get; internal set; }
 
-    public bool Completed { get; private set; }
+    public bool Completed { get; internal set; }
 
-    public bool Vetoed { get; private set; }
+    public bool Vetoed { get; internal set; }
+
+    internal JobExecutionHistory()
+    {
+    }
 
     public JobExecutionHistory(string id, string schedulerName, string instanceName, string? packageName,
         string jobName, string jobGroup, string triggerName, string triggerGroup, DateTime? scheduledTime,

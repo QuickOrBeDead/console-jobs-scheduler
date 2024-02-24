@@ -1,3 +1,4 @@
+using System.Transactions;
 using ConsoleJobScheduler.Core.Domain.Settings;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 
@@ -21,15 +22,25 @@ public sealed class SettingsApplicationService : ISettingsApplicationService
         _settingsService = settingsService;
     }
 
-    public Task<TSettings> GetSettings<TSettings>()
+    public async Task<TSettings> GetSettings<TSettings>()
         where TSettings : ISettings, new()
     {
-        return _settingsService.GetSettings<TSettings>();
+        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+
+        var result = await _settingsService.GetSettings<TSettings>().ConfigureAwait(false);
+
+        transactionScope.Complete();
+
+        return result;
     }
 
-    public Task SaveSettings<TSettings>(TSettings settings)
+    public async Task SaveSettings<TSettings>(TSettings settings)
         where TSettings : ISettings
     {
-        return _settingsService.SaveSettings(settings);
+        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
+
+        await _settingsService.SaveSettings(settings).ConfigureAwait(false);
+
+        transactionScope.Complete();
     }
 }

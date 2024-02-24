@@ -1,32 +1,51 @@
 using AutoFixture;
 using ConsoleJobScheduler.Core.Application;
-using ConsoleJobScheduler.Core.Domain.History;
+using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.History.Infra;
 using ConsoleJobScheduler.Core.Domain.History.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
+using Z.EntityFramework.Extensions;
 
 namespace ConsoleJobScheduler.Core.Tests.Application;
 
 [TestFixture]
 public sealed class JobHistoryApplicationServiceFixture
 {
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        EntityFrameworkManager.ContextFactory = _ =>
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<HistoryDbContext>();
+            UseUseSqliteDatabase(optionsBuilder);
+            return new HistoryDbContext(optionsBuilder.Options);
+        };
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        EntityFrameworkManager.ContextFactory = null;
+    }
+    
     [Test]
     public async Task Should_Insert_JobHistoryEntry()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
-        
+        var serviceProvider = await CreateServiceProvider();
+
         var expected = new Fixture().Create<JobExecutionHistory>();
         expected.SetException(new InvalidOperationException("test"));
         expected.SetLastSignalTime(DateTime.UtcNow);
         expected.SetCompleted(TimeSpan.FromSeconds(55));
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.InsertJobHistoryEntry(expected);
 
         // Assert
@@ -60,24 +79,19 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_Update_History_Completed_Without_Exception()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         
         var entry = new Fixture().Create<JobExecutionHistory>();
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
+        await arrangeService.InsertJobHistoryEntry(entry);
         
         var runTime = TimeSpan.FromSeconds(99);
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry.Id, runTime, null);
 
         // Assert
-        Assert.That(entry.RunTime, Is.EqualTo(runTime));
-        Assert.That(entry.Completed, Is.True);
-        Assert.That(entry.HasError, Is.False);
-        Assert.That(entry.ErrorMessage, Is.Null);
-        Assert.That(entry.ErrorDetails, Is.Null); 
-        
         using var scope = serviceProvider.CreateScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
         var actual = await dbContext.FindAsync<JobExecutionHistory>(entry.Id);
@@ -94,25 +108,20 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_Update_History_Completed_With_Exception()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         
         var entry = new Fixture().Create<JobExecutionHistory>();
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
+        await arrangeService.InsertJobHistoryEntry(entry);
         
         var runTime = TimeSpan.FromSeconds(99);
         var exception = new InvalidOperationException("test");
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry.Id, runTime, exception);
 
         // Assert
-        Assert.That(entry.RunTime, Is.EqualTo(runTime));
-        Assert.That(entry.Completed, Is.True);
-        Assert.That(entry.HasError, Is.True);
-        Assert.That(entry.ErrorMessage, Is.EqualTo(exception.Message));
-        Assert.That(entry.ErrorDetails, Is.EqualTo(exception.ToString()));
-        
         using var scope = serviceProvider.CreateScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
         var actual = await dbContext.FindAsync<JobExecutionHistory>(entry.Id);
@@ -124,7 +133,7 @@ public sealed class JobHistoryApplicationServiceFixture
         Assert.That(actual.ErrorMessage, Is.EqualTo(exception.Message));
         Assert.That(actual.ErrorDetails, Is.EqualTo(exception.ToString()));
 
-        var errorDetails = await jobHistoryApplicationService.GetJobExecutionErrorDetail(entry.Id);
+        var errorDetails = await arrangeService.GetJobExecutionErrorDetail(entry.Id);
         Assert.That(errorDetails, Is.EqualTo(exception.ToString()));
     }
     
@@ -132,18 +141,17 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_Update_History_Vetoed()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         
         var entry = new Fixture().Create<JobExecutionHistory>();
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
+        await arrangeService.InsertJobHistoryEntry(entry);
         
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.UpdateJobHistoryEntryVetoed(entry.Id);
 
         // Assert
-        Assert.That(entry.Vetoed, Is.True);
-        
         using var scope = serviceProvider.CreateScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
         var actual = await dbContext.FindAsync<JobExecutionHistory>(entry.Id);
@@ -156,20 +164,19 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_Update_History_LastSignalTime()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         
         var entry = new Fixture().Create<JobExecutionHistory>();
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
+        await arrangeService.InsertJobHistoryEntry(entry);
         
         var signalTime = DateTime.UtcNow;
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.UpdateJobHistoryEntryLastSignalTime(entry.Id, signalTime);
 
         // Assert
-        Assert.That(entry.LastSignalTime, Is.EqualTo(signalTime));
-        
         using var scope = serviceProvider.CreateScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
         var actual = await dbContext.FindAsync<JobExecutionHistory>(entry.Id);
@@ -184,16 +191,18 @@ public sealed class JobHistoryApplicationServiceFixture
         // Arrange
         var now = new DateTime(2024, 1, 1, 10, 12, 0, DateTimeKind.Utc);
         var fakeTimeProvider = new FakeTimeProvider(now);
-        
-        var jobHistoryApplicationService = CreateJobHistoryApplicationService(fakeTimeProvider);
+
+        var serviceProvider = await CreateServiceProvider(fakeTimeProvider);
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var entry1 = CreateJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
         var entry2 = CreateJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
         
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry1);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry2);
+        await arrangeService.InsertJobHistoryEntry(entry1);
+        await arrangeService.InsertJobHistoryEntry(entry2);
         
         // Act
-        var page1 = await jobHistoryApplicationService.ListJobExecutionHistory(string.Empty, 1, 1);
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var page1 = await jobHistoryApplicationService.ListJobExecutionHistory(string.Empty, 1);
         var page2 = await jobHistoryApplicationService.ListJobExecutionHistory(string.Empty, 1, 2);
 
         // Assert
@@ -214,16 +223,18 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_List_JobExecutionHistory_By_JobName()
     {
         // Arrange
-        var jobHistoryApplicationService = CreateJobHistoryApplicationService();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var job1Entry = CreateJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
         var job2Entry = CreateJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
         job2Entry.SetCompleted(TimeSpan.FromSeconds(99));
         
-        await jobHistoryApplicationService.InsertJobHistoryEntry(job1Entry);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(job2Entry);
+        await arrangeService.InsertJobHistoryEntry(job1Entry);
+        await arrangeService.InsertJobHistoryEntry(job2Entry);
         
         // Act
-        var actual = await jobHistoryApplicationService.ListJobExecutionHistory("Job2", 1, 1);
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var actual = await jobHistoryApplicationService.ListJobExecutionHistory("Job2", 1);
 
         // Assert
         Assert.That(actual.TotalCount, Is.EqualTo(1));
@@ -237,7 +248,8 @@ public sealed class JobHistoryApplicationServiceFixture
     public async Task Should_Get_Job_Execution_Statistics()
     {
         // Arrange
-        var jobHistoryApplicationService = CreateJobHistoryApplicationService();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var fixture = new Fixture();
         var entry1 = fixture.Create<JobExecutionHistory>();
         var entry2 = fixture.Create<JobExecutionHistory>();
@@ -246,21 +258,22 @@ public sealed class JobHistoryApplicationServiceFixture
         var entry5 = fixture.Create<JobExecutionHistory>();
         var entry6 = fixture.Create<JobExecutionHistory>();
 
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry1);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry2);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry3);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry4);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry5);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry6);
+        await arrangeService.InsertJobHistoryEntry(entry1);
+        await arrangeService.InsertJobHistoryEntry(entry2);
+        await arrangeService.InsertJobHistoryEntry(entry3);
+        await arrangeService.InsertJobHistoryEntry(entry4);
+        await arrangeService.InsertJobHistoryEntry(entry5);
+        await arrangeService.InsertJobHistoryEntry(entry6);
 
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry1.Id, TimeSpan.FromSeconds(99), null);
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry2.Id, TimeSpan.FromSeconds(101), null);
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry3.Id, TimeSpan.FromSeconds(77), null);
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry4.Id, TimeSpan.FromSeconds(50), new InvalidOperationException("test"));
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry5.Id, TimeSpan.FromSeconds(10), new InvalidOperationException("test"));
-        await jobHistoryApplicationService.UpdateJobHistoryEntryVetoed(entry6.Id);
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry1.Id, TimeSpan.FromSeconds(99), null);
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry2.Id, TimeSpan.FromSeconds(101), null);
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry3.Id, TimeSpan.FromSeconds(77), null);
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry4.Id, TimeSpan.FromSeconds(50), new InvalidOperationException("test"));
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry5.Id, TimeSpan.FromSeconds(10), new InvalidOperationException("test"));
+        await arrangeService.UpdateJobHistoryEntryVetoed(entry6.Id);
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var statistics = await jobHistoryApplicationService.GetJobExecutionStatistics();
 
         // Assert
@@ -276,19 +289,21 @@ public sealed class JobHistoryApplicationServiceFixture
         // Arrange
         var now = new DateTime(2024, 1, 1, 10, 12, 0, DateTimeKind.Utc);
         var fakeTimeProvider = new FakeTimeProvider(now);
-        
-        var jobHistoryApplicationService = CreateJobHistoryApplicationService(fakeTimeProvider);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("1", "Job1", firedTime: new DateTime(2023, 12, 12)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("2", "Job2", firedTime: new DateTime(2024, 1, 1, 9, 0, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("3", "Job3", firedTime: new DateTime(2024, 1, 1, 9, 5, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("4", "Job4", firedTime: new DateTime(2024, 1, 1, 9, 14, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("5", "Job5", firedTime: new DateTime(2024, 1, 1, 9, 16, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("6", "Job6", firedTime: new DateTime(2024, 1, 1, 9, 29, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("7", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 30, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("8", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 59, 0)));
-        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("9", "Job6", firedTime: new DateTime(2024, 1, 1, 12, 31, 0)));
+
+        var serviceProvider = await CreateServiceProvider(fakeTimeProvider);
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("1", "Job1", firedTime: new DateTime(2023, 12, 12)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("2", "Job2", firedTime: new DateTime(2024, 1, 1, 9, 0, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("3", "Job3", firedTime: new DateTime(2024, 1, 1, 9, 5, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("4", "Job4", firedTime: new DateTime(2024, 1, 1, 9, 14, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("5", "Job5", firedTime: new DateTime(2024, 1, 1, 9, 16, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("6", "Job6", firedTime: new DateTime(2024, 1, 1, 9, 29, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("7", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 30, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("8", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 59, 0)));
+        await arrangeService.InsertJobHistoryEntry(CreateJobExecutionHistory("9", "Job6", firedTime: new DateTime(2024, 1, 1, 12, 31, 0)));
 
         // Act
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var chartData = await jobHistoryApplicationService.ListJobExecutionHistoryChartData();
 
         // Assert
@@ -311,13 +326,16 @@ public sealed class JobHistoryApplicationServiceFixture
         var id = "1";
         var runTime = TimeSpan.FromSeconds(99);
 
-        var jobHistoryApplicationService = CreateJobHistoryApplicationService();
+        var serviceProvider = await CreateServiceProvider();
+        
+        var arrangeService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
         var entry = CreateJobExecutionHistory(id, "Job1", DateTime.UtcNow, "0 0/5 * 1/1 * ? *", DateTime.UtcNow);
-        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
-        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(id, runTime, null);
+        await arrangeService.InsertJobHistoryEntry(entry);
+        await arrangeService.UpdateJobHistoryEntryCompleted(entry.Id, runTime, null);
 
         // Act
-        var actual = await jobHistoryApplicationService.GetJobExecutionDetail(id);
+        var jobHistoryApplicationService = serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var actual = await jobHistoryApplicationService.GetJobExecutionDetail(entry.Id);
 
         // Assert
         Assert.That(actual, Is.Not.Null);
@@ -339,7 +357,7 @@ public sealed class JobHistoryApplicationServiceFixture
         Assert.That(actual.Id, Is.EqualTo(entry.Id));
         Assert.That(actual.CronExpressionDescription, Is.EqualTo("Every 5 minutes"));
     }
-
+    
     private static void AssertModel(JobExecutionHistoryListItem actual, JobExecutionHistory expected)
     {
         Assert.That(actual.Id, Is.EqualTo(expected.Id));
@@ -363,30 +381,30 @@ public sealed class JobHistoryApplicationServiceFixture
             "TriggerGroup1", null, firedTime, lastSignalTime, DateTime.Now, cronExpression);
     }
 
-    private IJobHistoryApplicationService CreateJobHistoryApplicationService(TimeProvider? timeProvider = null)
-    {
-        var serviceProvider = CreateServiceProvider(timeProvider);
-        return serviceProvider.GetRequiredService<IJobHistoryApplicationService>();
-    }
-
-    private static ServiceProvider CreateServiceProvider(TimeProvider? timeProvider = null)
+    private static async Task<ServiceProvider> CreateServiceProvider(TimeProvider? timeProvider = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
 
         var jobHistoryModule = new JobHistoryModule(Substitute.For<IConfigurationRoot>());
-        jobHistoryModule.Register(services, builder => builder.UseInMemoryDatabase($"JobHistoryApplicationServiceTest{TestContext.CurrentContext.Test.ID}"));
-
-        services.AddScoped<IJobHistoryApplicationService, JobHistoryApplicationService>();
-
+        jobHistoryModule.Register(services, UseUseSqliteDatabase);
+        
         services.AddSingleton(timeProvider ?? new FakeTimeProvider());
 
         var serviceProvider = services.BuildServiceProvider();
 
         using var scope = serviceProvider.CreateScope();
-        using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
-        dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+
+        await jobHistoryModule.MigrateDb(serviceProvider);
+        
         return serviceProvider;
+    }
+
+    private static void UseUseSqliteDatabase(DbContextOptionsBuilder builder)
+    {
+        builder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+        builder.UseSqlite($"DataSource={Path.Combine(TestContext.CurrentContext.TestDirectory, "test.db")}");
     }
 }

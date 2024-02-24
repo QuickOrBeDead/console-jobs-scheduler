@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using ConsoleJobScheduler.Core.Domain.History.Model;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
 
 namespace ConsoleJobScheduler.Core.Application.Model;
