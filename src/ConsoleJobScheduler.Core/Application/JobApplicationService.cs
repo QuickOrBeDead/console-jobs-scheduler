@@ -33,7 +33,6 @@ public interface IJobApplicationService
 
 public sealed class JobApplicationService : IJobApplicationService
 {
-    private readonly IJobHistoryService _jobHistoryService;
     private readonly IJobRunService _jobRunService;
     private readonly ISchedulerService _schedulerService;
     private readonly IJobRunRepository _jobRunRepository;
@@ -44,11 +43,9 @@ public sealed class JobApplicationService : IJobApplicationService
         IJobRunRepository jobRunRepository,
         IJobRunAttachmentRepository jobRunAttachmentRepository,
         IJobPackageRepository jobPackageRepository,
-        IJobHistoryService jobHistoryService,
         IJobRunService jobRunService,
         ISchedulerService schedulerService)
     {
-        _jobHistoryService = jobHistoryService;
         _jobRunService = jobRunService;
         _schedulerService = schedulerService;
         _jobRunRepository = jobRunRepository;
@@ -58,16 +55,10 @@ public sealed class JobApplicationService : IJobApplicationService
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
     {
-        var jobExecutionDetail = await _jobHistoryService.GetJobExecutionDetail(id).ConfigureAwait(false);
-        if (jobExecutionDetail == null)
-        {
-            return null;
-        }
-
         var logs = await _jobRunRepository.GetJobRunLogs(id).ConfigureAwait(false);
         var attachments = await _jobRunAttachmentRepository.GetJobRunAttachments(id).ConfigureAwait(false);
 
-        return new JobExecutionDetailModel(jobExecutionDetail, logs, attachments);
+        return new JobExecutionDetailModel(logs, attachments);
     }
 
     public Task<byte[]?> GetJobRunAttachmentContent(long id)

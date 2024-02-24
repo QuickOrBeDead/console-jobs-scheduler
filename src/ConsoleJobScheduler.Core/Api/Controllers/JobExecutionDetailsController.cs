@@ -13,12 +13,10 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 public class JobExecutionDetailsController : ControllerBase
 {
     private readonly IJobApplicationService _jobApplicationService;
-    private readonly IJobHistoryApplicationService _jobHistoryApplicationService;
 
-    public JobExecutionDetailsController(IJobApplicationService jobApplicationService, IJobHistoryApplicationService jobHistoryApplicationService)
+    public JobExecutionDetailsController(IJobApplicationService jobApplicationService)
     {
         _jobApplicationService = jobApplicationService;
-        _jobHistoryApplicationService = jobHistoryApplicationService;
     }
 
     [HttpGet("{id}")]
@@ -35,13 +33,6 @@ public class JobExecutionDetailsController : ControllerBase
         }
 
         return Ok(jobDetail);
-    }
-
-    [HttpGet("GetErrorDetail/{id}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public Task<string?> GetErrorDetail(string id)
-    {
-        return _jobHistoryApplicationService.GetJobExecutionErrorDetail(id);
     }
 
     [HttpGet("GetAttachment/{id}")]

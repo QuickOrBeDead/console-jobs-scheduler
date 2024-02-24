@@ -186,8 +186,8 @@ public sealed class JobHistoryApplicationServiceFixture
         var fakeTimeProvider = new FakeTimeProvider(now);
         
         var jobHistoryApplicationService = CreateJobHistoryApplicationService(fakeTimeProvider);
-        var entry1 = CreateJbJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
-        var entry2 = CreateJbJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
+        var entry1 = CreateJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
+        var entry2 = CreateJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
         
         await jobHistoryApplicationService.InsertJobHistoryEntry(entry1);
         await jobHistoryApplicationService.InsertJobHistoryEntry(entry2);
@@ -215,8 +215,8 @@ public sealed class JobHistoryApplicationServiceFixture
     {
         // Arrange
         var jobHistoryApplicationService = CreateJobHistoryApplicationService();
-        var job1Entry = CreateJbJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
-        var job2Entry = CreateJbJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
+        var job1Entry = CreateJobExecutionHistory("1", "Job1", new DateTime(2024, 1, 1, 10, 11, 12, DateTimeKind.Utc));
+        var job2Entry = CreateJobExecutionHistory("2", "Job2", new DateTime(2024, 1, 1, 10, 10, 10, DateTimeKind.Utc));
         job2Entry.SetCompleted(TimeSpan.FromSeconds(99));
         
         await jobHistoryApplicationService.InsertJobHistoryEntry(job1Entry);
@@ -231,6 +231,113 @@ public sealed class JobHistoryApplicationServiceFixture
         var item = actual.Items.Single();
         Assert.That(item.HasSignalTimeout, Is.EqualTo(false));
         AssertModel(item, job2Entry);
+    }
+
+    [Test]
+    public async Task Should_Get_Job_Execution_Statistics()
+    {
+        // Arrange
+        var jobHistoryApplicationService = CreateJobHistoryApplicationService();
+        var fixture = new Fixture();
+        var entry1 = fixture.Create<JobExecutionHistory>();
+        var entry2 = fixture.Create<JobExecutionHistory>();
+        var entry3 = fixture.Create<JobExecutionHistory>();
+        var entry4 = fixture.Create<JobExecutionHistory>();
+        var entry5 = fixture.Create<JobExecutionHistory>();
+        var entry6 = fixture.Create<JobExecutionHistory>();
+
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry1);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry2);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry3);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry4);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry5);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry6);
+
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry1.Id, TimeSpan.FromSeconds(99), null);
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry2.Id, TimeSpan.FromSeconds(101), null);
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry3.Id, TimeSpan.FromSeconds(77), null);
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry4.Id, TimeSpan.FromSeconds(50), new InvalidOperationException("test"));
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(entry5.Id, TimeSpan.FromSeconds(10), new InvalidOperationException("test"));
+        await jobHistoryApplicationService.UpdateJobHistoryEntryVetoed(entry6.Id);
+
+        // Act
+        var statistics = await jobHistoryApplicationService.GetJobExecutionStatistics();
+
+        // Assert
+        Assert.That(statistics.TotalExecutedJobs, Is.EqualTo(5));
+        Assert.That(statistics.TotalVetoedJobs, Is.EqualTo(1));
+        Assert.That(statistics.TotalSucceededJobs, Is.EqualTo(3));
+        Assert.That(statistics.TotalFailedJobs, Is.EqualTo(2));
+    }
+
+    [Test]
+    public async Task Should_List_JobExecutionHistoryChartData()
+    {
+        // Arrange
+        var now = new DateTime(2024, 1, 1, 10, 12, 0, DateTimeKind.Utc);
+        var fakeTimeProvider = new FakeTimeProvider(now);
+        
+        var jobHistoryApplicationService = CreateJobHistoryApplicationService(fakeTimeProvider);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("1", "Job1", firedTime: new DateTime(2023, 12, 12)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("2", "Job2", firedTime: new DateTime(2024, 1, 1, 9, 0, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("3", "Job3", firedTime: new DateTime(2024, 1, 1, 9, 5, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("4", "Job4", firedTime: new DateTime(2024, 1, 1, 9, 14, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("5", "Job5", firedTime: new DateTime(2024, 1, 1, 9, 16, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("6", "Job6", firedTime: new DateTime(2024, 1, 1, 9, 29, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("7", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 30, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("8", "Job6", firedTime: new DateTime(2024, 1, 1, 10, 59, 0)));
+        await jobHistoryApplicationService.InsertJobHistoryEntry(CreateJobExecutionHistory("9", "Job6", firedTime: new DateTime(2024, 1, 1, 12, 31, 0)));
+
+        // Act
+        var chartData = await jobHistoryApplicationService.ListJobExecutionHistoryChartData();
+
+        // Assert
+        Assert.That(chartData[0].X, Is.EqualTo(new DateTime(2024, 1, 1, 9, 0, 0)));
+        Assert.That(chartData[0].Y, Is.EqualTo(3));
+        Assert.That(chartData[1].X, Is.EqualTo(new DateTime(2024, 1, 1, 9, 15, 0)));
+        Assert.That(chartData[1].Y, Is.EqualTo(2));
+        Assert.That(chartData[2].X, Is.EqualTo(new DateTime(2024, 1, 1, 10, 30, 0)));
+        Assert.That(chartData[2].Y, Is.EqualTo(1));
+        Assert.That(chartData[3].X, Is.EqualTo(new DateTime(2024, 1, 1, 10, 45, 0)));
+        Assert.That(chartData[3].Y, Is.EqualTo(1));
+        Assert.That(chartData[4].X, Is.EqualTo(new DateTime(2024, 1, 1, 12, 30, 0)));
+        Assert.That(chartData[4].Y, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task Should_Get_JobExecutionDetail()
+    {
+        // Arrange
+        var id = "1";
+        var runTime = TimeSpan.FromSeconds(99);
+
+        var jobHistoryApplicationService = CreateJobHistoryApplicationService();
+        var entry = CreateJobExecutionHistory(id, "Job1", DateTime.UtcNow, "0 0/5 * 1/1 * ? *", DateTime.UtcNow);
+        await jobHistoryApplicationService.InsertJobHistoryEntry(entry);
+        await jobHistoryApplicationService.UpdateJobHistoryEntryCompleted(id, runTime, null);
+
+        // Act
+        var actual = await jobHistoryApplicationService.GetJobExecutionDetail(id);
+
+        // Assert
+        Assert.That(actual, Is.Not.Null);
+        Assert.That(actual!.Id, Is.EqualTo(entry.Id));
+        Assert.That(actual.InstanceName, Is.EqualTo(entry.InstanceName));
+        Assert.That(actual.PackageName, Is.EqualTo(entry.PackageName));
+        Assert.That(actual.TriggerGroup, Is.EqualTo(entry.TriggerGroup));
+        Assert.That(actual.TriggerName, Is.EqualTo(entry.TriggerName));
+        Assert.That(actual.JobName, Is.EqualTo(entry.JobName));
+        Assert.That(actual.JobGroup, Is.EqualTo(entry.JobGroup));
+        Assert.That(actual.ScheduledTime, Is.EqualTo(entry.ScheduledTime));
+        Assert.That(actual.FiredTime, Is.EqualTo(entry.FiredTime));
+        Assert.That(actual.RunTime, Is.EqualTo(runTime));
+        Assert.That(actual.Completed, Is.EqualTo(true));
+        Assert.That(actual.Vetoed, Is.EqualTo(false));
+        Assert.That(actual.HasError, Is.EqualTo(false));
+        Assert.That(actual.LastSignalTime, Is.EqualTo(entry.LastSignalTime));
+        Assert.That(actual.ErrorMessage, Is.Null);
+        Assert.That(actual.Id, Is.EqualTo(entry.Id));
+        Assert.That(actual.CronExpressionDescription, Is.EqualTo("Every 5 minutes"));
     }
 
     private static void AssertModel(JobExecutionHistoryListItem actual, JobExecutionHistory expected)
@@ -250,10 +357,10 @@ public sealed class JobHistoryApplicationServiceFixture
         Assert.That(actual.NextFireTime, Is.EqualTo(expected.NextFireTime));
     }
 
-    private static JobExecutionHistory CreateJbJobExecutionHistory(string id, string jobName, DateTime lastSignalTime = default, string? cronExpression = null)
+    private static JobExecutionHistory CreateJobExecutionHistory(string id, string jobName, DateTime lastSignalTime = default, string? cronExpression = null, DateTime firedTime = default)
     {
         return new JobExecutionHistory(id, "Scheduler1", "Instance1", "ConsolePackage", jobName, "Package", "Trigger1",
-            "TriggerGroup1", null, DateTime.Now, lastSignalTime, DateTime.Now, cronExpression);
+            "TriggerGroup1", null, firedTime, lastSignalTime, DateTime.Now, cronExpression);
     }
 
     private IJobHistoryApplicationService CreateJobHistoryApplicationService(TimeProvider? timeProvider = null)

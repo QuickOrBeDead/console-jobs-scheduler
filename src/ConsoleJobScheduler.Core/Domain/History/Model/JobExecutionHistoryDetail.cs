@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Domain.History.Model;
 
-public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
+public sealed class JobExecutionHistoryDetail : IJobExecutionHasLastSignalTimeout
 {
     public string Id { get; set; } = null!;
 

@@ -15,7 +15,7 @@ public interface IJobHistoryService
 {
     Task<PagedResult<JobExecutionHistoryListItem>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1);
 
-    Task<JobExecutionDetail?> GetJobExecutionDetail(string id);
+    Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id);
 
     Task<string?> GetJobExecutionErrorDetail(string id);
 
@@ -78,15 +78,18 @@ public sealed class JobHistoryService : IJobHistoryService
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    public async Task<JobExecutionDetail?> GetJobExecutionDetail(string id)
+    public async Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id)
     {
-        var result = await _jobHistoryRepository.FindExecutionHistory<JobExecutionDetail>(id, x => new JobExecutionDetail
+        var result = await _jobHistoryRepository.FindExecutionHistory<JobExecutionHistoryDetail>(id, x => new JobExecutionHistoryDetail
         {
             Id = x.Id,
+            InstanceName = x.InstanceName,
             TriggerGroup = x.TriggerGroup,
             TriggerName = x.TriggerName,
             JobName = x.JobName,
             JobGroup = x.JobGroup,
+            PackageName = x.PackageName,
+            CronExpressionDescription = x.CronExpressionString,
             ScheduledTime = x.ScheduledTime,
             FiredTime = x.FiredTime,
             RunTime = x.RunTime,
@@ -94,10 +97,7 @@ public sealed class JobHistoryService : IJobHistoryService
             Vetoed = x.Vetoed,
             HasError = x.HasError,
             LastSignalTime = x.LastSignalTime,
-            ErrorMessage = x.ErrorMessage,
-            InstanceName = x.InstanceName,
-            PackageName = x.PackageName,
-            CronExpressionDescription = x.CronExpressionString
+            ErrorMessage = x.ErrorMessage
         }).ConfigureAwait(false);
 
         if (result != null)
@@ -180,7 +180,7 @@ public sealed class JobHistoryService : IJobHistoryService
 
     public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
     {
-        var today = DateTime.UtcNow.Date;
+        var today = _timeProvider.GetUtcNow().Date;
         var to = today.AddDays(1);
 
         return _jobHistoryRepository.Queryable()

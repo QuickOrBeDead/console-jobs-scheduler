@@ -41,4 +41,26 @@ public sealed class JobHistoryController : ControllerBase
     {
         return _jobHistoryApplicationService.GetJobExecutionStatistics();
     }
+
+    [HttpGet("GetJobExecutionDetail/{id}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobExecutionHistoryDetail))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetJobExecutionDetail(string id)
+    {
+        var jobExecutionDetail = await _jobHistoryApplicationService.GetJobExecutionDetail(id).ConfigureAwait(false);
+        if (jobExecutionDetail == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(jobExecutionDetail);
+    }
+
+    [HttpGet("GetErrorDetail/{id}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    public Task<string?> GetErrorDetail(string id)
+    {
+        return _jobHistoryApplicationService.GetJobExecutionErrorDetail(id);
+    }
 }

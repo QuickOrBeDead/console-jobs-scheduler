@@ -23,6 +23,8 @@ public interface IJobHistoryApplicationService
     Task<JobExecutionStatistics> GetJobExecutionStatistics();
 
     Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData();
+
+    Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id);
 }
 
 public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
@@ -75,6 +77,17 @@ public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
         using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
 
         var result = await _jobHistoryService.GetJobExecutionErrorDetail(id).ConfigureAwait(false);
+
+        transactionScope.Complete();
+
+        return result;
+    }
+
+    public async Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id)
+    {
+        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+
+        var result = await  _jobHistoryService.GetJobExecutionDetail(id).ConfigureAwait(false);
 
         transactionScope.Complete();
 
