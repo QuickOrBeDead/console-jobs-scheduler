@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { createApi } from '../api'
-import { SchedulerApi, SchedulerJobExecutionStatisticsModel, SchedulerMetadataModel, SchedulerStateRecordModel } from '../metadata/console-jobs-scheduler-api'
+import {
+  SchedulerApi,
+  JobExecutionStatistics,
+  SchedulerMetadataModel,
+  SchedulerStateRecordModel,
+  JobHistoryApi
+} from '../metadata/console-jobs-scheduler-api'
 import { createTypedChart } from 'vue-chartjs'
 import { Chart as ChartJS, Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeScale, ChartData, ChartOptions, BarController } from 'chart.js'
 import 'chartjs-adapter-date-fns'
@@ -10,7 +16,7 @@ ChartJS.register(Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeSc
 
 const Bar = createTypedChart<'bar', {x: string, y: number} []>('bar', BarController)
 
-const statistics = ref<SchedulerJobExecutionStatisticsModel>()
+const statistics = ref<JobExecutionStatistics>()
 const metadata = ref<SchedulerMetadataModel>()
 const nodes = ref<SchedulerStateRecordModel[]>()
 
@@ -40,18 +46,25 @@ const historyChartOptions: ChartOptions<'bar'> = {
 }
 
 const schedulerApi = createApi(SchedulerApi)
+const jobHistoryApi = createApi(JobHistoryApi)
 
 onMounted(async () => {
     const { data } = await schedulerApi.apiSchedulerGet()
-    statistics.value = data.statistics
     metadata.value = data.metadata
     nodes.value = data.nodes ? data.nodes : []
 
-    await loadChart()
+  await loadStatistics();
+
+  await loadChart()
 })
 
+async function loadStatistics() {
+  const {data} = await jobHistoryApi.apiJobHistoryGetJobExecutionStatisticsGet()
+  statistics.value = data
+}
+
 async function loadChart() {
-    const { data } = await schedulerApi.apiSchedulerGetJobHistoryChartDataGet()
+    const { data } = await jobHistoryApi.apiJobHistoryGetJobHistoryChartDataGet()
     historyChartData.value = {
         datasets: [ 
             { 

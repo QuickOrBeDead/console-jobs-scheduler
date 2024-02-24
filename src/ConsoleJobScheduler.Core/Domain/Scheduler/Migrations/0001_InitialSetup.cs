@@ -18,18 +18,7 @@ public class InitialSetup : MigrationBase
     public override void Up()
     {
         CreateScheduler();
-        CreateHistory();
         CreateRunner();
-        CreateSettings();
-    }
-
-    private void CreateSettings()
-    {
-        // ------------------------------ settings ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("settings"))
-            .WithColumn("category_id").AsInt32().NotNullable().PrimaryKey()
-            .WithColumn("name").AsString(255).NotNullable().PrimaryKey()
-            .WithColumn("value").AsString().Nullable();
     }
 
     private void CreateRunner()
@@ -292,29 +281,6 @@ public class InitialSetup : MigrationBase
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)
             .OnDelete(Rule.Cascade);
-    }
-
-    private void CreateHistory()
-    {
-        // ------------------------------ job_history ----------------------------------------------
-        Create.Table(GetNameWithTablePrefix("job_history"))
-            .WithColumn("id").AsString(30).NotNullable().PrimaryKey()
-            .WithColumn("sched_name").AsString().NotNullable()
-            .WithColumn("instance_name").AsString().NotNullable()
-            .WithColumn("job_name").AsString().NotNullable()
-            .WithColumn("job_group").AsString().NotNullable()
-            .WithColumn("package_name").AsString().Nullable()
-            .WithColumn("trigger_name").AsString().NotNullable()
-            .WithColumn("trigger_group").AsString().NotNullable()
-            .WithColumn("fired_time").AsInt64().NotNullable()
-            .WithColumn("sched_time").AsInt64().NotNullable()
-            .WithColumn("last_signal_time").AsInt64().NotNullable()
-            .WithColumn("run_time").AsInt64().Nullable()
-            .WithColumn("has_error").AsBoolean().NotNullable()
-            .WithColumn("error_message").AsString().Nullable()
-            .WithColumn("error_details").AsString().Nullable()
-            .WithColumn("vetoed").AsBoolean().NotNullable()
-            .WithColumn("completed").AsBoolean().NotNullable();
     }
 
     public override void Down()

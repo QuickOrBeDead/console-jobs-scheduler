@@ -150,124 +150,9 @@ export interface JobDetail {
 /**
  * 
  * @export
- * @interface JobExecutionDetail
- */
-export interface JobExecutionDetail {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'id'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'instanceName'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'jobName'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'jobGroup'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'triggerName'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'triggerGroup'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'packageName'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'scheduledTime'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'firedTime'?: string;
-    /**
-     * 
-     * @type {TimeSpan}
-     * @memberof JobExecutionDetail
-     */
-    'runTime'?: TimeSpan;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof JobExecutionDetail
-     */
-    'hasError'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'errorMessage'?: string | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof JobExecutionDetail
-     */
-    'completed'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof JobExecutionDetail
-     */
-    'vetoed'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'lastSignalTime'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof JobExecutionDetail
-     */
-    'hasSignalTimeout'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobExecutionDetail
-     */
-    'cronExpressionDescription'?: string | null;
-}
-/**
- * 
- * @export
  * @interface JobExecutionDetailModel
  */
 export interface JobExecutionDetailModel {
-    /**
-     * 
-     * @type {JobExecutionDetail}
-     * @memberof JobExecutionDetailModel
-     */
-    'details'?: JobExecutionDetail;
     /**
      * 
      * @type {Array<JobRunAttachmentInfo>}
@@ -280,6 +165,134 @@ export interface JobExecutionDetailModel {
      * @memberof JobExecutionDetailModel
      */
     'logs'?: Array<JobRunLog> | null;
+}
+/**
+ * 
+ * @export
+ * @interface JobExecutionHistoryChartData
+ */
+export interface JobExecutionHistoryChartData {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryChartData
+     */
+    'x'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionHistoryChartData
+     */
+    'y'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface JobExecutionHistoryDetail
+ */
+export interface JobExecutionHistoryDetail {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'id'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'instanceName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'jobName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'jobGroup'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'triggerName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'triggerGroup'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'packageName'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'scheduledTime'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'firedTime'?: string;
+    /**
+     * 
+     * @type {TimeSpan}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'runTime'?: TimeSpan;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'hasError'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'errorMessage'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'completed'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'vetoed'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'lastSignalTime'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'hasSignalTimeout'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobExecutionHistoryDetail
+     */
+    'cronExpressionDescription'?: string | null;
 }
 /**
  * 
@@ -322,7 +335,7 @@ export interface JobExecutionHistoryListItem {
      * @type {string}
      * @memberof JobExecutionHistoryListItem
      */
-    'scheduledTime'?: string;
+    'scheduledTime'?: string | null;
     /**
      * 
      * @type {string}
@@ -412,21 +425,39 @@ export interface JobExecutionHistoryListItemPagedResult {
 /**
  * 
  * @export
- * @interface JobHistoryChartDataModel
+ * @interface JobExecutionStatistics
  */
-export interface JobHistoryChartDataModel {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobHistoryChartDataModel
-     */
-    'x'?: string;
+export interface JobExecutionStatistics {
     /**
      * 
      * @type {number}
-     * @memberof JobHistoryChartDataModel
+     * @memberof JobExecutionStatistics
      */
-    'y'?: number;
+    'totalExecutedJobs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionStatistics
+     */
+    'totalSucceededJobs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionStatistics
+     */
+    'totalRunningJobs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionStatistics
+     */
+    'totalFailedJobs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobExecutionStatistics
+     */
+    'totalVetoedJobs'?: number;
 }
 /**
  * 
@@ -709,49 +740,6 @@ export interface SchedulerInfoModel {
      * @memberof SchedulerInfoModel
      */
     'nodes'?: Array<SchedulerStateRecordModel> | null;
-    /**
-     * 
-     * @type {SchedulerJobExecutionStatisticsModel}
-     * @memberof SchedulerInfoModel
-     */
-    'statistics'?: SchedulerJobExecutionStatisticsModel;
-}
-/**
- * 
- * @export
- * @interface SchedulerJobExecutionStatisticsModel
- */
-export interface SchedulerJobExecutionStatisticsModel {
-    /**
-     * 
-     * @type {number}
-     * @memberof SchedulerJobExecutionStatisticsModel
-     */
-    'totalExecutedJobs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SchedulerJobExecutionStatisticsModel
-     */
-    'totalSucceededJobs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SchedulerJobExecutionStatisticsModel
-     */
-    'totalRunningJobs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SchedulerJobExecutionStatisticsModel
-     */
-    'totalFailedJobs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SchedulerJobExecutionStatisticsModel
-     */
-    'totalVetoedJobs'?: number;
 }
 /**
  * 
@@ -1141,6 +1129,12 @@ export interface UserContext {
 export interface UserDetailModel {
     /**
      * 
+     * @type {number}
+     * @memberof UserDetailModel
+     */
+    'id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof UserDetailModel
      */
@@ -1155,62 +1149,62 @@ export interface UserDetailModel {
 /**
  * 
  * @export
- * @interface UserListItemModel
+ * @interface UserListItem
  */
-export interface UserListItemModel {
+export interface UserListItem {
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'id'?: number;
     /**
      * 
      * @type {string}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'userName'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof UserListItemModel
+     * @memberof UserListItem
      */
     'roles'?: string | null;
 }
 /**
  * 
  * @export
- * @interface UserListItemModelPagedResult
+ * @interface UserListItemPagedResult
  */
-export interface UserListItemModelPagedResult {
+export interface UserListItemPagedResult {
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'page'?: number;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'totalCount'?: number;
     /**
      * 
-     * @type {Array<UserListItemModel>}
-     * @memberof UserListItemModelPagedResult
+     * @type {Array<UserListItem>}
+     * @memberof UserListItemPagedResult
      */
-    'items'?: Array<UserListItemModel> | null;
+    'items'?: Array<UserListItem> | null;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'pageSize'?: number;
     /**
      * 
      * @type {number}
-     * @memberof UserListItemModelPagedResult
+     * @memberof UserListItemPagedResult
      */
     'totalPages'?: number;
 }
@@ -1523,39 +1517,6 @@ export const JobExecutionDetailsApiAxiosParamCreator = function (configuration?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiJobExecutionDetailsGetErrorDetailIdGet: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('apiJobExecutionDetailsGetErrorDetailIdGet', 'id', id)
-            const localVarPath = `/api/JobExecutionDetails/GetErrorDetail/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
         apiJobExecutionDetailsIdGet: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('apiJobExecutionDetailsIdGet', 'id', id)
@@ -1610,16 +1571,6 @@ export const JobExecutionDetailsApiFp = function(configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiJobExecutionDetailsGetErrorDetailIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobExecutionDetailsGetErrorDetailIdGet(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
         async apiJobExecutionDetailsIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionDetailModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobExecutionDetailsIdGet(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
@@ -1643,15 +1594,6 @@ export const JobExecutionDetailsApiFactory = function (configuration?: Configura
          */
         apiJobExecutionDetailsGetAttachmentIdGet(id: number, attachmentName?: string, options?: any): AxiosPromise<void> {
             return localVarFp.apiJobExecutionDetailsGetAttachmentIdGet(id, attachmentName, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiJobExecutionDetailsGetErrorDetailIdGet(id: string, options?: any): AxiosPromise<string> {
-            return localVarFp.apiJobExecutionDetailsGetErrorDetailIdGet(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1691,17 +1633,6 @@ export class JobExecutionDetailsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof JobExecutionDetailsApi
      */
-    public apiJobExecutionDetailsGetErrorDetailIdGet(id: string, options?: AxiosRequestConfig) {
-        return JobExecutionDetailsApiFp(this.configuration).apiJobExecutionDetailsGetErrorDetailIdGet(id, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof JobExecutionDetailsApi
-     */
     public apiJobExecutionDetailsIdGet(id: string, options?: AxiosRequestConfig) {
         return JobExecutionDetailsApiFp(this.configuration).apiJobExecutionDetailsIdGet(id, options).then((request) => request(this.axios, this.basePath));
     }
@@ -1714,6 +1645,130 @@ export class JobExecutionDetailsApi extends BaseAPI {
  */
 export const JobHistoryApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetErrorDetailIdGet: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('apiJobHistoryGetErrorDetailIdGet', 'id', id)
+            const localVarPath = `/api/JobHistory/GetErrorDetail/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobExecutionDetailIdGet: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('apiJobHistoryGetJobExecutionDetailIdGet', 'id', id)
+            const localVarPath = `/api/JobHistory/GetJobExecutionDetail/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobExecutionStatisticsGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/JobHistory/GetJobExecutionStatistics`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobHistoryChartDataGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/JobHistory/GetJobHistoryChartData`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @param {number} pageNumber 
@@ -1764,6 +1819,44 @@ export const JobHistoryApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobHistoryGetErrorDetailIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryGetErrorDetailIdGet(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobHistoryGetJobExecutionDetailIdGet(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionHistoryDetail>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryGetJobExecutionDetailIdGet(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobHistoryGetJobExecutionStatisticsGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobExecutionStatistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryGetJobExecutionStatisticsGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobHistoryGetJobHistoryChartDataGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobExecutionHistoryChartData>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobHistoryGetJobHistoryChartDataGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {string} [jobName] 
          * @param {*} [options] Override http request option.
@@ -1785,6 +1878,40 @@ export const JobHistoryApiFactory = function (configuration?: Configuration, bas
     return {
         /**
          * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetErrorDetailIdGet(id: string, options?: any): AxiosPromise<string> {
+            return localVarFp.apiJobHistoryGetErrorDetailIdGet(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobExecutionDetailIdGet(id: string, options?: any): AxiosPromise<JobExecutionHistoryDetail> {
+            return localVarFp.apiJobHistoryGetJobExecutionDetailIdGet(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobExecutionStatisticsGet(options?: any): AxiosPromise<JobExecutionStatistics> {
+            return localVarFp.apiJobHistoryGetJobExecutionStatisticsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobHistoryGetJobHistoryChartDataGet(options?: any): AxiosPromise<Array<JobExecutionHistoryChartData>> {
+            return localVarFp.apiJobHistoryGetJobHistoryChartDataGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {string} [jobName] 
          * @param {*} [options] Override http request option.
@@ -1803,6 +1930,48 @@ export const JobHistoryApiFactory = function (configuration?: Configuration, bas
  * @extends {BaseAPI}
  */
 export class JobHistoryApi extends BaseAPI {
+    /**
+     * 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobHistoryApi
+     */
+    public apiJobHistoryGetErrorDetailIdGet(id: string, options?: AxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).apiJobHistoryGetErrorDetailIdGet(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobHistoryApi
+     */
+    public apiJobHistoryGetJobExecutionDetailIdGet(id: string, options?: AxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).apiJobHistoryGetJobExecutionDetailIdGet(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobHistoryApi
+     */
+    public apiJobHistoryGetJobExecutionStatisticsGet(options?: AxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).apiJobHistoryGetJobExecutionStatisticsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobHistoryApi
+     */
+    public apiJobHistoryGetJobHistoryChartDataGet(options?: AxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).apiJobHistoryGetJobHistoryChartDataGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @param {number} pageNumber 
@@ -2387,35 +2556,6 @@ export const SchedulerApiAxiosParamCreator = function (configuration?: Configura
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiSchedulerGetJobHistoryChartDataGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/Scheduler/GetJobHistoryChartData`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -2433,15 +2573,6 @@ export const SchedulerApiFp = function(configuration?: Configuration) {
          */
         async apiSchedulerGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SchedulerInfoModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiSchedulerGet(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobHistoryChartDataModel>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiSchedulerGetJobHistoryChartDataGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -2462,14 +2593,6 @@ export const SchedulerApiFactory = function (configuration?: Configuration, base
         apiSchedulerGet(options?: any): AxiosPromise<SchedulerInfoModel> {
             return localVarFp.apiSchedulerGet(options).then((request) => request(axios, basePath));
         },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        apiSchedulerGetJobHistoryChartDataGet(options?: any): AxiosPromise<Array<JobHistoryChartDataModel>> {
-            return localVarFp.apiSchedulerGetJobHistoryChartDataGet(options).then((request) => request(axios, basePath));
-        },
     };
 };
 
@@ -2488,16 +2611,6 @@ export class SchedulerApi extends BaseAPI {
      */
     public apiSchedulerGet(options?: AxiosRequestConfig) {
         return SchedulerApiFp(this.configuration).apiSchedulerGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SchedulerApi
-     */
-    public apiSchedulerGetJobHistoryChartDataGet(options?: AxiosRequestConfig) {
-        return SchedulerApiFp(this.configuration).apiSchedulerGetJobHistoryChartDataGet(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -2947,7 +3060,7 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserListItemModelPagedResult>> {
+        async apiUsersPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserListItemPagedResult>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiUsersPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2994,7 +3107,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiUsersPageNumberGet(pageNumber: number, options?: any): AxiosPromise<UserListItemModelPagedResult> {
+        apiUsersPageNumberGet(pageNumber: number, options?: any): AxiosPromise<UserListItemPagedResult> {
             return localVarFp.apiUsersPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**

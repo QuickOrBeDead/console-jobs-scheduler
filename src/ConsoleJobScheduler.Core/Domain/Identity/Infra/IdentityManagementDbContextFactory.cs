@@ -1,14 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics.CodeAnalysis;
+using ConsoleJobScheduler.Core.Infra.Migration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace ConsoleJobScheduler.Core.Domain.Identity.Infra;
 
-public class IdentityManagementDbContextFactory : IDesignTimeDbContextFactory<IdentityManagementDbContext>
+[ExcludeFromCodeCoverage]
+public sealed class IdentityManagementDbContextFactory : IDesignTimeDbContextFactory<IdentityManagementDbContext>
 {
     public IdentityManagementDbContext CreateDbContext(string[] args)
     {
+        var arguments = new ArgumentsReader(args);
+
         var optionsBuilder = new DbContextOptionsBuilder<IdentityManagementDbContext>();
-        optionsBuilder.UseNpgsql("User ID=quartz;Password=quartz;Host=localhost;Port=5432;Database=quartz;Pooling=true;Minimum Pool Size=0;Maximum Pool Size=105;");
+        optionsBuilder.UseNpgsql(arguments.GetValue("connection"));
 
         return new IdentityManagementDbContext(optionsBuilder.Options);
     }

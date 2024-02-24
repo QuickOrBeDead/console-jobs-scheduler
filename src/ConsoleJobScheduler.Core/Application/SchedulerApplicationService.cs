@@ -1,5 +1,4 @@
 using ConsoleJobScheduler.Core.Application.Model;
-using ConsoleJobScheduler.Core.Domain.History.Infra;
 using ConsoleJobScheduler.Core.Domain.Scheduler;
 
 namespace ConsoleJobScheduler.Core.Application;
@@ -7,27 +6,22 @@ namespace ConsoleJobScheduler.Core.Application;
 public interface ISchedulerApplicationService
 {
     Task<SchedulerInfoModel> GetStatistics();
-
-    Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData();
 }
 
 public sealed class SchedulerApplicationService : ISchedulerApplicationService
 {
     private readonly ISchedulerService _schedulerService;
-    private readonly IJobHistoryRepository _jobHistoryRepository;
 
-    public SchedulerApplicationService(ISchedulerService schedulerService, IJobHistoryRepository jobHistoryRepository)
+    public SchedulerApplicationService(ISchedulerService schedulerService)
     {
         _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
-        _jobHistoryRepository = jobHistoryRepository ?? throw new ArgumentNullException(nameof(jobHistoryRepository));
     }
 
     public async Task<SchedulerInfoModel> GetStatistics()
     {
-        var (metaData, nodes, statistics) =  (
+        var (metaData, nodes) =  (
             await _schedulerService.GetMetaData().ConfigureAwait(false),
-            await _schedulerService.GetInstances().ConfigureAwait(false),
-            await _jobHistoryRepository.GetJobExecutionStatistics().ConfigureAwait(false)
+            await _schedulerService.GetInstances().ConfigureAwait(false)
         );
 
         return new SchedulerInfoModel(
@@ -55,24 +49,6 @@ public sealed class SchedulerApplicationService : ISchedulerApplicationService
                     SchedulerInstanceId = x.SchedulerInstanceId,
                     CheckInInterval = x.CheckinInterval,
                     CheckInTimestamp = x.CheckinTimestamp
-                }).ToList(),
-            new SchedulerJobExecutionStatisticsModel
-            {
-                TotalExecutedJobs = statistics.TotalExecutedJobs,
-                TotalFailedJobs = statistics.TotalFailedJobs,
-                TotalRunningJobs = statistics.TotalRunningJobs,
-                TotalSucceededJobs = statistics.TotalSucceededJobs,
-                TotalVetoedJobs = statistics.TotalVetoedJobs
-            });
-    }
-
-    public async Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData()
-    {
-        return (await _jobHistoryRepository.ListJobExecutionHistoryChartData().ConfigureAwait(false))
-            .ConvertAll(x => new JobHistoryChartDataModel
-            {
-                X = x.Date,
-                Y = x.Count
-            });
+                }).ToList());
     }
 }

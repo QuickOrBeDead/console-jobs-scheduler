@@ -8,5 +8,5 @@ public interface IJobExecutionHasLastSignalTimeout
 
     DateTime LastSignalTime { get; }
 
-    bool HasSignalTimeout { get; set; }
+    void SetHasSignalTimeout(bool value);
 }

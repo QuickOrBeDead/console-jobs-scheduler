@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Domain.History.Model;
 
-public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
+public sealed class JobExecutionHistoryDetail : IJobExecutionHasLastSignalTimeout
 {
     public string Id { get; set; } = null!;
 
@@ -16,7 +16,7 @@ public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
 
     public string PackageName { get; set; } = null!;
 
-    public DateTime ScheduledTime { get; set; }
+    public DateTime? ScheduledTime { get; set; }
 
     public DateTime FiredTime { get; set; }
 
@@ -35,4 +35,9 @@ public sealed class JobExecutionDetail : IJobExecutionHasLastSignalTimeout
     public bool HasSignalTimeout { get; set; }
 
     public string? CronExpressionDescription { get; set; }
+
+    public void SetHasSignalTimeout(bool value)
+    {
+        HasSignalTimeout = value;
+    }
 }

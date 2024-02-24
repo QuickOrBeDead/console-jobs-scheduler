@@ -36,13 +36,13 @@ public sealed class ConsoleAppPackageJob : IJob
         var cancellationTokenSource = new CancellationTokenSource();
         try
         {
-            async Task UpdateJobLastSignalTime(string jobRunId, IJobApplicationService jobApplicationService, CancellationToken c)
+            async Task UpdateJobLastSignalTime(string jobRunId, IJobHistoryApplicationService jobHistoryApplicationService, CancellationToken c)
             {
                 while (!c.IsCancellationRequested)
                 {
                     try
                     {
-                        await jobApplicationService.UpdateJobHistoryEntryLastSignalTime(jobRunId, DateTime.UtcNow, c);
+                        await jobHistoryApplicationService.UpdateJobHistoryEntryLastSignalTime(jobRunId, DateTime.UtcNow, c);
                     }
                     catch (Exception ex)
                     {
@@ -64,7 +64,7 @@ public sealed class ConsoleAppPackageJob : IJob
             }
 
             using var serviceScope = _serviceProvider.CreateScope();
-            var signalTask = UpdateJobLastSignalTime(context.FireInstanceId, serviceScope.ServiceProvider.GetRequiredService<IJobApplicationService>(), cancellationTokenSource.Token);
+            var signalTask = UpdateJobLastSignalTime(context.FireInstanceId, serviceScope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>(), cancellationTokenSource.Token);
 
             await serviceScope.ServiceProvider.GetRequiredService<IConsoleAppPackageRunner>().Run(context.FireInstanceId, package, parameters, context.CancellationToken).ConfigureAwait(false);
 

@@ -16,7 +16,7 @@ public class JobExecutionDetailsController : ControllerBase
 
     public JobExecutionDetailsController(IJobApplicationService jobApplicationService)
     {
-        _jobApplicationService = jobApplicationService ?? throw new ArgumentNullException(nameof(jobApplicationService));
+        _jobApplicationService = jobApplicationService;
     }
 
     [HttpGet("{id}")]
@@ -33,13 +33,6 @@ public class JobExecutionDetailsController : ControllerBase
         }
 
         return Ok(jobDetail);
-    }
-
-    [HttpGet("GetErrorDetail/{id}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public Task<string?> GetErrorDetail(string id)
-    {
-        return _jobApplicationService.GetJobExecutionErrorDetail(id);
     }
 
     [HttpGet("GetAttachment/{id}")]

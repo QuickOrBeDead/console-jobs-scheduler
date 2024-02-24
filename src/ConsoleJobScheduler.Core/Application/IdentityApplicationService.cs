@@ -118,8 +118,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
         var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
         for (var i = 0; i < roles.Length; i++)
         {
-            var role = roles[i];
-            await AddRole(role).ConfigureAwait(false);
+            await _roleRepository.AddRole(roles[i]);
         }
 
         if (!await _userRepository.UserExists(DefaultAdminUserName).ConfigureAwait(false))
@@ -138,12 +137,5 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
     private static List<string> GetRoles(ClaimsPrincipal contextUser)
     {
         return contextUser.FindAll(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-    }
-
-    private async Task AddRole(string roleName)
-    {
-        using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-        await _roleRepository.AddRole(roleName);
-        transactionScope.Complete();
     }
 }

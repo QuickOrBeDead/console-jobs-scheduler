@@ -1,6 +1,7 @@
 ﻿using System.Net.Mime;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Model;
+using ConsoleJobScheduler.Core.Domain.History.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,12 +24,5 @@ public sealed class SchedulerController : ControllerBase
     public Task<SchedulerInfoModel> Get()
     {
         return _schedulerService.GetStatistics();
-    }
-
-    [HttpGet("GetJobHistoryChartData")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public Task<List<JobHistoryChartDataModel>> ListJobExecutionHistoryChartData()
-    {
-        return _schedulerService.ListJobExecutionHistoryChartData();
     }
 }

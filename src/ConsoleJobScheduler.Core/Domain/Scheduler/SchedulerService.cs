@@ -145,8 +145,6 @@ public sealed class SchedulerService : ISchedulerService
         return string.IsNullOrWhiteSpace(cronExpression) ? null : new JobCronExpression(cronExpression, GetCronExpressionDescription(cronExpression));
     }
 
-   
-
     private async Task<int> GetPageSize()
     {
         var generalSettings = await _settingsService.GetSettings<GeneralSettings>().ConfigureAwait(false);
