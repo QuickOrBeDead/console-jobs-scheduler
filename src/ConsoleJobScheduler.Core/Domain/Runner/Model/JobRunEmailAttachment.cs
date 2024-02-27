@@ -2,10 +2,13 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Model;
 
 public sealed class JobRunEmailAttachment : JobRunAttachment
 {
-    public Guid EmailId { get; private set; }
+    private JobRunEmailAttachment()
+        : base()
+    {
+    }
 
-    public JobRunEmailAttachment(Guid emailId, string jobRunId, string fileContent, string fileName, string contentType) : 
-        base(jobRunId, fileContent, fileName, contentType)
+    public JobRunEmailAttachment(Guid emailId, string jobRunId, byte[] content, string fileName, string contentType) : 
+        base(jobRunId, content, fileName, contentType)
     {
         EmailId = emailId;
     }

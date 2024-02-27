@@ -68,7 +68,7 @@ public sealed class ServiceHost
         var identityModule = new IdentityModule(builder.Configuration);
         var schedulerModule = new SchedulerModule(builder.Configuration);
         var historyModule = new JobHistoryModule(builder.Configuration);
-        var jobRunModule = new JobRunModule();
+        var jobRunModule = new JobRunModule(builder.Configuration);
         var settingsModule = new SettingsModule(builder.Configuration);
 
         identityModule.Register(builder.Services);
@@ -133,6 +133,7 @@ public sealed class ServiceHost
         await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await schedulerModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await settingsModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await jobRunModule.MigrateDb(_app.Services).ConfigureAwait(false);
 
         await _schedulerManager.Start();
         await _app.RunAsync().ConfigureAwait(false);

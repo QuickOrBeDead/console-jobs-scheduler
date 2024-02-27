@@ -2,7 +2,7 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Model;
 
 public sealed class JobRunEmail
 {
-    private IList<JobRunEmailAttachment>? _attachments;
+    private IList<JobRunEmailAttachment> _attachments = new List<JobRunEmailAttachment>();
 
     public Guid Id { get; private set; }
 
@@ -16,8 +16,6 @@ public sealed class JobRunEmail
     {
         get
         {
-            _attachments ??= new List<JobRunEmailAttachment>();
-
             return _attachments.AsReadOnly();
         }
         private set => _attachments = value;
@@ -29,21 +27,28 @@ public sealed class JobRunEmail
 
     public string? Bcc { get; private set; }
 
-    public JobRunEmail(string jobRunId, string subject, string body, string to, string? cc = null, string? bcc = null)
+    public bool IsSent { get; set; }
+
+    public DateTime CreateDate { get; set; }
+
+    internal JobRunEmail()
     {
-        Id = Guid.NewGuid();
+    }
+
+    public JobRunEmail(Guid id, string jobRunId, string subject, string body, string to, string? cc = null, string? bcc = null)
+    {
+        Id = id;
         JobRunId = jobRunId;
         Subject = subject;
         Body = body;
         To = to;
         CC = cc;
         Bcc = bcc;
+        CreateDate = DateTime.UtcNow;
     }
 
-    public void AddAttachment(string fileName, string fileContent, string contentType)
+    public void AddAttachment(string fileName, byte[] fileContent, string contentType)
     {
-        var attachment = new JobRunEmailAttachment(Id, JobRunId, fileContent, fileName, contentType);
-
-        Attachments.Add(attachment);
+        _attachments.Add(new JobRunEmailAttachment(Id, JobRunId, fileContent, fileName, contentType));
     }
 }

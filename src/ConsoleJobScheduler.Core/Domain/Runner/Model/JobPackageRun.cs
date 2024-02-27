@@ -6,15 +6,15 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Model
     {
         private readonly string _tempDirectory;
 
-        private byte[] Content { get; set; } = null!;
+        private byte[] Content { get; set; }
 
-        public string FileName { get; set; } = null!;
+        public string FileName { get; set; }
 
-        public string Arguments { get; set; } = null!;
+        public string Arguments { get; set; }
 
-        private string PackageName { get; set; } = null!;
+        private string PackageName { get; set; }
 
-        public string PackageRunDirectory { get; set; } = null!;
+        public string PackageRunDirectory { get; set; }
 
         public JobPackageRun(string name, byte[] content, string fileName, string arguments, string tempRootPath)
         {
@@ -60,6 +60,15 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Model
                 {
                     zipArchive.ExtractToDirectory(PackageRunDirectory);
                 }
+            }
+        }
+
+        public void DeletePackageRun()
+        {
+            var directory = new DirectoryInfo(PackageRunDirectory);
+            if (directory.Exists)
+            {
+                directory.Delete(true);
             }
         }
     }

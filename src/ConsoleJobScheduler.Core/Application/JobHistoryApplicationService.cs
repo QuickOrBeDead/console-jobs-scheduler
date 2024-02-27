@@ -1,4 +1,3 @@
-using System.Transactions;
 using ConsoleJobScheduler.Core.Domain.History;
 using ConsoleJobScheduler.Core.Domain.History.Infra;
 using ConsoleJobScheduler.Core.Domain.History.Model;
@@ -42,12 +41,9 @@ public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
 
     public async Task<PagedResult<JobExecutionHistoryListItem>> ListJobExecutionHistory(string jobName = "", int pageSize = 10, int page = 1)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
-
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await _jobHistoryService.ListJobExecutionHistory(jobName, pageSize, page).ConfigureAwait(false);
-
         transactionScope.Complete();
-
         return result;
     }
 
@@ -74,39 +70,33 @@ public sealed class JobHistoryApplicationService : IJobHistoryApplicationService
 
     public async Task<string?> GetJobExecutionErrorDetail(string id)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
-
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await _jobHistoryService.GetJobExecutionErrorDetail(id).ConfigureAwait(false);
-
         transactionScope.Complete();
-
         return result;
     }
 
     public async Task<JobExecutionHistoryDetail?> GetJobExecutionDetail(string id)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
-
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await  _jobHistoryService.GetJobExecutionDetail(id).ConfigureAwait(false);
-
         transactionScope.Complete();
-
         return result;
     }
 
     public async Task<JobExecutionStatistics> GetJobExecutionStatistics()
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
-
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await _jobHistoryService.GetJobExecutionStatistics().ConfigureAwait(false);
-
         transactionScope.Complete();
-
         return result;
     }
 
-    public Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
+    public async Task<List<JobExecutionHistoryChartData>> ListJobExecutionHistoryChartData()
     {
-        return _jobHistoryService.ListJobExecutionHistoryChartData();
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var result = await  _jobHistoryService.ListJobExecutionHistoryChartData().ConfigureAwait(false);
+        transactionScope.Complete();
+        return result;
     }
 }

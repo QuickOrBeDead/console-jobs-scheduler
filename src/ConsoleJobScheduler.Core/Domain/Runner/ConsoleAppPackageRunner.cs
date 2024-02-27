@@ -5,6 +5,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
 
+public interface IConsoleAppPackageRunner
+{
+    Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken);
+}
+
 public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
 {
     private readonly IJobRunService _jobRunService;
@@ -76,11 +81,7 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
         {
             try
             {
-                var directory = new DirectoryInfo(packageRunModel.PackageRunDirectory);
-                if (directory.Exists)
-                {
-                    directory.Delete(true);
-                }
+                packageRunModel.DeletePackageRun();
             }
             catch
             {

@@ -42,4 +42,19 @@
       <Folder Include="Domain\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Application\_Data\GithubReadmeStatsManifest.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Application\_Data\NbaMatchesManifest.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Application\_Data\GithubReadmeStats.zip">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Application\_Data\NbaMatches.zip">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

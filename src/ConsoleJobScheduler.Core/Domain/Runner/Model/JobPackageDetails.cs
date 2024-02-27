@@ -1,6 +1,6 @@
 ﻿namespace ConsoleJobScheduler.Core.Domain.Runner.Model;
 
-public sealed class PackageDetails
+public sealed class JobPackageDetails
 {
     public string? Name { get; set; }
 

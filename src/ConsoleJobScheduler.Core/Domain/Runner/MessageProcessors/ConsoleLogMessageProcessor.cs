@@ -1,20 +1,21 @@
+using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Messaging.Models;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner.MessageProcessors;
 
 public sealed class ConsoleLogMessageProcessor : IConsoleMessageProcessor
 {
-    private readonly IJobRunService _jobRunService;
+    private readonly IJobApplicationService _jobApplicationService;
 
-    public ConsoleLogMessageProcessor(IJobRunService jobRunService)
+    public ConsoleLogMessageProcessor(IJobApplicationService jobApplicationService)
     {
-        _jobRunService = jobRunService;
+        _jobApplicationService = jobApplicationService;
     }
 
     public ConsoleMessageType MessageType => ConsoleMessageType.Log;
 
     public Task ProcessMessage(string jobRunId, object message, CancellationToken cancellationToken = default)
     {
-        return _jobRunService.InsertJobRunLog(jobRunId, ((ConsoleLogMessage)message).Message, false, cancellationToken);
+        return _jobApplicationService.InsertJobRunLog(jobRunId, ((ConsoleLogMessage)message).Message, false, cancellationToken);
     }
 }

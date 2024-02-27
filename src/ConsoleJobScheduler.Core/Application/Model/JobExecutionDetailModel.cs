@@ -7,15 +7,14 @@ public sealed class JobExecutionDetailModel
 {
     public IList<JobRunAttachmentInfo> Attachments { get; }
 
-    public IList<JobRunLog> Logs { get; }
+    public IList<JobRunLogDetail> Logs { get; }
 
-    public JobExecutionDetailModel(IList<JobRunLog> logs, IList<JobRunAttachmentInfo> attachments)
+    public JobExecutionDetailModel(IList<JobRunLogDetail> logs, IList<JobRunAttachmentInfo> attachments)
     {
         ArgumentNullException.ThrowIfNull(logs);
-
         ArgumentNullException.ThrowIfNull(attachments);
-        
+
         Attachments = new ReadOnlyCollection<JobRunAttachmentInfo>(attachments);
-        Logs = new ReadOnlyCollection<JobRunLog>(logs);
+        Logs = new ReadOnlyCollection<JobRunLogDetail>(logs);
     }
 }

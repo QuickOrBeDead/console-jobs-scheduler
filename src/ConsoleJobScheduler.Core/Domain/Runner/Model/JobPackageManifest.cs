@@ -1,6 +1,6 @@
 namespace ConsoleJobScheduler.Core.Domain.Runner.Model;
 
-public sealed class PackageManifest
+public sealed class JobPackageManifest
 {
     public sealed class ProgramStartInfo
     {

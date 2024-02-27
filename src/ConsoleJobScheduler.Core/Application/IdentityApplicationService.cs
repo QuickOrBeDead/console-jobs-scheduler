@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Transactions;
 using ConsoleJobScheduler.Core.Application.Model;
 using ConsoleJobScheduler.Core.Domain.Identity;
 using ConsoleJobScheduler.Core.Domain.Identity.Infra;
@@ -76,7 +75,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     public async Task<PagedResult<UserListItem>> ListUsers(int? pageNumber = null)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await _userRepository.ListUsers(10, pageNumber);
         transactionScope.Complete();
         return result;
@@ -84,7 +83,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     public async Task<UserDetailModel?> GetUserForEdit(int userId)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var user = await _userRepository.FindByIdAsync(userId);
         transactionScope.Complete();
         return user == null ? null : new UserDetailModel
@@ -97,7 +96,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     public async Task<List<string>> GetAllRoles()
     {
-        using var transactionScope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, TransactionScopeAsyncFlowOption.Enabled);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
         var result = await _roleRepository.GetRoles().ConfigureAwait(false);
         transactionScope.Complete();
         return result;
@@ -105,7 +104,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     public async Task<UserAddOrUpdateResultModel> SaveUser(UserAddOrUpdateModel model)
     {
-        using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadCommitted();
         var result = await _identityService.SaveUser(model);
         transactionScope.Complete();
 
@@ -114,7 +113,7 @@ public sealed class IdentityApplicationService : IIdentityApplicationService
 
     public async Task AddInitialRolesAndUsers()
     {
-        using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadCommitted();
         var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
         for (var i = 0; i < roles.Length; i++)
         {
