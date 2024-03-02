@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using System.Reflection;
+using ConsoleJobScheduler.Messaging;
+using ConsoleJobScheduler.Messaging.Models;
 
 namespace ConsoleJobScheduler.Core.Tests.Jobs.Fakes;
 
@@ -31,6 +33,16 @@ public sealed class FakeProcessRunner(ProcessStartInfo processStartInfo) : IProc
     public void StopReceivingEvents()
     {
         _manualResetEvent.Set();
+    }
+
+    public void AddEmailMessage(EmailMessage message)
+    {
+        AddOutputData(ConsoleMessageWriter.GetEmailMessage(message));
+    }
+    
+    public void AddLogMessage(ConsoleMessageLogType type, string message)
+    {
+        AddOutputData(ConsoleMessageWriter.GetLogMessage(type, message));
     }
     
     public void AddOutputData(string data)

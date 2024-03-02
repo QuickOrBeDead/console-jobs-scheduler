@@ -2,6 +2,7 @@
 using ConsoleJobScheduler.Core.Domain.Runner.Exceptions;
 using ConsoleJobScheduler.Messaging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
 
@@ -11,17 +12,15 @@ public interface IConsoleAppPackageRunner
 }
 
 public sealed class ConsoleAppPackageRunner(
-    IJobRunService jobRunService,
-    IConsoleMessageProcessorManager consoleMessageProcessorManager,
+    IServiceProvider serviceProvider,
     IProcessRunnerFactory processRunnerFactory,
     IConfiguration configuration)
     : IConsoleAppPackageRunner
 {
-    private readonly IJobRunService _jobRunService = jobRunService ?? throw new ArgumentNullException(nameof(jobRunService));
-
     public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
-        var packageRunModel = await _jobRunService.GetPackageRun(packageName, configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory).ConfigureAwait(false);
+        using var scope = serviceProvider.CreateScope();
+        var packageRunModel = await scope.ServiceProvider.GetRequiredService<IJobRunService>().GetPackageRun(packageName, configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory).ConfigureAwait(false);
         if (packageRunModel == null)
         {
             throw new InvalidOperationException($"Console app package '{packageName}' not found");
@@ -96,7 +95,8 @@ public sealed class ConsoleAppPackageRunner(
 
         if (isError)
         {
-            await _jobRunService.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+            using var scope = serviceProvider.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<IJobRunService>().InsertJobRunLog(jobRunId, data, isError, cancellationToken);
             return;
         }
 
@@ -106,6 +106,7 @@ public sealed class ConsoleAppPackageRunner(
             return;
         }
 
-        await consoleMessageProcessorManager.ProcessMessage(jobRunId, consoleMessage, cancellationToken);
+        using var processorScope = serviceProvider.CreateScope();
+        await processorScope.ServiceProvider.GetRequiredService<IConsoleMessageProcessorManager>().ProcessMessage(jobRunId, consoleMessage, cancellationToken);
     }
 }

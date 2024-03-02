@@ -7,6 +7,7 @@ using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Infra.EMail;
 using ConsoleJobScheduler.Core.Jobs;
 using ConsoleJobScheduler.Core.Tests.Jobs.Fakes;
+using ConsoleJobScheduler.Messaging.Models;
 using MessagePipe;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -66,7 +67,16 @@ public sealed class ConsoleAppPackageJobFixture
         var executeTask = Task.Run(async () => await consoleAppPackageJob.Execute(jobExecutionContext));
         manualResetEvent.WaitOne();
         fakeProcessRunner!.AddErrorData("error");
-        fakeProcessRunner!.AddOutputData("test");
+        fakeProcessRunner.AddOutputData("test");
+        fakeProcessRunner.AddEmailMessage(new EmailMessage
+        {
+            To = "to@email.com",
+            CC = "cc@email.com",
+            Bcc = "bcc@email.com",
+            Body = "Body",
+            Subject = "Subject"
+        });
+        fakeProcessRunner.AddLogMessage(ConsoleMessageLogType.Info, "Info");
         
         // Assert
         fakeProcessRunner.StopReceivingEvents();
