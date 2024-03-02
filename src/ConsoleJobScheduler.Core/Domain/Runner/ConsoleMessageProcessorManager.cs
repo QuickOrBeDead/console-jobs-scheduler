@@ -1,10 +1,11 @@
+using ConsoleJobScheduler.Core.Domain.Runner.MessageProcessors;
 using ConsoleJobScheduler.Messaging.Models;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
 
 public interface IConsoleMessageProcessorManager
 {
-    Task ProcessMessage(string jobRunId, ConsoleMessage message, CancellationToken cancellationToken = default);
+    Task ProcessMessage(string jobRunId, int messageOrder, ConsoleMessage message, CancellationToken cancellationToken = default);
 }
 
 public sealed class ConsoleMessageProcessorManager : IConsoleMessageProcessorManager
@@ -21,7 +22,7 @@ public sealed class ConsoleMessageProcessorManager : IConsoleMessageProcessorMan
         }
     }
 
-    public async Task ProcessMessage(string jobRunId, ConsoleMessage message, CancellationToken cancellationToken = default)
+    public async Task ProcessMessage(string jobRunId, int messageOrder, ConsoleMessage message, CancellationToken cancellationToken = default)
     {
         if (_processors.TryGetValue(message.MessageType, out var processor))
         {
@@ -31,7 +32,7 @@ public sealed class ConsoleMessageProcessorManager : IConsoleMessageProcessorMan
                 return;
             }
 
-            await processor.ProcessMessage(jobRunId, message.Message, cancellationToken).ConfigureAwait(false);
+            await processor.ProcessMessage(jobRunId, messageOrder, message.Message, cancellationToken).ConfigureAwait(false);
 
             return;
         }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Module;
+using ConsoleJobScheduler.Core.Domain.History.Model;
 using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Infra.EMail;
@@ -46,6 +47,7 @@ public sealed class ConsoleAppPackageJobFixture
     public async Task ShouldExecute()
     {
         // Arrange
+        var jobRunId = "Node1638440532318841376";
         var package = "package";
         var packageParameters = "package-parameters";
 
@@ -59,14 +61,15 @@ public sealed class ConsoleAppPackageJobFixture
         };
         var serviceProvider = await CreateServiceProvider(fakeProcessRunnerFunc);
         var consoleAppPackageJob = new ConsoleAppPackageJob(serviceProvider, Substitute.For<ILogger<ConsoleAppPackageJob>>());
-        var jobExecutionContext = CreateJobExecutionContext(package, packageParameters);
-        var jobApplicationService = serviceProvider.GetRequiredService<IJobApplicationService>();
-        await jobApplicationService.SavePackage(package, await ReadPackageData("GithubReadmeStats.zip"));
+        var jobExecutionContext = CreateJobExecutionContext(package, packageParameters, jobRunId);
+        await SavePackage(serviceProvider, package, "GithubReadmeStats.zip");
+        await InsertJobRunHistory(serviceProvider, jobRunId, package);
 
         // Act
         var executeTask = Task.Run(async () => await consoleAppPackageJob.Execute(jobExecutionContext));
         manualResetEvent.WaitOne();
-        fakeProcessRunner!.AddErrorData("error");
+        fakeProcessRunner!.WaitForErrorAndOutputReadLine();
+        fakeProcessRunner.AddErrorData("error");
         fakeProcessRunner.AddOutputData("test");
         fakeProcessRunner.AddEmailMessage(new EmailMessage
         {
@@ -77,26 +80,49 @@ public sealed class ConsoleAppPackageJobFixture
             Subject = "Subject"
         });
         fakeProcessRunner.AddLogMessage(ConsoleMessageLogType.Info, "Info");
-        
-        // Assert
         fakeProcessRunner.StopReceivingEvents();
         await executeTask;
+        
+        // Assert
+        using var scope = serviceProvider.CreateScope();
+        var jobHistoryApplicationService = scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        var jobHistoryExecutionDetail = await jobHistoryApplicationService.GetJobExecutionDetail(jobRunId);
 
+        var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+        var jobExecutionDetail = await jobApplicationService.GetJobExecutionDetail(jobRunId);
+        jobHistoryExecutionDetail.ToString();
 
     }
 
-    private static IJobExecutionContext CreateJobExecutionContext(string package, string parameters)
+    private static async Task InsertJobRunHistory(IServiceProvider serviceProvider, string jobRunId, string package)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var jobHistoryApplicationService = scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        await jobHistoryApplicationService.InsertJobHistoryEntry(new JobExecutionHistory(jobRunId, "Test", "Test",
+            package, "job", "jobGroup", "trigger", "triggerGroup", DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow,
+            DateTime.UtcNow, "0 0/1 * 1/1 * ? *"));
+    }
+
+    private static async Task SavePackage(IServiceProvider serviceProvider, string package, string packageZipName)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+        await jobApplicationService.SavePackage(package, await ReadPackageData(packageZipName));
+    }
+
+    private static IJobExecutionContext CreateJobExecutionContext(string package, string parameters, string jobRunId)
     {
         var jobExecutionContext = Substitute.For<IJobExecutionContext>();
         var jobDetail = Substitute.For<IJobDetail>();
         jobDetail.JobDataMap.Returns(new JobDataMap((IDictionary)new Dictionary<string, object> { { "package", package }, { "parameters", parameters } }));
         jobExecutionContext.JobDetail.Returns(jobDetail);
+        jobExecutionContext.FireInstanceId.Returns(jobRunId);
         return jobExecutionContext;
     }
 
-    private static Task<byte[]> ReadPackageData(string packageName)
+    private static Task<byte[]> ReadPackageData(string packageZipName)
     {
-        return File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Jobs", "_Data", packageName));
+        return File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Jobs", "_Data", packageZipName));
     }
     
     private static async Task<ServiceProvider> CreateServiceProvider(Func<ProcessStartInfo, FakeProcessRunner> fakeProcessRunnerFunc, TimeProvider? timeProvider = null)

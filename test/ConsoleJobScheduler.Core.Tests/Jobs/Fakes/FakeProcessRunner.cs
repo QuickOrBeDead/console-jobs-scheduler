@@ -9,6 +9,9 @@ namespace ConsoleJobScheduler.Core.Tests.Jobs.Fakes;
 public sealed class FakeProcessRunner(ProcessStartInfo processStartInfo) : IProcessRunner
 {
     private readonly ManualResetEvent _manualResetEvent = new(false);
+    private readonly ManualResetEvent _outputResetEvent = new(false);
+    private readonly ManualResetEvent _errorResetEvent = new(false);
+    
     public ProcessStartInfo StartInfo { get; } = processStartInfo;
 
     public bool Start()
@@ -18,10 +21,17 @@ public sealed class FakeProcessRunner(ProcessStartInfo processStartInfo) : IProc
 
     public void BeginOutputReadLine()
     {
+        _outputResetEvent.Set();
     }
 
     public void BeginErrorReadLine()
     {
+        _errorResetEvent.Set();
+    }
+
+    public void WaitForErrorAndOutputReadLine()
+    {
+        WaitHandle.WaitAll([_outputResetEvent, _errorResetEvent]);
     }
 
     public Task WaitForExitAsync(CancellationToken cancellationToken)

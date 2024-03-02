@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner.Infra;
 
-public sealed class RunnerDbContext : DbContext
+public sealed class RunnerDbContext(DbContextOptions<RunnerDbContext> options) : DbContext(options)
 {
     public DbSet<Model.JobPackage> JobPackages { get; set; }
 
@@ -11,11 +11,6 @@ public sealed class RunnerDbContext : DbContext
     public DbSet<Model.JobRunEmail> JobRunEmails { get; set; }
 
     public DbSet<Model.JobRunAttachment> JobRunAttachments { get; set; }
-
-    public RunnerDbContext(DbContextOptions<RunnerDbContext> options)
-        : base(options)
-    {
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +40,7 @@ public sealed class RunnerDbContext : DbContext
                 b.Property(x => x.JobRunId).HasColumnName("job_run_id").HasMaxLength(30).IsRequired();
                 b.Property(x => x.Content).HasColumnName("content").HasColumnType("text").IsRequired();
                 b.Property(x => x.IsError).HasColumnName("is_error").IsRequired();
+                b.Property(x => x.Order).HasColumnName("order");
                 b.Property(x => x.CreateDate).HasColumnName("create_time").IsRequired();
 
                 b.HasIndex(x => x.JobRunId)
