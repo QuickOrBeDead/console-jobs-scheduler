@@ -14,11 +14,11 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public sealed class JobsController : ControllerBase
 {
-    private readonly IJobApplicationService _schedulerService;
+    private readonly ISchedulerApplicationService _schedulerApplicationService;
 
-    public JobsController(IJobApplicationService schedulerService)
+    public JobsController(ISchedulerApplicationService schedulerApplicationService)
     {
-        _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
+        _schedulerApplicationService = schedulerApplicationService ?? throw new ArgumentNullException(nameof(schedulerApplicationService));
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor},{Roles.JobViewer}")]
@@ -26,7 +26,7 @@ public sealed class JobsController : ControllerBase
     [Produces(MediaTypeNames.Application.Json)]
     public Task<PagedResult<JobListItem>> Get(int? pageNumber = null)
     {
-        return _schedulerService.ListJobs(pageNumber ?? 1);
+        return _schedulerApplicationService.ListJobs(pageNumber ?? 1);
     }
 
     [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
@@ -37,7 +37,7 @@ public sealed class JobsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string group, string name)
     {
-        var jobDetail = await _schedulerService.GetJobDetail(group, name);
+        var jobDetail = await _schedulerApplicationService.GetJobDetail(group, name);
         if (jobDetail == null)
         {
             return NotFound();
@@ -57,7 +57,7 @@ public sealed class JobsController : ControllerBase
             return BadRequest();
         }
 
-        await _schedulerService.AddOrUpdateJob(model).ConfigureAwait(false);
+        await _schedulerApplicationService.AddOrUpdateJob(model).ConfigureAwait(false);
 
         return Ok();
     }

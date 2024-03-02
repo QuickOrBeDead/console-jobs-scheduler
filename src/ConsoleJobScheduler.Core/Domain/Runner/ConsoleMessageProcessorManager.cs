@@ -1,37 +1,41 @@
 using ConsoleJobScheduler.Messaging.Models;
 
-namespace ConsoleJobScheduler.Core.Domain.Runner
+namespace ConsoleJobScheduler.Core.Domain.Runner;
+
+public interface IConsoleMessageProcessorManager
 {
-    public sealed class ConsoleMessageProcessorManager : IConsoleMessageProcessorManager
+    Task ProcessMessage(string jobRunId, ConsoleMessage message, CancellationToken cancellationToken = default);
+}
+
+public sealed class ConsoleMessageProcessorManager : IConsoleMessageProcessorManager
+{
+    private readonly IDictionary<ConsoleMessageType, IConsoleMessageProcessor> _processors = new Dictionary<ConsoleMessageType, IConsoleMessageProcessor>();
+
+    public ConsoleMessageProcessorManager(IEnumerable<IConsoleMessageProcessor> messageProcessors)
     {
-        private readonly IDictionary<ConsoleMessageType, IConsoleMessageProcessor> _processors = new Dictionary<ConsoleMessageType, IConsoleMessageProcessor>();
+        ArgumentNullException.ThrowIfNull(messageProcessors);
 
-        public ConsoleMessageProcessorManager(IEnumerable<IConsoleMessageProcessor> messageProcessors)
+        foreach (var messageProcessor in messageProcessors)
         {
-            ArgumentNullException.ThrowIfNull(messageProcessors);
-
-            foreach (var messageProcessor in messageProcessors)
-            {
-                _processors[messageProcessor.MessageType] = messageProcessor;
-            }
+            _processors[messageProcessor.MessageType] = messageProcessor;
         }
+    }
 
-        public async Task ProcessMessage(string jobRunId, ConsoleMessage message, CancellationToken cancellationToken = default)
+    public async Task ProcessMessage(string jobRunId, ConsoleMessage message, CancellationToken cancellationToken = default)
+    {
+        if (_processors.TryGetValue(message.MessageType, out var processor))
         {
-            if (_processors.TryGetValue(message.MessageType, out var processor))
+            if (message.Message == null)
             {
-                if (message.Message == null)
-                {
-                    // TODO: log
-                    return;
-                }
-
-                await processor.ProcessMessage(jobRunId, message.Message, cancellationToken).ConfigureAwait(false);
-
+                // TODO: log
                 return;
             }
 
-            // TODO: log
+            await processor.ProcessMessage(jobRunId, message.Message, cancellationToken).ConfigureAwait(false);
+
+            return;
         }
+
+        // TODO: log
     }
 }

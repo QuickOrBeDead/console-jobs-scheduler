@@ -8,7 +8,7 @@ public sealed class AttachmentModel
 
     public string? JobRunId { get; private set; }
 
-    public string? FileContent { get; private set; }
+    public byte[]? FileContent { get; private set; }
 
     public string? FileName { get; private set; }
 
@@ -21,7 +21,7 @@ public sealed class AttachmentModel
         EmailId = id;
     }
 
-    public static AttachmentModel Create(string jobRunId, string fileName, string fileContent, string contentType)
+    public static AttachmentModel Create(string jobRunId, string fileName, byte[] fileContent, string contentType)
     {
         // TODO: validation
         return new AttachmentModel

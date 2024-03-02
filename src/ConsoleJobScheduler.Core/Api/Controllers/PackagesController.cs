@@ -31,7 +31,7 @@ public sealed class PackagesController : ControllerBase
 
     [HttpGet("List/{pageNumber:int?}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Task<PagedResult<PackageListItem>> Get(int? pageNumber = null)
+    public Task<PagedResult<JobPackageListItem>> Get(int? pageNumber = null)
     {
         return _jobApplicationService.ListPackages(10, pageNumber ?? 1);
     }
@@ -39,7 +39,7 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("Detail")]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageDetails))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobPackageDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDetail([FromQuery] string packageName)
     {

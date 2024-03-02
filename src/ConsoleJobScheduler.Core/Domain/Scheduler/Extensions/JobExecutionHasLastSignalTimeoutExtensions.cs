@@ -1,4 +1,5 @@
 ﻿using ConsoleJobScheduler.Core.Domain.History.Model;
+using ConsoleJobScheduler.Core.Infra;
 
 namespace ConsoleJobScheduler.Core.Domain.Scheduler.Extensions;
 
@@ -13,7 +14,7 @@ public static class JobExecutionHasLastSignalTimeoutExtensions
         }
         else
         {
-            item.SetHasSignalTimeout(now.Subtract(item.LastSignalTime.ToUniversalTime()) > timeout);
+            item.SetHasSignalTimeout(now.Subtract(item.LastSignalTime.ToUtc()) > timeout);
         }
     }
 }

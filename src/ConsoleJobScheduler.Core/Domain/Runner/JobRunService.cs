@@ -4,10 +4,43 @@ using System.Text.Json;
 using ConsoleJobScheduler.Core.Domain.Runner.Events;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
+using ConsoleJobScheduler.Core.Infra.Data;
 using ConsoleJobScheduler.Core.Infra.EMail.Model;
 using MessagePipe;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
+
+public interface IJobRunService
+{
+    Task<long> InsertJobRunLog(
+        string jobRunId,
+        string content,
+        bool isError,
+        CancellationToken cancellationToken = default);
+
+    Task<List<JobRunLogDetail>> GetJobRunLogs(string jobRunId);
+
+    Task<long> InsertJobRunAttachment(AttachmentModel attachment, CancellationToken cancellationToken = default);
+
+    Task InsertJobRunEmail(EmailModel email, CancellationToken cancellationToken = default);
+
+    Task UpdateJobRunEmailIsSent(Guid id, bool isSent, CancellationToken cancellationToken = default);
+
+    Task SavePackage(string packageName, byte[] content);
+
+    Task<JobPackageRun?> GetPackageRun(string name, string tempRootPath);
+
+    Task<List<string>> GetAllPackageNames();
+
+    Task<JobPackageDetails?> GetPackageDetails(string name);
+
+    Task<PagedResult<JobPackageListItem>> ListPackages(int pageSize = 10, int page = 1);
+
+    Task<byte[]?> GetJobRunAttachmentContent(long id);
+
+    Task<List<JobRunAttachmentInfo>> GetJobRunAttachments(string id);
+}
 
 public sealed class JobRunService : IJobRunService
 {
@@ -31,34 +64,63 @@ public sealed class JobRunService : IJobRunService
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
-    public async Task InsertJobRunLog(
+    public async Task<long> InsertJobRunLog(
         string jobRunId,
         string content,
         bool isError,
         CancellationToken cancellationToken = default)
     {
-        var jobRunLog = new JobRunLog(jobRunId, content, isError);
-        await _jobRunRepository.SaveJobRunLog(jobRunLog, cancellationToken);
+        var jobRunLog = JobRunLog.Created(jobRunId, content, isError);
+        await _jobRunRepository.Add(jobRunLog, cancellationToken);
+        await _jobRunRepository.SaveChanges(cancellationToken).ConfigureAwait(false);
         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, content, isError), cancellationToken).ConfigureAwait(false);
+
+        return jobRunLog.Id;
     }
 
-    public Task InsertJobRunAttachment(AttachmentModel attachment, CancellationToken cancellationToken = default)
+    public Task<List<JobRunLogDetail>> GetJobRunLogs(string jobRunId)
+    {
+        return _jobRunRepository.QueryableAsNoTracking().Where(x => x.JobRunId == jobRunId)
+            .OrderBy(x => x.Id)
+            .Select(x => new JobRunLogDetail(x.Content, x.IsError, x.CreateDate)).ToListAsync();
+    }
+
+    public async Task<long> InsertJobRunAttachment(AttachmentModel attachment, CancellationToken cancellationToken = default)
     {
         var jobRunAttachment = new JobRunAttachment(attachment.JobRunId, attachment.FileContent, attachment.FileName, attachment.ContentType);
-        return _jobRunAttachmentRepository.InsertJobRunAttachment(jobRunAttachment, cancellationToken);
+        await _jobRunAttachmentRepository.Add(jobRunAttachment, cancellationToken);
+        await _jobRunAttachmentRepository.SaveChanges(cancellationToken);
+
+        return jobRunAttachment.Id;
     }
 
-    public Task InsertJobRunEmail(EmailModel email, CancellationToken cancellationToken = default)
+    public Task<byte[]?> GetJobRunAttachmentContent(long id)
+    {
+        return _jobRunAttachmentRepository.FindAsNoTracking(id, x => x.Content);
+    }
+
+    public Task<List<JobRunAttachmentInfo>> GetJobRunAttachments(string id)
+    {
+        return _jobRunAttachmentRepository.QueryableAsNoTracking().Where(x => x.JobRunId == id)
+            .Select(x => new JobRunAttachmentInfo
+            {
+                Id = x.Id,
+                FileName = x.FileName
+            }).ToListAsync();
+    }
+
+    public async Task InsertJobRunEmail(EmailModel email, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(email);
 
-        var jobRunEmail = new JobRunEmail(email.JobRunId, email.Subject, email.Body, email.To, email.CC, email.Bcc);
+        var jobRunEmail = new JobRunEmail(email.Id, email.JobRunId, email.Subject, email.Body, email.To, email.CC, email.Bcc);
         foreach (var attachment in email.GetAttachments())
         {
             jobRunEmail.AddAttachment(attachment.FileName, attachment.FileContent, attachment.ContentType);
         }
 
-        return _jobRunAttachmentRepository.SaveJobRunEmail(jobRunEmail, cancellationToken);
+        await _jobRunAttachmentRepository.Add(jobRunEmail, cancellationToken);
+        await _jobRunAttachmentRepository.SaveChanges(cancellationToken);
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
@@ -78,20 +140,46 @@ public sealed class JobRunService : IJobRunService
 
         var manifest = await GetPackageManifest(content).ConfigureAwait(false);
         var jobPackage = manifest.CreateJobPackage(packageName, content);
-        await _jobPackageRepository.SavePackage(jobPackage);
+        await _jobPackageRepository.Add(jobPackage).ConfigureAwait(false);
+        await _jobPackageRepository.SaveChanges().ConfigureAwait(false);
     }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<JobPackageRun?> GetPackageRun(string name, string tempRootPath)
     {
-        var jobPackage = await _jobPackageRepository.GetByName(name);
+        var jobPackage = await _jobPackageRepository.Get(name).ConfigureAwait(false);
 
         return jobPackage?.CreateJobPackageRun(tempRootPath);
     }
 
-    private static async Task<PackageManifest> GetPackageManifest(byte[] packageContent)
+    public Task<List<string>> GetAllPackageNames()
     {
-        PackageManifest packageManifest;
+        return _jobPackageRepository.QueryableAsNoTracking().Select(x => x.Name).ToListAsync();
+    }
+
+    public Task<JobPackageDetails?> GetPackageDetails(string name)
+    {
+        return _jobPackageRepository.FindAsNoTracking(name, x => new JobPackageDetails
+        {
+            Name = x.Name,
+            ModifyDate = x.CreateDate
+        });
+    }
+
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
+    public Task<PagedResult<JobPackageListItem>> ListPackages(int pageSize = 10, int page = 1)
+    {
+        return _jobPackageRepository.QueryableAsNoTracking().List(pageSize, page,
+            q => q.Select(
+                x => new JobPackageListItem
+                {
+                    Name = x.Name
+                }).OrderBy(x => x.Name));
+    }
+
+    private static async Task<JobPackageManifest> GetPackageManifest(byte[] packageContent)
+    {
+        JobPackageManifest jobPackageManifest;
 
         await using (var stream = new MemoryStream(packageContent))
         {
@@ -102,8 +190,8 @@ public sealed class JobRunService : IJobRunService
                 {
                     using (var reader = new StreamReader(manifestJsonEntry.Open()))
                     {
-                        packageManifest = JsonSerializer.Deserialize<PackageManifest>(await reader.ReadToEndAsync().ConfigureAwait(false), PackageManifestJsonSerializerOptions) ?? throw new InvalidOperationException();
-                        packageManifest.Validate();
+                        jobPackageManifest = JsonSerializer.Deserialize<JobPackageManifest>(await reader.ReadToEndAsync().ConfigureAwait(false), PackageManifestJsonSerializerOptions) ?? throw new InvalidOperationException();
+                        jobPackageManifest.Validate();
                     }
                 }
                 else
@@ -113,6 +201,6 @@ public sealed class JobRunService : IJobRunService
             }
         }
 
-        return packageManifest;
+        return jobPackageManifest;
     }
 }

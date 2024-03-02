@@ -2,25 +2,25 @@
 using ConsoleJobScheduler.Core.Domain.Runner.Exceptions;
 using ConsoleJobScheduler.Messaging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleJobScheduler.Core.Domain.Runner;
 
-public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
+public interface IConsoleAppPackageRunner
 {
-    private readonly IJobRunService _jobRunService;
-    private readonly IConsoleMessageProcessorManager _consoleMessageProcessorManager;
-    private readonly IConfiguration _configuration;
+    Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken);
+}
 
-    public ConsoleAppPackageRunner(IJobRunService jobRunService, IConsoleMessageProcessorManager consoleMessageProcessorManager, IConfiguration configuration)
-    {
-        _jobRunService = jobRunService ?? throw new ArgumentNullException(nameof(jobRunService));
-        _consoleMessageProcessorManager = consoleMessageProcessorManager;
-        _configuration = configuration;
-    }
-
+public sealed class ConsoleAppPackageRunner(
+    IServiceProvider serviceProvider,
+    IProcessRunnerFactory processRunnerFactory,
+    IConfiguration configuration)
+    : IConsoleAppPackageRunner
+{
     public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
-        var packageRunModel = await _jobRunService.GetPackageRun(packageName, _configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory).ConfigureAwait(false);
+        using var scope = serviceProvider.CreateScope();
+        var packageRunModel = await scope.ServiceProvider.GetRequiredService<IJobRunService>().GetPackageRun(packageName, configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory).ConfigureAwait(false);
         if (packageRunModel == null)
         {
             throw new InvalidOperationException($"Console app package '{packageName}' not found");
@@ -30,16 +30,17 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
         {
             await packageRunModel.ExtractPackage().ConfigureAwait(false);
 
-            using (var process = new Process())
+            var processStartInfo = new ProcessStartInfo
             {
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.WorkingDirectory = packageRunModel.PackageRunDirectory;
-                process.StartInfo.FileName = packageRunModel.GetRunFilePath();
-                process.StartInfo.Arguments = packageRunModel.GetRunArguments(arguments);
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
-
+                WorkingDirectory = packageRunModel.PackageRunDirectory,
+                FileName = packageRunModel.GetRunFilePath(),
+                Arguments = packageRunModel.GetRunArguments(arguments),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            using (var process = processRunnerFactory.CreateNewProcessRunner(processStartInfo))
+            {
                 var processOutputTasks = new List<Task>();
 
                 process.OutputDataReceived += async (_, e) =>
@@ -76,11 +77,7 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
         {
             try
             {
-                var directory = new DirectoryInfo(packageRunModel.PackageRunDirectory);
-                if (directory.Exists)
-                {
-                    directory.Delete(true);
-                }
+                packageRunModel.DeletePackageRun();
             }
             catch
             {
@@ -98,7 +95,8 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
 
         if (isError)
         {
-            await _jobRunService.InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+            using var scope = serviceProvider.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<IJobRunService>().InsertJobRunLog(jobRunId, data, isError, cancellationToken);
             return;
         }
 
@@ -108,6 +106,7 @@ public sealed class ConsoleAppPackageRunner : IConsoleAppPackageRunner
             return;
         }
 
-        await _consoleMessageProcessorManager.ProcessMessage(jobRunId, consoleMessage, cancellationToken);
+        using var processorScope = serviceProvider.CreateScope();
+        await processorScope.ServiceProvider.GetRequiredService<IConsoleMessageProcessorManager>().ProcessMessage(jobRunId, consoleMessage, cancellationToken);
     }
 }

@@ -1,9 +1,10 @@
 using AutoFixture;
 using ConsoleJobScheduler.Core.Application;
-using ConsoleJobScheduler.Core.Domain.Settings;
+using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.Settings.Infra;
 using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -20,7 +21,7 @@ public sealed class SettingsApplicationServiceFixture
         EntityFrameworkManager.ContextFactory = _ =>
         {
             var optionsBuilder = new DbContextOptionsBuilder<SettingsDbContext>();
-            UseInMemoryDatabase(optionsBuilder);
+            UseSqliteDatabase(optionsBuilder);
             return new SettingsDbContext(optionsBuilder.Options);
         };
     }
@@ -83,7 +84,7 @@ public sealed class SettingsApplicationServiceFixture
         // Arrange
         var expected = new Fixture().Create<TSettings>();
         
-        var settingsApplicationService = CreateSettingsApplicationService();
+        var settingsApplicationService = await CreateSettingsApplicationService();
 
         // Act
         await settingsApplicationService.SaveSettings(expected);
@@ -103,7 +104,7 @@ public sealed class SettingsApplicationServiceFixture
         var expected = new TSettings();
         expected.Map(new SettingsData());
         
-        var settingsApplicationService = CreateSettingsApplicationService();
+        var settingsApplicationService = await CreateSettingsApplicationService();
 
         // Act
         var actual = await settingsApplicationService.GetSettings<TSettings>();
@@ -114,19 +115,26 @@ public sealed class SettingsApplicationServiceFixture
         assertAction(actual, expected);
     }
     
-    private ISettingsApplicationService CreateSettingsApplicationService()
+    private static async Task<ISettingsApplicationService> CreateSettingsApplicationService()
     {
-        IServiceCollection services = new ServiceCollection();
+        var services = new ServiceCollection();
         var settingsModule = new SettingsModule(Substitute.For<IConfigurationRoot>());
-        settingsModule.Register(services, UseInMemoryDatabase);
+        settingsModule.Register(services, UseSqliteDatabase);
+        
+        var serviceProvider = services.BuildServiceProvider();
+        
+        using var scope = serviceProvider.CreateScope();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<SettingsDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+        
+        await settingsModule.MigrateDb(serviceProvider);
 
-        services.AddScoped<ISettingsApplicationService, SettingsApplicationService>();
-
-        return services.BuildServiceProvider().GetRequiredService<ISettingsApplicationService>();
+        return serviceProvider.GetRequiredService<ISettingsApplicationService>();
     }
 
-    private static void UseInMemoryDatabase(DbContextOptionsBuilder builder)
+    private static void UseSqliteDatabase(DbContextOptionsBuilder builder)
     {
-        builder.UseInMemoryDatabase($"{nameof(SettingsApplicationServiceFixture)}{TestContext.CurrentContext.Test.ID}");
+        builder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+        builder.UseSqlite($"DataSource={Path.Combine(TestContext.CurrentContext.TestDirectory, "test.db")}");
     }
 }

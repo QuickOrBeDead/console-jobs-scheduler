@@ -8,16 +8,11 @@ using Quartz;
 namespace ConsoleJobScheduler.Core.Jobs;
 
 [PersistJobDataAfterExecution]
-public sealed class ConsoleAppPackageJob : IJob
+public sealed class ConsoleAppPackageJob(IServiceProvider serviceProvider, ILogger<ConsoleAppPackageJob> logger)
+    : IJob
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ConsoleAppPackageJob> _logger;
-
-    public ConsoleAppPackageJob(IServiceProvider serviceProvider, ILogger<ConsoleAppPackageJob> logger)
-    {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly ILogger<ConsoleAppPackageJob> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task Execute(IJobExecutionContext context)
     {

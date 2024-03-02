@@ -1,6 +1,6 @@
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Model;
-using ConsoleJobScheduler.Core.Domain.Identity;
+using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.Identity.Infra;
 using ConsoleJobScheduler.Core.Domain.Identity.Model;
 using Microsoft.AspNetCore.Authentication;
@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -22,7 +23,7 @@ public sealed class IdentityApplicationServiceFixture
     public async Task Admin_Should_Add_Default_Roles_And_Users_When_Application_First_Initialized()
     {
         // Arrange
-        var identityApplicationService = CreateIdentityApplicationService();
+        var identityApplicationService = await CreateIdentityApplicationService();
         
         // Act
         await identityApplicationService.AddInitialRolesAndUsers();
@@ -43,13 +44,14 @@ public sealed class IdentityApplicationServiceFixture
     public async Task Admin_Should_Login_With_Default_Password_When_Application_First_Initialized()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext!;
         
-        await identityApplicationService.AddInitialRolesAndUsers();
+        await arrangeService.AddInitialRolesAndUsers();
         
         // Act
+        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var signInResult = await identityApplicationService.Login(new LoginModel
         {
             UserName = IdentityApplicationService.DefaultAdminUserName,
@@ -72,8 +74,9 @@ public sealed class IdentityApplicationServiceFixture
     public async Task Should_Add_New_User()
     {
         // Arrange
-        var identityApplicationService = CreateIdentityApplicationService();
-        await identityApplicationService.AddInitialRolesAndUsers();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
+        await arrangeService.AddInitialRolesAndUsers();
         var userAddOrUpdateModel = new UserAddOrUpdateModel
         {
             UserName = "test",
@@ -82,6 +85,7 @@ public sealed class IdentityApplicationServiceFixture
         };
         
         // Act
+        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var result = await identityApplicationService.SaveUser(userAddOrUpdateModel);
 
         // Assert
@@ -99,17 +103,18 @@ public sealed class IdentityApplicationServiceFixture
     public async Task Should_Update_Existing_User()
     {
         // Arrange
-        var identityApplicationService = CreateIdentityApplicationService();
-        await identityApplicationService.AddInitialRolesAndUsers();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
+        await arrangeService.AddInitialRolesAndUsers();
         var userAddOrUpdateModel = new UserAddOrUpdateModel
         {
             UserName = "test",
             Password = "12345678",
             Roles = new List<string> { Roles.JobViewer, Roles.JobEditor }
         };
-        await identityApplicationService.SaveUser(userAddOrUpdateModel);
+        await arrangeService.SaveUser(userAddOrUpdateModel);
        
-        var userToEdit = await identityApplicationService.GetUserForEdit(userAddOrUpdateModel.Id);
+        var userToEdit = await arrangeService.GetUserForEdit(userAddOrUpdateModel.Id);
         
         Assert.That(userToEdit, Is.Not.Null);
         
@@ -121,6 +126,7 @@ public sealed class IdentityApplicationServiceFixture
         };
         
         // Act
+        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var result = await identityApplicationService.SaveUser(userToUpdate);
         
         // Assert
@@ -138,20 +144,20 @@ public sealed class IdentityApplicationServiceFixture
     public async Task Should_Update_Password_Of_Existing_User()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
-        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
+        var serviceProvider = await CreateServiceProvider();
+        var arrangeService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext!;
         
-        await identityApplicationService.AddInitialRolesAndUsers();
+        await arrangeService.AddInitialRolesAndUsers();
         var userAddOrUpdateModel = new UserAddOrUpdateModel
         {
             UserName = "test",
             Password = "12345678",
             Roles = new List<string> { Roles.JobViewer, Roles.JobEditor }
         };
-        await identityApplicationService.SaveUser(userAddOrUpdateModel);
+        await arrangeService.SaveUser(userAddOrUpdateModel);
        
-        var userToEdit = await identityApplicationService.GetUserForEdit(userAddOrUpdateModel.Id);
+        var userToEdit = await arrangeService.GetUserForEdit(userAddOrUpdateModel.Id);
         
         Assert.That(userToEdit, Is.Not.Null);
         
@@ -164,6 +170,7 @@ public sealed class IdentityApplicationServiceFixture
         };
         
         // Act
+        var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var result = await identityApplicationService.SaveUser(userToUpdate);
         
         // Assert
@@ -191,7 +198,7 @@ public sealed class IdentityApplicationServiceFixture
     public async Task User_Context_Should_Be_Null_When_User_Is_Not_LoggedIn()
     {
         // Arrange
-        var serviceProvider = CreateServiceProvider();
+        var serviceProvider = await CreateServiceProvider();
         var identityApplicationService = serviceProvider.GetRequiredService<IIdentityApplicationService>();
         var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext!;
         
@@ -204,13 +211,13 @@ public sealed class IdentityApplicationServiceFixture
         Assert.That(result, Is.Null);
     }
     
-    private static IIdentityApplicationService CreateIdentityApplicationService()
+    private static async Task<IIdentityApplicationService> CreateIdentityApplicationService()
     {
-        var serviceProvider = CreateServiceProvider();
+        var serviceProvider = await CreateServiceProvider();
         return serviceProvider.GetRequiredService<IIdentityApplicationService>();
     }
     
-    private static IServiceProvider CreateServiceProvider()
+    private static async Task<IServiceProvider> CreateServiceProvider()
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -230,16 +237,19 @@ public sealed class IdentityApplicationServiceFixture
         services.AddSingleton(_ => httpContextAccessor);
         
         var identityModule = new IdentityModule(Substitute.For<IConfigurationRoot>());
-        identityModule.Register(services, builder => builder.UseInMemoryDatabase($"IdentityApplicationServiceTest{TestContext.CurrentContext.Test.ID}"));
-
-        services.AddScoped<IIdentityApplicationService, IdentityApplicationService>();
-
+        identityModule.Register(services, builder =>
+        {
+            builder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+            builder.UseSqlite($"DataSource={Path.Combine(TestContext.CurrentContext.TestDirectory, "test.db")}");
+        });
+        
         var serviceProvider = services.BuildServiceProvider();
 
         using var scope = serviceProvider.CreateScope();
-        using var dbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
-        dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+
+        await identityModule.MigrateDb(serviceProvider);
         
         ConfigureHttpContext(serviceProvider, httpContextAccessor);
         return serviceProvider;

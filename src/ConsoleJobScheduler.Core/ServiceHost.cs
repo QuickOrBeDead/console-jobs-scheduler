@@ -1,21 +1,14 @@
 ﻿using ConsoleJobScheduler.Core.Api.Hubs;
 using ConsoleJobScheduler.Core.Api.Hubs.Handlers;
-using ConsoleJobScheduler.Core.Application;
-using ConsoleJobScheduler.Core.Domain.History;
-using ConsoleJobScheduler.Core.Domain.Identity;
-using ConsoleJobScheduler.Core.Domain.Runner;
-using ConsoleJobScheduler.Core.Domain.Scheduler;
+using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
-using ConsoleJobScheduler.Core.Domain.Settings;
 using ConsoleJobScheduler.Core.Infra.EMail;
-using ConsoleJobScheduler.Core.Infra.Migration;
 using MessagePipe;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -75,7 +68,7 @@ public sealed class ServiceHost
         var identityModule = new IdentityModule(builder.Configuration);
         var schedulerModule = new SchedulerModule(builder.Configuration);
         var historyModule = new JobHistoryModule(builder.Configuration);
-        var jobRunModule = new JobRunModule();
+        var jobRunModule = new JobRunModule(builder.Configuration);
         var settingsModule = new SettingsModule(builder.Configuration);
 
         identityModule.Register(builder.Services);
@@ -83,12 +76,6 @@ public sealed class ServiceHost
         historyModule.Register(builder.Services);
         jobRunModule.Register(builder.Services);
         settingsModule.Register(builder.Services);
-
-        builder.Services.AddScoped<IIdentityApplicationService, IdentityApplicationService>();
-        builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
-        builder.Services.AddScoped<ISchedulerApplicationService, SchedulerApplicationService>();
-        builder.Services.AddScoped<ISettingsApplicationService, SettingsApplicationService>();
-        builder.Services.AddScoped<IJobHistoryApplicationService, JobHistoryApplicationService>();
 
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
@@ -144,30 +131,11 @@ public sealed class ServiceHost
 
         await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
-        await InitDb(_app.Services).ConfigureAwait(false);
+        await schedulerModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await settingsModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await jobRunModule.MigrateDb(_app.Services).ConfigureAwait(false);
 
         await _schedulerManager.Start();
         await _app.RunAsync().ConfigureAwait(false);
-    }
-
-    private static async Task InitDb(IServiceProvider serviceProvider)
-    {
-        MigrateDb(serviceProvider);
-        await AddDbInitialData(serviceProvider).ConfigureAwait(false);
-    }
-
-    private static void MigrateDb(IServiceProvider serviceProvider)
-    {
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-        var dbMigrationRunner = new DbMigrationRunner();
-        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!, "Scheduler");
-    }
-
-    private static async Task AddDbInitialData(IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
-        await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
     }
 }

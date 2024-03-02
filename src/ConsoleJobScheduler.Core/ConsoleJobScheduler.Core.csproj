@@ -12,6 +12,7 @@
   
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.32.0" />
+    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0" />
     <PackageReference Include="FluentMigrator" Version="5.1.0" />
     <PackageReference Include="FluentMigrator.Runner" Version="5.1.0" />
     <PackageReference Include="MessagePipe" Version="1.7.4" />

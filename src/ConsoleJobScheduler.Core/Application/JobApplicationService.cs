@@ -1,12 +1,10 @@
 using ConsoleJobScheduler.Core.Application.Model;
-using ConsoleJobScheduler.Core.Domain.History;
 using ConsoleJobScheduler.Core.Domain.Runner;
-using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner.Model;
-using ConsoleJobScheduler.Core.Domain.Scheduler;
-using ConsoleJobScheduler.Core.Domain.Scheduler.Model;
 using ConsoleJobScheduler.Core.Infra.Data;
-using Quartz;
+using ConsoleJobScheduler.Core.Infra.EMail;
+using ConsoleJobScheduler.Core.Infra.EMail.Model;
+using ConsoleJobScheduler.Messaging.Models;
 
 namespace ConsoleJobScheduler.Core.Application;
 
@@ -14,107 +12,110 @@ public interface IJobApplicationService
 {
     Task<byte[]?> GetJobRunAttachmentContent(long id);
 
+    Task<long> InsertJobRunAttachment(AttachmentModel attachment, CancellationToken cancellationToken = default);
+
     Task SavePackage(string packageName, byte[] content);
 
     Task<List<string>> GetAllPackageNames();
 
-    Task<PackageDetails?> GetPackageDetails(string name);
+    Task<JobPackageDetails?> GetPackageDetails(string name);
 
-    Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1);
-
-    Task<PagedResult<JobListItem>> ListJobs(int? pageNumber = null);
-
-    Task<JobDetail?> GetJobDetail(string group, string name);
-
-    Task AddOrUpdateJob(JobAddOrUpdateModel model);
+    Task<PagedResult<JobPackageListItem>> ListPackages(int pageSize = 10, int page = 1);
 
     Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id);
+
+    Task<Guid> SendEmailMessage(string jobRunId, EmailMessage emailMessage, CancellationToken cancellationToken = default);
+
+    Task<long> InsertJobRunLog(string jobRunId, string content, bool isError, CancellationToken cancellationToken = default);
 }
 
 public sealed class JobApplicationService : IJobApplicationService
 {
     private readonly IJobRunService _jobRunService;
-    private readonly ISchedulerService _schedulerService;
-    private readonly IJobRunRepository _jobRunRepository;
-    private readonly IJobRunAttachmentRepository _jobRunAttachmentRepository;
-    private readonly IJobPackageRepository _jobPackageRepository;
+    private readonly IEmailSender _emailSender;
 
-    public JobApplicationService(
-        IJobRunRepository jobRunRepository,
-        IJobRunAttachmentRepository jobRunAttachmentRepository,
-        IJobPackageRepository jobPackageRepository,
-        IJobRunService jobRunService,
-        ISchedulerService schedulerService)
+    public JobApplicationService(IJobRunService jobRunService, IEmailSender emailSender)
     {
         _jobRunService = jobRunService;
-        _schedulerService = schedulerService;
-        _jobRunRepository = jobRunRepository;
-        _jobRunAttachmentRepository = jobRunAttachmentRepository;
-        _jobPackageRepository = jobPackageRepository;
+        _emailSender = emailSender;
     }
 
     public async Task<JobExecutionDetailModel?> GetJobExecutionDetail(string id)
     {
-        var logs = await _jobRunRepository.GetJobRunLogs(id).ConfigureAwait(false);
-        var attachments = await _jobRunAttachmentRepository.GetJobRunAttachments(id).ConfigureAwait(false);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var logs = await _jobRunService.GetJobRunLogs(id).ConfigureAwait(false);
+        var attachments = await _jobRunService.GetJobRunAttachments(id).ConfigureAwait(false);
+
+        transactionScope.Complete();
 
         return new JobExecutionDetailModel(logs, attachments);
     }
 
-    public Task<byte[]?> GetJobRunAttachmentContent(long id)
+    public async Task<byte[]?> GetJobRunAttachmentContent(long id)
     {
-        return _jobRunAttachmentRepository.GetJobRunAttachmentContent(id);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var result = await  _jobRunService.GetJobRunAttachmentContent(id).ConfigureAwait(false);
+        transactionScope.Complete();
+        return result;
     }
 
-    public Task SavePackage(string packageName, byte[] content)
+    public Task<long> InsertJobRunAttachment(AttachmentModel attachment, CancellationToken cancellationToken = default)
     {
-        return _jobRunService.SavePackage(packageName, content);
+        return _jobRunService.InsertJobRunAttachment(attachment, cancellationToken);
     }
 
-    public Task<List<string>> GetAllPackageNames()
+    public async Task SavePackage(string packageName, byte[] content)
     {
-        return _jobPackageRepository.GetAllPackageNames();
+        using var transactionScope = TransactionScopeUtility.CreateNewReadCommitted();
+        await _jobRunService.SavePackage(packageName, content).ConfigureAwait(false);
+        transactionScope.Complete();
     }
 
-    public Task<PackageDetails?> GetPackageDetails(string name)
+    public async Task<List<string>> GetAllPackageNames()
     {
-        return _jobPackageRepository.GetPackageDetails(name);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var result = await _jobRunService.GetAllPackageNames().ConfigureAwait(false);
+        transactionScope.Complete();
+        return result;
     }
 
-    public Task<PagedResult<PackageListItem>> ListPackages(int pageSize = 10, int page = 1)
+    public async Task<JobPackageDetails?> GetPackageDetails(string name)
     {
-        return _jobPackageRepository.ListPackages(pageSize, page);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var result = await _jobRunService.GetPackageDetails(name).ConfigureAwait(false);
+        transactionScope.Complete();
+        return result;
     }
 
-    public Task<PagedResult<JobListItem>> ListJobs(int? pageNumber = null)
+    public async Task<PagedResult<JobPackageListItem>> ListPackages(int pageSize = 10, int page = 1)
     {
-        return _schedulerService.ListJobs(pageNumber ?? 1);
+        using var transactionScope = TransactionScopeUtility.CreateNewReadUnCommitted();
+        var result = await  _jobRunService.ListPackages(pageSize, page).ConfigureAwait(false);
+        transactionScope.Complete();
+        return result;
     }
 
-    public async Task<JobDetail?> GetJobDetail(string group, string name)
+    public async Task<Guid> SendEmailMessage(string jobRunId, EmailMessage emailMessage, CancellationToken cancellationToken = default)
     {
-        var jobKey = new JobKey(name, group);
-        var jobDetail = await _schedulerService.GetJobDetail(jobKey);
-        if (jobDetail == null)
+        await _jobRunService.InsertJobRunLog(jobRunId, $"Sending email to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+        var emailModel = EmailModel.Create(jobRunId, emailMessage.Subject, emailMessage.Body, emailMessage.To, emailMessage.CC, emailMessage.Bcc);
+        var emailMessageAttachments = emailMessage.Attachments;
+        for (var i = 0; i < emailMessageAttachments.Count; i++)
         {
-            return null;
+            var attachment = emailMessageAttachments[i];
+            emailModel.AddAttachment(attachment.FileName, attachment.GetContentBytes(), attachment.ContentType);
         }
 
-        return
-            new JobDetail
-            {
-                JobName = jobDetail.JobName,
-                JobGroup = jobDetail.JobGroup,
-                Description = jobDetail.Description,
-                CronExpression = jobDetail.CronExpression,
-                CronExpressionDescription = jobDetail.CronExpressionDescription,
-                Package = jobDetail.Package,
-                Parameters = jobDetail.Parameters
-            };
+        await _jobRunService.InsertJobRunEmail(emailModel, cancellationToken).ConfigureAwait(false);
+        await _emailSender.SendMailAsync(emailMessage, cancellationToken).ConfigureAwait(false);
+        await _jobRunService.UpdateJobRunEmailIsSent(emailModel.Id, true, cancellationToken).ConfigureAwait(false);
+        await _jobRunService.InsertJobRunLog(jobRunId, $"Email is sent to {emailMessage.To}", false, cancellationToken).ConfigureAwait(false);
+
+        return emailModel.Id;
     }
 
-    public Task AddOrUpdateJob(JobAddOrUpdateModel model)
+    public Task<long> InsertJobRunLog(string jobRunId, string content, bool isError, CancellationToken cancellationToken = default)
     {
-        return _schedulerService.AddOrUpdateJob(model);
+        return _jobRunService.InsertJobRunLog(jobRunId, content, isError, cancellationToken);
     }
 }

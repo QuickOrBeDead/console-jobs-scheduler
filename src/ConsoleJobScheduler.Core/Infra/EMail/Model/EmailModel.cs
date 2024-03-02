@@ -36,8 +36,8 @@ public sealed class EmailModel
     {
         return Attachments.AsReadOnly();
     }
-    
-    public void AddAttachment(string fileName, string fileContent, string contentType)
+
+    public void AddAttachment(string fileName, byte[] fileContent, string contentType)
     {
         var attachmentModel = AttachmentModel.Create(JobRunId, fileName, fileContent, contentType);
         attachmentModel.SetEmailId(Id);
