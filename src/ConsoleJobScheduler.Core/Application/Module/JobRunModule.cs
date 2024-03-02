@@ -7,22 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleJobScheduler.Core.Application.Module;
 
-public sealed class JobRunModule
+public sealed class JobRunModule(IConfigurationRoot configuration)
 {
-    private readonly IConfigurationRoot _configuration;
-
-    public JobRunModule(IConfigurationRoot configuration)
-    {
-        _configuration = configuration;
-    }
-
     public void Register(IServiceCollection services, Action<DbContextOptionsBuilder>? dbContextOptionsBuilderAction = null)
     {
         services.AddDbContext<RunnerDbContext>(o =>
         {
             if (dbContextOptionsBuilderAction == null)
             {
-                o.UseNpgsql(_configuration["ConnectionString"]);
+                o.UseNpgsql(configuration["ConnectionString"]);
             }
             else
             {
@@ -38,6 +31,7 @@ public sealed class JobRunModule
         services.AddScoped<IConsoleMessageProcessor, ConsoleLogMessageProcessor>();
         services.AddScoped<IConsoleMessageProcessorManager, ConsoleMessageProcessorManager>();
         services.AddScoped<IJobApplicationService, JobApplicationService>();
+        services.AddSingleton<IProcessRunnerFactory, ProcessRunnerFactory>();
     }
 
     public async Task MigrateDb(IServiceProvider serviceProvider)

@@ -55,6 +55,9 @@
       <None Update="Application\_Data\NbaMatches.zip">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Jobs\_Data\GithubReadmeStats.zip">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

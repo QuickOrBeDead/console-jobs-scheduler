@@ -36,7 +36,7 @@ public sealed class JobHistoryModule
     public async Task MigrateDb(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
-        await using var identityDbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
-        await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
+        await using var historyDbContext = scope.ServiceProvider.GetRequiredService<HistoryDbContext>();
+        await historyDbContext.Database.MigrateAsync().ConfigureAwait(false);
     }
 }

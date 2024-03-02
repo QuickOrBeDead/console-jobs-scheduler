@@ -137,8 +137,8 @@ public sealed class JobApplicationServiceFixture
         var jobApplicationService = serviceProvider.GetRequiredService<IJobApplicationService>();
         
         // Act
-        await jobApplicationService.SavePackage("GithubReadmeStats", await ReadPackageManifest("GithubReadmeStats.zip"));
-        await jobApplicationService.SavePackage("NbaMatches", await ReadPackageManifest("NbaMatches.zip"));
+        await jobApplicationService.SavePackage("GithubReadmeStats", await ReadPackageData("GithubReadmeStats.zip"));
+        await jobApplicationService.SavePackage("NbaMatches", await ReadPackageData("NbaMatches.zip"));
 
         // Assert
         var assertJobApplicationService = serviceProvider.GetRequiredService<IJobApplicationService>();
@@ -181,9 +181,9 @@ public sealed class JobApplicationServiceFixture
         Assert.That(log.CreateDate, Is.GreaterThan(default(DateTime)));
     }
 
-    private static Task<byte[]> ReadPackageManifest(string manifestJsonFile)
+    private static Task<byte[]> ReadPackageData(string packageName)
     {
-        return File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Application", "_Data", manifestJsonFile));
+        return File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Application", "_Data", packageName));
     }
 
     private static async Task<ServiceProvider> CreateServiceProvider()
@@ -200,8 +200,8 @@ public sealed class JobApplicationServiceFixture
                 x.EnableAutoRegistration = false;
             });
         
-        var jobHistoryModule = new JobRunModule(Substitute.For<IConfigurationRoot>());
-        jobHistoryModule.Register(services, UseUseSqliteDatabase);
+        var jobRunModule = new JobRunModule(Substitute.For<IConfigurationRoot>());
+        jobRunModule.Register(services, UseUseSqliteDatabase);
         
         var serviceProvider = services.BuildServiceProvider();
 
