@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics;
 using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Application.Model;
 using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.History.Model;
 using ConsoleJobScheduler.Core.Domain.Runner;
@@ -44,12 +45,15 @@ public sealed class ConsoleAppPackageJobFixture
     }
     
     [Test]
-    public async Task ShouldExecute()
+    public async Task ShouldExecuteConsolePackage()
     {
         // Arrange
+        var initialSignalTime = DateTime.UtcNow;
+
         var jobRunId = "Node1638440532318841376";
         var package = "package";
         var packageParameters = "package-parameters";
+        var packageRunTempPath = TestContext.CurrentContext.TestDirectory;
 
         var manualResetEvent = new ManualResetEvent(false);
         FakeProcessRunner? fakeProcessRunner = null;
@@ -59,47 +63,86 @@ public sealed class ConsoleAppPackageJobFixture
             manualResetEvent.Set();
             return fakeProcessRunner;
         };
-        var serviceProvider = await CreateServiceProvider(fakeProcessRunnerFunc);
+        var serviceProvider = await CreateServiceProvider(fakeProcessRunnerFunc, packageRunTempPath);
         var consoleAppPackageJob = new ConsoleAppPackageJob(serviceProvider, Substitute.For<ILogger<ConsoleAppPackageJob>>());
-        var jobExecutionContext = CreateJobExecutionContext(package, packageParameters, jobRunId);
         await SavePackage(serviceProvider, package, "GithubReadmeStats.zip");
-        await InsertJobRunHistory(serviceProvider, jobRunId, package);
+        await InsertJobRunHistory(serviceProvider, jobRunId, package, initialSignalTime);
 
         // Act
+        var jobExecutionContext = CreateJobExecutionContext(package, packageParameters, jobRunId);
         var executeTask = Task.Run(async () => await consoleAppPackageJob.Execute(jobExecutionContext));
         manualResetEvent.WaitOne();
         fakeProcessRunner!.WaitForErrorAndOutputReadLine();
-        fakeProcessRunner.AddErrorData("error");
-        fakeProcessRunner.AddOutputData("test");
-        fakeProcessRunner.AddEmailMessage(new EmailMessage
+        
+        Assert.That(fakeProcessRunner.StartInfo.WorkingDirectory, Does.Exist);
+        
+        fakeProcessRunner.AddErrorData("#1 error");
+        fakeProcessRunner.AddOutputData("#2 output");
+        var emailMessage = new EmailMessage
         {
             To = "to@email.com",
             CC = "cc@email.com",
             Bcc = "bcc@email.com",
             Body = "Body",
             Subject = "Subject"
-        });
-        fakeProcessRunner.AddLogMessage(ConsoleMessageLogType.Info, "Info");
+        };
+        emailMessage.AddAttachment("attachment.txt", "text/plain", "Attachment Text"u8.ToArray());
+        fakeProcessRunner.AddEmailMessage(emailMessage);
+        fakeProcessRunner.AddLogMessage(ConsoleMessageLogType.Info, "#3 info");
         fakeProcessRunner.StopReceivingEvents();
         await executeTask;
         
         // Assert
-        using var scope = serviceProvider.CreateScope();
-        var jobHistoryApplicationService = scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>();
-        var jobHistoryExecutionDetail = await jobHistoryApplicationService.GetJobExecutionDetail(jobRunId);
+        Assert.That(fakeProcessRunner.StartInfo.WorkingDirectory, Does.Not.Exist);
+        
+        Assert.That(fakeProcessRunner.StartInfo.UseShellExecute, Is.False);
+        Assert.That(fakeProcessRunner.StartInfo.RedirectStandardOutput, Is.True);
+        Assert.That(fakeProcessRunner.StartInfo.RedirectStandardError, Is.True);
+        Assert.That(fakeProcessRunner.StartInfo.FileName, Is.EqualTo("dotnet"));
+        Assert.That(fakeProcessRunner.StartInfo.Arguments, Is.EqualTo($"GithubReadmeStats.dll {packageParameters}"));
+        Assert.That(fakeProcessRunner.StartInfo.WorkingDirectory, Does.StartWith(Path.Combine(packageRunTempPath, "Temp", package)));
 
-        var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
-        var jobExecutionDetail = await jobApplicationService.GetJobExecutionDetail(jobRunId);
-        jobHistoryExecutionDetail.ToString();
-
+        var jobHistoryExecutionDetail = await GetJobHistoryExecutionDetail(serviceProvider, jobRunId);
+        Assert.That(jobHistoryExecutionDetail, Is.Not.Null);
+        Assert.That(jobHistoryExecutionDetail!.LastSignalTime, Is.GreaterThan(initialSignalTime));
+        
+        var jobExecutionDetail = await GetJobExecutionDetail(serviceProvider, jobRunId); 
+        Assert.That(jobExecutionDetail, Is.Not.Null);
+        Assert.That(jobExecutionDetail!.Attachments.Count, Is.EqualTo(1));
+        Assert.That(jobExecutionDetail.Attachments[0].FileName, Is.EqualTo("attachment.txt"));
+        Assert.That(jobExecutionDetail.Logs.Count, Is.EqualTo(5));
+        Assert.That(jobExecutionDetail.Logs[0].Content, Is.EqualTo("##[error] #1 error"));
+        Assert.That(jobExecutionDetail.Logs[0].IsError, Is.True);
+        Assert.That(jobExecutionDetail.Logs[1].Content, Is.EqualTo("#2 output"));
+        Assert.That(jobExecutionDetail.Logs[1].IsError, Is.False);
+        Assert.That(jobExecutionDetail.Logs[2].Content, Is.EqualTo("Sending email to to@email.com"));
+        Assert.That(jobExecutionDetail.Logs[2].IsError, Is.False);
+        Assert.That(jobExecutionDetail.Logs[3].Content, Is.EqualTo("Email is sent to to@email.com"));
+        Assert.That(jobExecutionDetail.Logs[3].IsError, Is.False);
+        Assert.That(jobExecutionDetail.Logs[4].Content, Is.EqualTo("#3 info"));
+        Assert.That(jobExecutionDetail.Logs[4].IsError, Is.False);
     }
 
-    private static async Task InsertJobRunHistory(IServiceProvider serviceProvider, string jobRunId, string package)
+    private static async Task<JobExecutionDetailModel?> GetJobExecutionDetail(IServiceProvider serviceProvider, string jobRunId)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+        return await jobApplicationService.GetJobExecutionDetail(jobRunId);
+    }
+    
+    private static async Task<JobExecutionHistoryDetail?> GetJobHistoryExecutionDetail(IServiceProvider serviceProvider, string jobRunId)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var jobHistoryApplicationService = scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>();
+        return await jobHistoryApplicationService.GetJobExecutionDetail(jobRunId);
+    }
+
+    private static async Task InsertJobRunHistory(IServiceProvider serviceProvider, string jobRunId, string package, DateTime lastSignalTime)
     {
         using var scope = serviceProvider.CreateScope();
         var jobHistoryApplicationService = scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>();
         await jobHistoryApplicationService.InsertJobHistoryEntry(new JobExecutionHistory(jobRunId, "Test", "Test",
-            package, "job", "jobGroup", "trigger", "triggerGroup", DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow,
+            package, "job", "jobGroup", "trigger", "triggerGroup", DateTime.UtcNow, DateTime.UtcNow, lastSignalTime,
             DateTime.UtcNow, "0 0/1 * 1/1 * ? *"));
     }
 
@@ -125,9 +168,9 @@ public sealed class ConsoleAppPackageJobFixture
         return File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Jobs", "_Data", packageZipName));
     }
     
-    private static async Task<ServiceProvider> CreateServiceProvider(Func<ProcessStartInfo, FakeProcessRunner> fakeProcessRunnerFunc, TimeProvider? timeProvider = null)
+    private static async Task<ServiceProvider> CreateServiceProvider(Func<ProcessStartInfo, FakeProcessRunner> fakeProcessRunnerFunc, string packageRunTempPath, TimeProvider? timeProvider = null)
     {
-        Environment.SetEnvironmentVariable("ConsoleAppPackageRunTempPath", TestContext.CurrentContext.TestDirectory);
+        Environment.SetEnvironmentVariable("ConsoleAppPackageRunTempPath", packageRunTempPath);
         
         var services = new ServiceCollection();
         services.AddLogging();
