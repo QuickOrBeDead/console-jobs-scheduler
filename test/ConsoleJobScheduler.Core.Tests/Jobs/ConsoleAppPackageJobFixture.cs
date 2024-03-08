@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Text;
 using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Model;
 using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.History.Model;
 using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
+using ConsoleJobScheduler.Core.Domain.Settings.Model;
 using ConsoleJobScheduler.Core.Infra.EMail;
 using ConsoleJobScheduler.Core.Jobs;
 using ConsoleJobScheduler.Core.Tests.Jobs.Fakes;
@@ -18,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
+using netDumbster.smtp;
 using NSubstitute;
 using Quartz;
 using Z.EntityFramework.Extensions;
@@ -48,6 +51,8 @@ public sealed class ConsoleAppPackageJobFixture
     public async Task ShouldExecuteConsolePackage()
     {
         // Arrange
+        using var simpleSmtpServer = SimpleSmtpServer.Start(44444);
+        
         var initialSignalTime = DateTime.UtcNow;
 
         var jobRunId = "Node1638440532318841376";
@@ -86,7 +91,9 @@ public sealed class ConsoleAppPackageJobFixture
             Body = "Body",
             Subject = "Subject"
         };
-        emailMessage.AddAttachment("attachment.txt", "text/plain", "Attachment Text"u8.ToArray());
+        
+        var attachmentContent = "Attachment Text";
+        emailMessage.AddAttachment("attachment.txt", "text/plain", Encoding.UTF8.GetBytes(attachmentContent));
         fakeProcessRunner.AddEmailMessage(emailMessage);
         fakeProcessRunner.AddLogMessage(ConsoleMessageLogType.Info, "#3 info");
         fakeProcessRunner.StopReceivingEvents();
@@ -121,6 +128,18 @@ public sealed class ConsoleAppPackageJobFixture
         Assert.That(jobExecutionDetail.Logs[3].IsError, Is.False);
         Assert.That(jobExecutionDetail.Logs[4].Content, Is.EqualTo("#3 info"));
         Assert.That(jobExecutionDetail.Logs[4].IsError, Is.False);
+        
+        Assert.That(simpleSmtpServer.ReceivedEmailCount, Is.EqualTo(1));
+        Assert.That(simpleSmtpServer.ReceivedEmail.Length, Is.EqualTo(1));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].FromAddress.Address, Is.EqualTo("from@email.com"));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].Subject, Is.EqualTo(emailMessage.Subject));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].ToAddresses.Length, Is.EqualTo(3));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].ToAddresses[0].Address, Is.EqualTo(emailMessage.To));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].ToAddresses[1].Address, Is.EqualTo(emailMessage.CC));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].ToAddresses[2].Address, Is.EqualTo(emailMessage.Bcc));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[0].BodyData, Is.EqualTo(emailMessage.Body));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[1].BodyData, Is.EqualTo(attachmentContent));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[1].HeaderData, Is.EqualTo("text/plain; name=attachment.txt"));
     }
 
     private static async Task<JobExecutionDetailModel?> GetJobExecutionDetail(IServiceProvider serviceProvider, string jobRunId)
@@ -174,7 +193,7 @@ public sealed class ConsoleAppPackageJobFixture
         
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSingleton(Substitute.For<IEmailSender>());
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddMessagePipe(
             x =>
             {
@@ -193,17 +212,35 @@ public sealed class ConsoleAppPackageJobFixture
 
         var jobHistoryModule = new JobHistoryModule(Substitute.For<IConfigurationRoot>());
         jobHistoryModule.Register(services, UseUseSqliteDatabase);
+
+        var settingsModule = new SettingsModule(Substitute.For<IConfigurationRoot>());
+        settingsModule.Register(services, UseUseSqliteDatabase);
         
         services.AddSingleton(timeProvider ?? new FakeTimeProvider());
         
         var serviceProvider = services.BuildServiceProvider();
 
-        using var scope = serviceProvider.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetRequiredService<RunnerDbContext>();
+        using var createDbScope = serviceProvider.CreateScope();
+        await using var dbContext = createDbScope.ServiceProvider.GetRequiredService<RunnerDbContext>();
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.EnsureCreatedAsync();
 
         await jobHistoryModule.MigrateDb(serviceProvider);
+        await settingsModule.MigrateDb(serviceProvider);
+        
+        using var scope = serviceProvider.CreateScope();
+        var settingsApplicationService = scope.ServiceProvider.GetRequiredService<ISettingsApplicationService>();
+        await settingsApplicationService.SaveSettings(new SmtpSettings
+        {
+            Host = "localhost",
+            Port = 44444,
+            From = "from@email.com",
+            FromName = "from",
+            Domain = string.Empty,
+            UserName = "test",
+            Password = "test",
+            EnableSsl = false
+        });
         
         return serviceProvider;
     }
