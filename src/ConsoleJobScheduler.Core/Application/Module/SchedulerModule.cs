@@ -66,7 +66,6 @@ public sealed class SchedulerModule(IConfigurationRoot configuration, SchedulerD
             var factory = new CustomSchedulerFactory(x, schedulerBuilder.Properties);
             return factory.GetScheduler().Result;
         });
-        services.AddSingleton<IQuartzDbStore>(x => x.GetRequiredService<IScheduler>().GetJobStore());
         services.AddScoped<ISchedulerService, SchedulerService>();
         services.AddSingleton<ISchedulerManager, SchedulerManager>();
         services.AddSingleton<JobExecutionHistoryPlugin>();
