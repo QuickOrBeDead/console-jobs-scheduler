@@ -38,6 +38,7 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     job_run_id = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    order = table.Column<int>(type: "integer", nullable: true),
                     content = table.Column<string>(type: "text", nullable: false),
                     is_error = table.Column<bool>(type: "boolean", nullable: false),
                     create_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -74,7 +75,6 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                     email_id = table.Column<Guid>(type: "uuid", nullable: true),
                     content = table.Column<byte[]>(type: "bytea", nullable: false),
                     job_run_id = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    FileContent = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     content_type = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     create_time = table.Column<string>(type: "text", nullable: false),

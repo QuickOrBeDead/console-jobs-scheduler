@@ -41,8 +41,8 @@ public class InitialSetupFixture
         
         // Assert
         var schedulerBuilder = SchedulerBuilder.Create()
-            .WithId("SchedulerInstanceId")
-            .WithName("ConsoleJobsSchedulerService")
+            .WithId($"SchedulerInstance_InitialSetupFixture_{TestContext.CurrentContext.Test.ID}")
+            .WithName($"ConsoleJobsSchedulerService_InitialSetupFixture_{TestContext.CurrentContext.Test.ID}")
             .UsePersistentStore(
                 o =>
                 {

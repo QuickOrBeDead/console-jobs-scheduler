@@ -14,15 +14,14 @@ using Quartz.Util;
 
 namespace ConsoleJobScheduler.Core.Application.Module;
 
-public sealed class SchedulerModule
+public enum SchedulerDbType
 {
-    private readonly IConfigurationRoot _configuration;
+    Postgresql = 0,
+    SqLite = 1
+}
 
-    public SchedulerModule(IConfigurationRoot configuration)
-    {
-        _configuration = configuration;
-    }
-
+public sealed class SchedulerModule(IConfigurationRoot configuration, SchedulerDbType schedulerDbType = SchedulerDbType.Postgresql)
+{
     public void Register(IServiceCollection services)
     {
         services.AddSingleton<IJobFactory, ServiceProviderJobFactory>();
@@ -31,22 +30,35 @@ public sealed class SchedulerModule
         services.AddSingleton<IScheduler>(x =>
         {
             var schedulerBuilder = SchedulerBuilder.Create()
-                .WithId(_configuration["SchedulerInstanceId"]!)
-                .WithName("ConsoleJobsSchedulerService")
+                .WithId(configuration["SchedulerInstanceId"]!)
+                .WithName(configuration["SchedulerInstanceName"] ?? "ConsoleJobsSchedulerService")
                 .UseDefaultThreadPool(y => y.MaxConcurrency = 100)
                 .UseJobFactory<ServiceProviderJobFactory>()
                 .UsePersistentStore(
                     o =>
                     {
-                        o.UseClustering();
+                        if (schedulerDbType != SchedulerDbType.SqLite)
+                        {
+                            o.UseClustering();
+                        }
+
                         o.UseProperties = true;
                         o.UseNewtonsoftJsonSerializer();
-                        o.UsePostgres(
-                            p =>
-                            {
-                                p.TablePrefix = _configuration["TablePrefix"]!;
-                                p.ConnectionString = _configuration["ConnectionString"]!;
-                            });
+
+                        Action<SchedulerBuilder.AdoProviderOptions> dbConfigurator = p =>
+                        {
+                            p.TablePrefix = configuration["TablePrefix"]!;
+                            p.ConnectionString = configuration["ConnectionString"]!;
+                        };
+
+                        if (schedulerDbType == SchedulerDbType.Postgresql)
+                        {
+                            o.UsePostgres(dbConfigurator);
+                        }
+                        else
+                        {
+                            o.UseMicrosoftSQLite(dbConfigurator);
+                        }
                     });
             schedulerBuilder.SetProperty(StdSchedulerFactory.PropertyJobStoreType, typeof(CustomJobStoreTx).AssemblyQualifiedNameWithoutVersion());
             schedulerBuilder.SetProperty(JobExecutionHistoryPlugin.PluginConfigurationProperty, typeof(JobExecutionHistoryPlugin).AssemblyQualifiedNameWithoutVersion());
@@ -61,20 +73,19 @@ public sealed class SchedulerModule
         services.AddScoped<ISchedulerApplicationService, SchedulerApplicationService>();
     }
 
-    public async Task MigrateDb(IServiceProvider serviceProvider)
+    public void MigrateDb()
     {
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
         var dbMigrationRunner = new DbMigrationRunner();
-        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!, "Scheduler");
-
-        await AddDbInitialData(serviceProvider).ConfigureAwait(false);
+        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!, "Scheduler", GetDbType());
     }
 
-    private static async Task AddDbInitialData(IServiceProvider serviceProvider)
+    private string GetDbType()
     {
-        using var scope = serviceProvider.CreateScope();
-        var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
-        await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
+        return schedulerDbType switch
+        {
+            SchedulerDbType.Postgresql => "PostgreSQL",
+            SchedulerDbType.SqLite => "Sqlite",
+            _ => "PostgreSQL"
+        };
     }
 }

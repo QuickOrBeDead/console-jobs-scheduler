@@ -107,10 +107,6 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("email_id");
 
-                    b.Property<string>("FileContent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -217,6 +213,10 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("job_run_id");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
 
                     b.HasKey("Id");
 

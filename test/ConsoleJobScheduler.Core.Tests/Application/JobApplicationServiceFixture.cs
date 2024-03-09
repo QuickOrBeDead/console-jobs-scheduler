@@ -55,7 +55,7 @@ public sealed class JobApplicationServiceFixture
         emailMessage.AddAttachment("test.txt", "text/plain", "test"u8.ToArray());
 
         // Act
-        var emailId = await jobApplicationService.SendEmailMessage(jobRunId, emailMessage);
+        var emailId = await jobApplicationService.SendEmailMessage(jobRunId, 100, emailMessage);
 
         // Assert
         using var scope = serviceProvider.CreateScope();
@@ -167,7 +167,7 @@ public sealed class JobApplicationServiceFixture
         var jobApplicationService = serviceProvider.GetRequiredService<IJobApplicationService>();
         
         // Act
-        var id = await jobApplicationService.InsertJobRunLog("1", "Error", true);
+        var id = await jobApplicationService.InsertJobRunLog("1", 100, "Error", true);
 
         // Assert
         using var scope = serviceProvider.CreateScope();
@@ -178,6 +178,7 @@ public sealed class JobApplicationServiceFixture
         Assert.That(log!.JobRunId, Is.EqualTo("1"));
         Assert.That(log.Content, Is.EqualTo("##[error] Error"));
         Assert.That(log.IsError, Is.True);
+        Assert.That(log.Order, Is.EqualTo(100));
         Assert.That(log.CreateDate, Is.GreaterThan(default(DateTime)));
     }
 

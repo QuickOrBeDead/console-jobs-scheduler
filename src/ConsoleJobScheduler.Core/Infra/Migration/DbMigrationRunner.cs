@@ -22,6 +22,7 @@ public sealed class DbMigrationRunner : IDbMigrationRunner
             .AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddPostgres11_0()
+                .AddSQLite()
                 .WithGlobalConnectionString(connectionString)
                 .ScanIn(typeof(DbMigrationRunner).Assembly).For.Migrations())
             .AddLogging(lb => lb.AddFluentMigratorConsole())

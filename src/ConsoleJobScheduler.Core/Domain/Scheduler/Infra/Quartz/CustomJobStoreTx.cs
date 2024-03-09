@@ -15,14 +15,4 @@ public sealed class CustomJobStoreTx : JobStoreTX, IExtendedJobStore
     {
         return ExecuteWithoutLock(conn => Delegate.SelectSchedulerStateRecords(conn, null, cancellationToken), cancellationToken);
     }
-
-    public IDbAccessor GetDbAccessor()
-    {
-        if (Delegate is not IDbAccessor dbAccessor)
-        {
-            throw new InvalidOperationException($"Delegate must be {typeof(IDbAccessor)}");
-        }
-
-        return dbAccessor;
-    }
 }

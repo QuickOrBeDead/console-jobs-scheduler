@@ -14,8 +14,8 @@ public sealed class ConsoleLogMessageProcessor : IConsoleMessageProcessor
 
     public ConsoleMessageType MessageType => ConsoleMessageType.Log;
 
-    public Task ProcessMessage(string jobRunId, object message, CancellationToken cancellationToken = default)
+    public Task ProcessMessage(string jobRunId, int messageOrder, object message, CancellationToken cancellationToken = default)
     {
-        return _jobApplicationService.InsertJobRunLog(jobRunId, ((ConsoleLogMessage)message).Message, false, cancellationToken);
+        return _jobApplicationService.InsertJobRunLog(jobRunId, messageOrder, ((ConsoleLogMessage)message).Message, false, cancellationToken);
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
 {
     [DbContext(typeof(RunnerDbContext))]
-    [Migration("20240226143312_InitialMigration")]
+    [Migration("20240302224507_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -109,10 +109,6 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                     b.Property<Guid?>("EmailId")
                         .HasColumnType("uuid")
                         .HasColumnName("email_id");
-
-                    b.Property<string>("FileContent")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -220,6 +216,10 @@ namespace ConsoleJobScheduler.Core.Domain.Runner.Infra.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("job_run_id");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
 
                     b.HasKey("Id");
 

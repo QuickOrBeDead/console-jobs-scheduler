@@ -21,13 +21,9 @@ public interface ISchedulerService
 
     Task<PagedResult<JobListItem>> ListJobs(int page = 1);
 
-    Task<ITrigger?> GetTrigger(TriggerKey triggerKey);
-
     Task<SchedulerMetaData> GetMetaData();
 
     Task<IReadOnlyCollection<SchedulerStateRecord>> GetInstances();
-
-    Task<JobCronExpression?> GetCronExpression(JobKey jobKey);
 }
 
 public sealed class SchedulerService : ISchedulerService
@@ -123,11 +119,6 @@ public sealed class SchedulerService : ISchedulerService
         return new PagedResult<JobListItem>(result, pageSize, page, totalCount);
     }
 
-    public Task<ITrigger?> GetTrigger(TriggerKey triggerKey)
-    {
-        return _scheduler.GetTrigger(triggerKey);
-    }
-
     public Task<SchedulerMetaData> GetMetaData()
     {
         return _scheduler.GetMetaData();
@@ -138,7 +129,7 @@ public sealed class SchedulerService : ISchedulerService
         return _scheduler.GetJobStore().SelectSchedulerStateRecords();
     }
 
-    public async Task<JobCronExpression?> GetCronExpression(JobKey jobKey)
+    private async Task<JobCronExpression?> GetCronExpression(JobKey jobKey)
     {
         var triggers = await _scheduler.GetTriggersOfJob(jobKey).ConfigureAwait(false);
         var cronExpression = GetCronExpression(triggers);

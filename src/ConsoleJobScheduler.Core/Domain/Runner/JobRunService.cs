@@ -15,6 +15,7 @@ public interface IJobRunService
 {
     Task<long> InsertJobRunLog(
         string jobRunId,
+        int order,
         string content,
         bool isError,
         CancellationToken cancellationToken = default);
@@ -66,11 +67,12 @@ public sealed class JobRunService : IJobRunService
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "<Pending>")]
     public async Task<long> InsertJobRunLog(
         string jobRunId,
+        int order,
         string content,
         bool isError,
         CancellationToken cancellationToken = default)
     {
-        var jobRunLog = JobRunLog.Created(jobRunId, content, isError);
+        var jobRunLog = JobRunLog.Create(jobRunId, order, content, isError);
         await _jobRunRepository.Add(jobRunLog, cancellationToken);
         await _jobRunRepository.SaveChanges(cancellationToken).ConfigureAwait(false);
         await _jobConsoleLogMessagePublisher.PublishAsync(new JobConsoleLogMessageEvent(jobRunId, content, isError), cancellationToken).ConfigureAwait(false);
@@ -81,7 +83,8 @@ public sealed class JobRunService : IJobRunService
     public Task<List<JobRunLogDetail>> GetJobRunLogs(string jobRunId)
     {
         return _jobRunRepository.QueryableAsNoTracking().Where(x => x.JobRunId == jobRunId)
-            .OrderBy(x => x.Id)
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.CreateDate)
             .Select(x => new JobRunLogDetail(x.Content, x.IsError, x.CreateDate)).ToListAsync();
     }
 

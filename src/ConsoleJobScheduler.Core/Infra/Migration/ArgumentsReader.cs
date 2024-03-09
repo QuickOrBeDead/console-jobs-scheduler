@@ -40,12 +40,6 @@ namespace ConsoleJobScheduler.Core.Infra.Migration
                 return value;
             }
 
-            /*
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine($"{key} argument not found!");
-
-            Environment.Exit(-1);
-            */
             return null;
         }
     }

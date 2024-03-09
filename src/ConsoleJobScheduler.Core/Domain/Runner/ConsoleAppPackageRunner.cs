@@ -17,6 +17,8 @@ public sealed class ConsoleAppPackageRunner(
     IConfiguration configuration)
     : IConsoleAppPackageRunner
 {
+    private int _messageOrder;
+
     public async Task Run(string jobRunId, string packageName, string arguments, CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
@@ -41,19 +43,36 @@ public sealed class ConsoleAppPackageRunner(
             };
             using (var process = processRunnerFactory.CreateNewProcessRunner(processStartInfo))
             {
-                var processOutputTasks = new List<Task>();
-
+                using var countdown = new CountdownEvent(1);
                 process.OutputDataReceived += async (_, e) =>
                 {
-                    var task = ProcessOutputDataHandler(jobRunId, e.Data, false, cancellationToken);
-                    processOutputTasks.Add(task);
-                    await task;
+                    // ReSharper disable once AccessToDisposedClosure
+                    IgnoreObjectDisposedException(() => countdown.AddCount());
+
+                    try
+                    {
+                        await ProcessOutputDataHandler(jobRunId, GetNextOrder(), e.Data, false, cancellationToken).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        // ReSharper disable once AccessToDisposedClosure
+                        IgnoreObjectDisposedException(() => countdown.Signal());
+                    }
                 };
                 process.ErrorDataReceived += async (_, e) =>
                 {
-                    var task = ProcessOutputDataHandler(jobRunId, e.Data, true, cancellationToken);
-                    processOutputTasks.Add(task);
-                    await task;
+                    // ReSharper disable once AccessToDisposedClosure
+                    IgnoreObjectDisposedException(() => countdown.AddCount());
+
+                    try
+                    {
+                        await ProcessOutputDataHandler(jobRunId, GetNextOrder(), e.Data, true, cancellationToken).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        // ReSharper disable once AccessToDisposedClosure
+                        IgnoreObjectDisposedException(() => countdown.Signal());
+                    }
                 };
 
                 if (!process.Start())
@@ -65,7 +84,9 @@ public sealed class ConsoleAppPackageRunner(
                 process.BeginErrorReadLine();
 
                 await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-                await Task.WhenAll(processOutputTasks).WaitAsync(cancellationToken);
+
+                countdown.Signal();
+                countdown.Wait(TimeSpan.FromMinutes(5), cancellationToken);
 
                 if (process.ExitCode != 0)
                 {
@@ -86,7 +107,24 @@ public sealed class ConsoleAppPackageRunner(
         }
     }
 
-    private async Task ProcessOutputDataHandler(string jobRunId, string? data, bool isError, CancellationToken cancellationToken)
+    private static void IgnoreObjectDisposedException(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (ObjectDisposedException)
+        {
+           // Empty
+        }
+    }
+
+    private int GetNextOrder()
+    {
+        return Interlocked.Increment(ref _messageOrder);
+    }
+
+    private async Task ProcessOutputDataHandler(string jobRunId, int order, string? data, bool isError, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(data))
         {
@@ -96,7 +134,7 @@ public sealed class ConsoleAppPackageRunner(
         if (isError)
         {
             using var scope = serviceProvider.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<IJobRunService>().InsertJobRunLog(jobRunId, data, isError, cancellationToken);
+            await scope.ServiceProvider.GetRequiredService<IJobRunService>().InsertJobRunLog(jobRunId, order, data, isError, cancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -107,6 +145,6 @@ public sealed class ConsoleAppPackageRunner(
         }
 
         using var processorScope = serviceProvider.CreateScope();
-        await processorScope.ServiceProvider.GetRequiredService<IConsoleMessageProcessorManager>().ProcessMessage(jobRunId, consoleMessage, cancellationToken);
+        await processorScope.ServiceProvider.GetRequiredService<IConsoleMessageProcessorManager>().ProcessMessage(jobRunId, order, consoleMessage, cancellationToken).ConfigureAwait(false);
     }
 }

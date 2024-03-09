@@ -17,14 +17,9 @@ public interface ISchedulerApplicationService
     Task AddOrUpdateJob(JobAddOrUpdateModel model);
 }
 
-public sealed class SchedulerApplicationService : ISchedulerApplicationService
+public sealed class SchedulerApplicationService(ISchedulerService schedulerService) : ISchedulerApplicationService
 {
-    private readonly ISchedulerService _schedulerService;
-
-    public SchedulerApplicationService(ISchedulerService schedulerService)
-    {
-        _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
-    }
+    private readonly ISchedulerService _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
 
     public async Task<SchedulerInfoModel> GetStatistics()
     {
