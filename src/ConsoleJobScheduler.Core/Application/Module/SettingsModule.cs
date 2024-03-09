@@ -6,22 +6,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleJobScheduler.Core.Application.Module;
 
-public sealed class SettingsModule
+public sealed class SettingsModule(IConfigurationRoot configuration)
 {
-    private readonly IConfigurationRoot _configuration;
-
-    public SettingsModule(IConfigurationRoot configuration)
-    {
-        _configuration = configuration;
-    }
-
     public void Register(IServiceCollection services, Action<DbContextOptionsBuilder>? dbContextOptionsBuilderAction = null)
     {
         services.AddDbContext<SettingsDbContext>(o =>
         {
             if (dbContextOptionsBuilderAction == null)
             {
-                o.UseNpgsql(_configuration["ConnectionString"]);
+                o.UseNpgsql(configuration["ConnectionString"]);
             }
             else
             {

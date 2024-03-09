@@ -1,5 +1,3 @@
-using Quartz.Impl.AdoJobStore;
-
 namespace ConsoleJobScheduler.Core.Infra.Data
 {
     public interface IQuartzDbStore
@@ -7,7 +5,5 @@ namespace ConsoleJobScheduler.Core.Infra.Data
         string DataSource { get; }
 
         string TablePrefix { get; }
-
-        IDbAccessor GetDbAccessor();
     }
 }

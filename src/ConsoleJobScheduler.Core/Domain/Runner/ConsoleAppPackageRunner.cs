@@ -107,7 +107,7 @@ public sealed class ConsoleAppPackageRunner(
         }
     }
 
-    private void IgnoreObjectDisposedException(Action action)
+    private static void IgnoreObjectDisposedException(Action action)
     {
         try
         {

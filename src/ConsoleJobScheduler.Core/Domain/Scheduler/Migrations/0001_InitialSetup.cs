@@ -59,7 +59,7 @@ public class InitialSetup : MigrationBase
             .OnColumn("trigger_state").Ascending()
             .WithOptions().NonClustered();
 
-        Create.ForeignKey(GetNameWithTablePrefix("blob_triggers_sched_name_trigger_name_trigger_group_fkey"))
+        IfDatabase("PostgreSQL").Create.ForeignKey(GetNameWithTablePrefix("blob_triggers_sched_name_trigger_name_trigger_group_fkey"))
             .FromTable(GetNameWithTablePrefix("blob_triggers")).ForeignColumns("sched_name", "trigger_name", "trigger_group")
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)
@@ -82,7 +82,7 @@ public class InitialSetup : MigrationBase
             .OnColumn("requests_recovery").Ascending()
             .WithOptions().NonClustered();
 
-        Create.ForeignKey(GetNameWithTablePrefix("triggers_sched_name_job_name_job_group_fkey"))
+        IfDatabase("PostgreSQL").Create.ForeignKey(GetNameWithTablePrefix("triggers_sched_name_job_name_job_group_fkey"))
             .FromTable(GetNameWithTablePrefix("triggers")).ForeignColumns("sched_name", "job_name", "job_group")
             .ToTable(GetNameWithTablePrefix("job_details")).PrimaryColumns("sched_name", "job_name", "job_group")
             .OnUpdate(Rule.None)
@@ -102,7 +102,7 @@ public class InitialSetup : MigrationBase
             .WithColumn("cron_expression").AsString().NotNullable()
             .WithColumn("time_zone_id").AsString().Nullable();
 
-        Create.ForeignKey(GetNameWithTablePrefix("cron_triggers_sched_name_trigger_name_trigger_group_fkey"))
+        IfDatabase("PostgreSQL").Create.ForeignKey(GetNameWithTablePrefix("cron_triggers_sched_name_trigger_name_trigger_group_fkey"))
             .FromTable(GetNameWithTablePrefix("cron_triggers")).ForeignColumns("sched_name", "trigger_name", "trigger_group")
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)
@@ -187,7 +187,7 @@ public class InitialSetup : MigrationBase
             .WithColumn("repeat_interval").AsInt64().NotNullable()
             .WithColumn("times_triggered").AsInt64().NotNullable();
 
-        Create.ForeignKey(GetNameWithTablePrefix("simple_triggers_sched_name_trigger_name_trigger_group_fkey"))
+        IfDatabase("PostgreSQL").Create.ForeignKey(GetNameWithTablePrefix("simple_triggers_sched_name_trigger_name_trigger_group_fkey"))
             .FromTable(GetNameWithTablePrefix("simple_triggers")).ForeignColumns("sched_name", "trigger_name", "trigger_group")
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)
@@ -211,7 +211,7 @@ public class InitialSetup : MigrationBase
             .WithColumn("bool_prop_2").AsBoolean().Nullable()
             .WithColumn("time_zone_id").AsString().Nullable();
 
-        Create.ForeignKey(GetNameWithTablePrefix("simprop_triggers_sched_name_trigger_name_trigger_grou_fkey"))
+        IfDatabase("PostgreSQL").Create.ForeignKey(GetNameWithTablePrefix("simprop_triggers_sched_name_trigger_name_trigger_grou_fkey"))
             .FromTable(GetNameWithTablePrefix("simprop_triggers")).ForeignColumns("sched_name", "trigger_name", "trigger_group")
             .ToTable(GetNameWithTablePrefix("triggers")).PrimaryColumns("sched_name", "trigger_name", "trigger_group")
             .OnUpdate(Rule.None)

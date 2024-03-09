@@ -1,5 +1,6 @@
 ﻿using ConsoleJobScheduler.Core.Api.Hubs;
 using ConsoleJobScheduler.Core.Api.Hubs.Handlers;
+using ConsoleJobScheduler.Core.Application;
 using ConsoleJobScheduler.Core.Application.Module;
 using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
 using ConsoleJobScheduler.Core.Infra.EMail;
@@ -131,9 +132,13 @@ public sealed class ServiceHost
 
         await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
-        await schedulerModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        schedulerModule.MigrateDb();
         await settingsModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await jobRunModule.MigrateDb(_app.Services).ConfigureAwait(false);
+
+        using var scope = _app.Services.CreateScope();
+        var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
+        await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
 
         await _schedulerManager.Start();
         await _app.RunAsync().ConfigureAwait(false);

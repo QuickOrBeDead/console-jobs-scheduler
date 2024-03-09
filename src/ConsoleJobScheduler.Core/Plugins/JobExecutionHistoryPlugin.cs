@@ -9,20 +9,14 @@ using Quartz.Spi;
 
 namespace ConsoleJobScheduler.Core.Plugins;
 
-public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
+public sealed class JobExecutionHistoryPlugin(
+    IServiceProvider serviceProvider,
+    ILogger<JobExecutionHistoryPlugin> logger)
+    : ISchedulerPlugin, IJobListener
 {
     public const string PluginConfigurationProperty = "quartz.plugin.jobExecutionHistory.type";
 
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<JobExecutionHistoryPlugin> _logger;
-
     public string Name { get; private set; } = null!;
-
-    public JobExecutionHistoryPlugin(IServiceProvider serviceProvider, ILogger<JobExecutionHistoryPlugin> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
 
     public Task Initialize(string pluginName, IScheduler scheduler, CancellationToken cancellationToken = default)
     {
@@ -61,12 +55,12 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
                 context.Trigger.GetFireTimeAfter(context.ScheduledFireTimeUtc)?.UtcDateTime,
                 (context.Trigger as ICronTrigger)?.CronExpressionString);
 
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().InsertJobHistoryEntry(jobExecutionHistory, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            DoNotThrow(() => _logger.LogError(e, "error on JobToBeExecuted"));
+            DoNotThrow(() => logger.LogError(e, "error on JobToBeExecuted"));
         }
     }
 
@@ -74,12 +68,12 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().UpdateJobHistoryEntryVetoed(context.FireInstanceId, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            DoNotThrow(() => _logger.LogError(e, "error on JobExecutionVetoed"));
+            DoNotThrow(() => logger.LogError(e, "error on JobExecutionVetoed"));
         }
     }
 
@@ -90,12 +84,12 @@ public sealed class JobExecutionHistoryPlugin : ISchedulerPlugin, IJobListener
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             await scope.ServiceProvider.GetRequiredService<IJobHistoryApplicationService>().UpdateJobHistoryEntryCompleted(context.FireInstanceId, context.JobRunTime, jobException, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            DoNotThrow(() => _logger.LogError(e, "error on JobWasExecuted"));
+            DoNotThrow(() => logger.LogError(e, "error on JobWasExecuted"));
         }
     }
 
