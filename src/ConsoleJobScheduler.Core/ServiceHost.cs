@@ -90,6 +90,9 @@ public sealed class ServiceHost
             });
 
         _app = builder.Build();
+
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         _app.Lifetime.ApplicationStopped.Register(
                 () =>
                 {
