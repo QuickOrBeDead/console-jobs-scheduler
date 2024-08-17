@@ -25,13 +25,13 @@ async function login() {
             <div class="row">
                 <section class="w-100 p-4 d-flex justify-content-center pb-4">
                     <form style="width: 22rem;">
-                        <div class="mb-4">
-                            <input type="text" id="txtUserName" class="form-control" v-model="loginModel.userName" />
+                        <div class="form-floating mb-4">
+                            <input type="text" id="txtUserName" class="form-control" v-model="loginModel.userName" placeholder="Username" />
                             <label class="form-label" for="txtUserName">Username</label>
                         </div>
 
-                        <div class="mb-4">
-                            <input type="password" id="txtPassword" class="form-control" v-model="loginModel.password" />
+                        <div class="form-floating mb-4">
+                            <input type="password" id="txtPassword" class="form-control" v-model="loginModel.password" placeholder="Password" />
                             <label class="form-label" for="txtPassword">Password</label>
                         </div>
 
