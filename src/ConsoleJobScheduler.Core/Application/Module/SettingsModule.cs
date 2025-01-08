@@ -1,6 +1,7 @@
 using ConsoleJobScheduler.Core.Domain.Settings;
 using ConsoleJobScheduler.Core.Domain.Settings.Infra;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +21,8 @@ public sealed class SettingsModule(IConfigurationRoot configuration)
             {
                 dbContextOptionsBuilderAction(o);
             }
+
+            o.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddScoped<ISettingsRepository, SettingsRepository>();
         services.AddScoped<ISettingsService, SettingsService>();

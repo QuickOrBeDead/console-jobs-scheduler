@@ -2,6 +2,7 @@ using ConsoleJobScheduler.Core.Domain.Identity;
 using ConsoleJobScheduler.Core.Domain.Identity.Infra;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +29,8 @@ public sealed class IdentityModule
             {
                 dbContextOptionsBuilderAction(o);
             }
+
+            o.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
             (options =>
