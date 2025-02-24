@@ -2,7 +2,7 @@
 import { ref, onMounted, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createApi } from '../../api'
-import { PackageDetails, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobPackageDetails, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,7 +10,7 @@ const router = useRouter()
 let name: string
 let isInEditMode: boolean
 
-const packageDetail = ref<PackageDetails>() as Ref<PackageDetails>
+const packageDetail = ref<JobPackageDetails>() as Ref<JobPackageDetails>
 const fileInput = ref<HTMLInputElement>()
 const file = ref<File | null>()
 
