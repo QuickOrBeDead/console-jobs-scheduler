@@ -2,30 +2,35 @@
 import { ref, reactive, onMounted, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import { createApi } from '../../api'
-import { AttachmentInfoModel, JobExecutionDetail, JobExecutionDetailsApi, LogLine } from '../../metadata/console-jobs-scheduler-api'
+import {
+  JobRunAttachmentInfo,
+  JobExecutionHistoryDetail,
+  JobExecutionDetailsApi,
+  JobRunLog,
+  JobHistoryApi
+} from '../../metadata/console-jobs-scheduler-api'
 import { HubConnectionBuilder } from '@microsoft/signalr'
 
 const route = useRoute()
 const id = route.params.id as string
 
-const job = ref<JobExecutionDetail>()
-const logs = reactive<LogLine[]>([])
-const attachments = ref<AttachmentInfoModel[]>()
+const job = ref<JobExecutionHistoryDetail>()
+const logs = reactive<JobRunLog[]>([])
+const attachments = ref<JobRunAttachmentInfo[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
+const jobHistoryApi = createApi(JobHistoryApi)
 
 onMounted(async () => {
-    const { data } = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
-    job.value = data.details
-    logs.push(...data.logs as LogLine[])
-    attachments.value = data.attachments as AttachmentInfoModel[]
+  await setJobExecutionHistoryDetail();
+  await setJobExecutionDetail();
 
-    const $console = document.getElementById('console')
+  const $console = document.getElementById('console')
 
-    var connection = new HubConnectionBuilder().withUrl('/jobRunConsoleHub').build()
+    const connection = new HubConnectionBuilder().withUrl('/jobRunConsoleHub').build()
 
     connection.on('ReceiveJobConsoleLogMessage', function (data, isError) {
         logs.push({
-            message: data,
+            content: data,
             isError: isError
         })
 
@@ -42,7 +47,18 @@ onUpdated(() => {
     $console!.scrollTop = $console!.scrollHeight
 })
 
-function getAttachmentUrl(attachment: AttachmentInfoModel): string {
+async function setJobExecutionHistoryDetail() {
+  const {data} = await jobHistoryApi.apiJobHistoryGetJobExecutionDetailIdGet(id)
+  job.value = data;
+}
+
+async function setJobExecutionDetail() {
+  const {data} = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
+  logs.push(...data.logs as JobRunLog[])
+  attachments.value = data.attachments as JobRunAttachmentInfo[]
+}
+
+function getAttachmentUrl(attachment: JobRunAttachmentInfo): string {
     const basePath = jobExecutionDetailsApi["basePath"]
     return `${basePath}/api/JobExecutionDetails/GetAttachment/${attachment.id}?attachmentName=${encodeURIComponent(attachment.fileName as string)}`
 }
@@ -96,7 +112,7 @@ function getAttachmentUrl(attachment: AttachmentInfoModel): string {
                                 <p>
                                     <div id="console">
                                         <template v-for="jobLog in logs">
-                                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.message }}</div>
+                                            <div :class="[jobLog.isError ? 'text-danger' : '']" class="col-12 text-start text-nowrap ps-1">{{ jobLog.content }}</div>
                                         </template>
                                     </div>
                                 </p>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { createApi } from '../../api'
-import { JobExecutionHistoryPagedResult, JobHistoryApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobExecutionHistoryListItemPagedResult, JobHistoryApi } from '../../metadata/console-jobs-scheduler-api'
 import { useRoute } from 'vue-router';
 
 const route = useRoute()
 
-const jobHistoryItems = ref<JobExecutionHistoryPagedResult>()
+const jobHistoryItems = ref<JobExecutionHistoryListItemPagedResult>()
 const jobHistoryApi = createApi(JobHistoryApi)
 
 async function loadPage(page: number)  {

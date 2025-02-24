@@ -1,7 +1,5 @@
 ﻿using System.Web;
-
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Events;
-
+using ConsoleJobScheduler.Core.Domain.Runner.Events;
 using MessagePipe;
 
 using Microsoft.AspNetCore.SignalR;

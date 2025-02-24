@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { createApi } from '../../api'
-import { UserListItemModelPagedResult, UsersApi } from '../../metadata/console-jobs-scheduler-api'
+import { UserListItemPagedResult, UsersApi } from '../../metadata/console-jobs-scheduler-api'
 
-const userItems = ref<UserListItemModelPagedResult>()
+const userItems = ref<UserListItemPagedResult>()
 const totalPages = ref<number>(0)
 const usersApi = createApi(UsersApi)
 

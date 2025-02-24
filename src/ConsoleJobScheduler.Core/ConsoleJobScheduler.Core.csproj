@@ -12,25 +12,26 @@
   
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.32.0" />
-    <PackageReference Include="FluentMigrator" Version="5.0.0" />
-    <PackageReference Include="FluentMigrator.Runner" Version="5.0.0" />
+    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0" />
+    <PackageReference Include="FluentMigrator" Version="5.1.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="5.1.0" />
     <PackageReference Include="MessagePipe" Version="1.7.4" />
     <PackageReference Include="MessagePipe.Analyzer" Version="1.7.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql" Version="8.0.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
-    <PackageReference Include="Quartz" Version="3.8.0" />
-    <PackageReference Include="Quartz.Serialization.Json" Version="3.8.0" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="Quartz" Version="3.8.1" />
+    <PackageReference Include="Quartz.Serialization.Json" Version="3.8.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="8.101.2.1" />
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="8.102.1.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,11 +43,11 @@
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="Roslynator.Analyzers" Version="4.10.0">
+   <PackageReference Include="Roslynator.Analyzers" Version="4.11.0">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>
-   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.17.0.82934">
+   <PackageReference Include="SonarAnalyzer.CSharp" Version="9.21.0.86780">
      <PrivateAssets>all</PrivateAssets>
      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
    </PackageReference>

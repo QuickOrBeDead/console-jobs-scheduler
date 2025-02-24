@@ -9,15 +9,25 @@ public static class ConsoleMessageWriter
 
     public static void WriteEmail(EmailMessage emailMessage)
     {
+        Console.WriteLine(GetEmailMessage(emailMessage));
+    }
+    
+    public static void WriteLog(ConsoleMessageLogType logType, string message)
+    {
+        Console.WriteLine(GetLogMessage(logType, message));
+    }
+
+    internal static string GetEmailMessage(EmailMessage emailMessage)
+    {
         var json = JsonSerializer.Serialize(new ConsoleMessage
         {
             MessageType = ConsoleMessageType.Email,
             Message = emailMessage
         });
-        Console.WriteLine($"{JsonPrefix}{json}");
+        return $"{JsonPrefix}{json}";
     }
-
-    public static void WriteLog(ConsoleMessageLogType logType, string message)
+    
+    internal static string GetLogMessage(ConsoleMessageLogType logType, string message)
     {
         var json = JsonSerializer.Serialize(new ConsoleMessage
         {
@@ -28,6 +38,6 @@ public static class ConsoleMessageWriter
                 Message = message
             }
         });
-        Console.WriteLine($"{JsonPrefix}{json}");
+       return $"{JsonPrefix}{json}";
     }
 }

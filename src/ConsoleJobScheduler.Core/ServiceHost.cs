@@ -1,31 +1,17 @@
 ﻿using ConsoleJobScheduler.Core.Api.Hubs;
 using ConsoleJobScheduler.Core.Api.Hubs.Handlers;
-using ConsoleJobScheduler.Core.Api.Models;
-using ConsoleJobScheduler.Core.Infrastructure.Identity;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Jobs.Events;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Migrations.Core;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Plugins;
-using ConsoleJobScheduler.Core.Infrastructure.Settings.Data;
-using ConsoleJobScheduler.Core.Infrastructure.Settings.Service;
-
+using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Application.Module;
+using ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
+using ConsoleJobScheduler.Core.Infra.EMail;
 using MessagePipe;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-
-using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
-using Quartz.Util;
 
 namespace ConsoleJobScheduler.Core;
 
@@ -61,9 +47,7 @@ public sealed class ServiceHost
         var builder = WebApplication.CreateBuilder();
         builder.Services.Configure<HostOptions>(option => option.ShutdownTimeout = TimeSpan.FromSeconds(60));
 
-        // Add services to the container.
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -71,20 +55,6 @@ public sealed class ServiceHost
         builder.Services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
 
         builder.Services.AddSingleton<JobConsoleLogMessageToHubHandler>();
-
-        builder.Services.AddDbContext<IdentityManagementDbContext>(o => o.UseNpgsql(builder.Configuration["ConnectionString"]));
-        builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
-            (options =>
-                {
-                    options.SignIn.RequireConfirmedAccount = false;
-                    options.Password.RequireDigit = false;
-                    options.Password.RequiredLength = 6;
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequireLowercase = false;
-                })
-            .AddEntityFrameworkStores<IdentityManagementDbContext>()
-            .AddDefaultTokenProviders();
 
         builder.Services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, option =>
             {
@@ -96,44 +66,19 @@ public sealed class ServiceHost
                     };
             });
 
-        builder.Services.AddSingleton<ISchedulerFactory>(x =>
-        {
-            var schedulerBuilder = SchedulerBuilder.Create()
-                .WithId(builder.Configuration["SchedulerInstanceId"]!)
-                .WithName("ConsoleJobsSchedulerService")
-                .UseDefaultThreadPool(y => y.MaxConcurrency = 100)
-                .UseJobFactory<ServiceProviderJobFactory>()
-                .UsePersistentStore(
-                    o =>
-                    {
-                        o.UseClustering();
-                        o.UseProperties = true;
-                        o.UseNewtonsoftJsonSerializer();
-                        o.UsePostgres(
-                                p =>
-                                {
-                                    p.TablePrefix = builder.Configuration["TablePrefix"]!;
-                                    p.ConnectionString = builder.Configuration["ConnectionString"]!;
-                                });
-                    });
-            schedulerBuilder.SetProperty(StdSchedulerFactory.PropertyJobStoreType, typeof(CustomJobStoreTx).AssemblyQualifiedNameWithoutVersion());
-            schedulerBuilder.SetProperty(JobExecutionHistoryPlugin.PluginConfigurationProperty, typeof(JobExecutionHistoryPlugin).AssemblyQualifiedNameWithoutVersion());
+        var identityModule = new IdentityModule(builder.Configuration);
+        var schedulerModule = new SchedulerModule(builder.Configuration);
+        var historyModule = new JobHistoryModule(builder.Configuration);
+        var jobRunModule = new JobRunModule(builder.Configuration);
+        var settingsModule = new SettingsModule(builder.Configuration);
 
-            return new CustomSchedulerFactory(x, schedulerBuilder.Properties);
-        });
-        builder.Services.AddSingleton<IJobFactory, ServiceProviderJobFactory>();
+        identityModule.Register(builder.Services);
+        schedulerModule.Register(builder.Services);
+        historyModule.Register(builder.Services);
+        jobRunModule.Register(builder.Services);
+        settingsModule.Register(builder.Services);
 
-        var appRunTempRootPath = builder.Configuration["ConsoleAppPackageRunTempPath"] ?? AppDomain.CurrentDomain.BaseDirectory;
-
-        builder.Services.AddDbContext<SettingsDbContext>(o => o.UseNpgsql(builder.Configuration["ConnectionString"]));
-
-        builder.Services.AddScoped<IConsoleAppPackageRunner>(x => new DefaultConsoleAppPackageRunner(
-            x.GetRequiredService<IAsyncPublisher<JobConsoleLogMessageEvent>>(),
-            x.GetRequiredService<IEmailSender>(),
-            appRunTempRootPath));
-        builder.Services.AddScoped<ISettingsService, SettingsService>();
-        builder.Services.AddScoped<IEmailSender>(x => new SmtpEmailSender(x.GetRequiredService<ISettingsService>()));
-        builder.Services.AddTransient<ConsoleAppPackageJob>();
+        builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         builder.Services.AddMessagePipe(
             x =>
@@ -143,10 +88,6 @@ public sealed class ServiceHost
                 x.DefaultAsyncPublishStrategy = AsyncPublishStrategy.Parallel;
                 x.EnableAutoRegistration = false;
             });
-
-        builder.Services.AddSingleton(x => x.GetRequiredService<ISchedulerFactory>().GetScheduler().Result);
-        builder.Services.AddSingleton<ISchedulerManager, SchedulerManager>();
-        builder.Services.AddScoped<ISchedulerService, SchedulerService>();
 
         _app = builder.Build();
         _app.Lifetime.ApplicationStopped.Register(
@@ -158,7 +99,6 @@ public sealed class ServiceHost
                     }
                 });
 
-        // Configure the HTTP request pipeline.
         if (!_app.Environment.IsDevelopment())
         {
             _app.UseExceptionHandler("/Error");
@@ -190,52 +130,17 @@ public sealed class ServiceHost
         _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
         _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
-        await InitDb(_app.Services).ConfigureAwait(false);
+        await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        schedulerModule.MigrateDb();
+        await settingsModule.MigrateDb(_app.Services).ConfigureAwait(false);
+        await jobRunModule.MigrateDb(_app.Services).ConfigureAwait(false);
 
-        await _schedulerManager.Start(_app.Services.GetRequiredService<ILoggerFactory>());
+        using var scope = _app.Services.CreateScope();
+        var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
+        await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
+
+        await _schedulerManager.Start();
         await _app.RunAsync().ConfigureAwait(false);
-    }
-
-    private static async Task InitDb(IServiceProvider serviceProvider)
-    {
-        MigrateDb(serviceProvider);
-        await AddDbInitialData(serviceProvider).ConfigureAwait(false);
-    }
-
-    private static void MigrateDb(IServiceProvider serviceProvider)
-    {
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-        var dbMigrationRunner = new DbMigrationRunner();
-        dbMigrationRunner.Migrate(configuration["ConnectionString"]!, configuration["TablePrefix"]!);
-    }
-
-    private static async Task AddDbInitialData(IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        using var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<int>>>();
-        using var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-        await using var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
-
-        await identityDbContext.Database.MigrateAsync().ConfigureAwait(false);
-
-        var roles = new[] { Roles.Admin, Roles.JobEditor, Roles.JobViewer };
-        for (var i = 0; i < roles.Length; i++)
-        {
-            var role = roles[i];
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new IdentityRole<int>(role));
-            }
-        }
-
-        var adminUser = await userManager.FindByNameAsync("admin");
-        if (adminUser == null)
-        {
-            adminUser = new IdentityUser<int>("admin") { Email = "admin@email.com" };
-
-            await userManager.CreateAsync(adminUser, "Password");
-            await userManager.AddToRoleAsync(adminUser, Roles.Admin);
-        }
     }
 }

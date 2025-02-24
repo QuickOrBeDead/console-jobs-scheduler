@@ -1,8 +1,6 @@
 ﻿using System.Net.Mime;
-
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler;
-using ConsoleJobScheduler.Core.Infrastructure.Scheduler.Models;
-
+using ConsoleJobScheduler.Core.Application;
+using ConsoleJobScheduler.Core.Application.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +12,11 @@ namespace ConsoleJobScheduler.Core.Api.Controllers;
 [ApiController]
 public class JobExecutionDetailsController : ControllerBase
 {
-    private readonly ISchedulerService _schedulerService;
+    private readonly IJobApplicationService _jobApplicationService;
 
-    public JobExecutionDetailsController(ISchedulerService schedulerService)
+    public JobExecutionDetailsController(IJobApplicationService jobApplicationService)
     {
-        _schedulerService = schedulerService ?? throw new ArgumentNullException(nameof(schedulerService));
+        _jobApplicationService = jobApplicationService;
     }
 
     [HttpGet("{id}")]
@@ -28,7 +26,7 @@ public class JobExecutionDetailsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(string id)
     {
-        var jobDetail = await _schedulerService.GetJobExecutionDetail(id).ConfigureAwait(false);
+        var jobDetail = await _jobApplicationService.GetJobExecutionDetail(id).ConfigureAwait(false);
         if (jobDetail == null)
         {
             return NotFound();
@@ -37,18 +35,11 @@ public class JobExecutionDetailsController : ControllerBase
         return Ok(jobDetail);
     }
 
-    [HttpGet("GetErrorDetail/{id}")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public Task<string?> GetErrorDetail(string id)
-    {
-        return _schedulerService.GetJobExecutionErrorDetail(id);
-    }
-
     [HttpGet("GetAttachment/{id}")]
     [Produces(MediaTypeNames.Application.Octet)]
     public async Task<IActionResult> GetAttachment(long id, [FromQuery] string attachmentName)
     {
-        var fileContents = await _schedulerService.GetAttachmentBytes(id).ConfigureAwait(false);
+        var fileContents = await _jobApplicationService.GetJobRunAttachmentContent(id).ConfigureAwait(false);
         if (fileContents == null)
         {
             return NotFound();
