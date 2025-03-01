@@ -139,7 +139,7 @@ public sealed class ConsoleAppPackageJobFixture
         Assert.That(simpleSmtpServer.ReceivedEmail[0].ToAddresses[2].Address, Is.EqualTo(emailMessage.Bcc));
         Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[0].BodyData, Is.EqualTo(emailMessage.Body));
         Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[1].BodyData, Is.EqualTo(attachmentContent));
-        Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[1].HeaderData, Is.EqualTo("text/plain; name=attachment.txt"));
+        Assert.That(simpleSmtpServer.ReceivedEmail[0].MessageParts[1].HeaderData, Does.Match("Content-Type: text/plain; name=attachment.txt\nContent-Transfer-Encoding: Base64\nContent-ID: [0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}\nContent-Disposition: attachment\n"));
     }
 
     private static async Task<JobExecutionDetailModel?> GetJobExecutionDetail(IServiceProvider serviceProvider, string jobRunId)

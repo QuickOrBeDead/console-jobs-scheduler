@@ -63,6 +63,8 @@ public sealed class SchedulerApplicationServiceFixture
         fakeConsoleAppPackageRunner.WaitForCompletion(TimeSpan.FromSeconds(30));
         await addTask;
         
+        Thread.Sleep(TimeSpan.FromSeconds(1));
+        
         // Assert
         var schedulerApplicationService = serviceProvider.GetRequiredService<ISchedulerApplicationService>();
         var jobs = await schedulerApplicationService.ListJobs();

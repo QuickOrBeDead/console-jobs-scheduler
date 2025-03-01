@@ -14,9 +14,4 @@ public static class DateTimeExtensions
         }
         return value;
     }
-
-    public static DateTime? ToUtc(this DateTime? value)
-    {
-        return value.HasValue ? ToUtc(value.Value) : value;
-    }
 }

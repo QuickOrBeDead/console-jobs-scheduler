@@ -90,6 +90,9 @@ public sealed class ServiceHost
             });
 
         _app = builder.Build();
+
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         _app.Lifetime.ApplicationStopped.Register(
                 () =>
                 {
@@ -127,9 +130,6 @@ public sealed class ServiceHost
             b.UseEndpoints(e => e.MapFallbackToFile("index.html"));
         });
 
-        _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
-        _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
-
         await identityModule.MigrateDb(_app.Services).ConfigureAwait(false);
         await historyModule.MigrateDb(_app.Services).ConfigureAwait(false);
         schedulerModule.MigrateDb();
@@ -139,6 +139,9 @@ public sealed class ServiceHost
         using var scope = _app.Services.CreateScope();
         var identityApplicationService = scope.ServiceProvider.GetRequiredService<IIdentityApplicationService>();
         await identityApplicationService.AddInitialRolesAndUsers().ConfigureAwait(false);
+
+        _schedulerManager = _app.Services.GetRequiredService<ISchedulerManager>();
+        _schedulerManager.SubscribeToEvent(_app.Services.GetRequiredService<JobConsoleLogMessageToHubHandler>());
 
         await _schedulerManager.Start();
         await _app.RunAsync().ConfigureAwait(false);

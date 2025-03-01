@@ -2,6 +2,7 @@ using ConsoleJobScheduler.Core.Domain.Runner;
 using ConsoleJobScheduler.Core.Domain.Runner.Infra;
 using ConsoleJobScheduler.Core.Domain.Runner.MessageProcessors;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,8 @@ public sealed class JobRunModule(IConfigurationRoot configuration)
             {
                 dbContextOptionsBuilderAction(o);
             }
+
+            o.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddScoped<IJobRunAttachmentRepository, JobRunAttachmentRepository>();
         services.AddScoped<IJobPackageRepository, JobPackageRepository>();

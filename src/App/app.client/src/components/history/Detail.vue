@@ -6,7 +6,7 @@ import {
   JobRunAttachmentInfo,
   JobExecutionHistoryDetail,
   JobExecutionDetailsApi,
-  JobRunLog,
+  JobRunLogDetail,
   JobHistoryApi
 } from '../../metadata/console-jobs-scheduler-api'
 import { HubConnectionBuilder } from '@microsoft/signalr'
@@ -15,7 +15,7 @@ const route = useRoute()
 const id = route.params.id as string
 
 const job = ref<JobExecutionHistoryDetail>()
-const logs = reactive<JobRunLog[]>([])
+const logs = reactive<JobRunLogDetail[]>([])
 const attachments = ref<JobRunAttachmentInfo[]>()
 const jobExecutionDetailsApi = createApi(JobExecutionDetailsApi)
 const jobHistoryApi = createApi(JobHistoryApi)
@@ -54,7 +54,7 @@ async function setJobExecutionHistoryDetail() {
 
 async function setJobExecutionDetail() {
   const {data} = await jobExecutionDetailsApi.apiJobExecutionDetailsIdGet(id)
-  logs.push(...data.logs as JobRunLog[])
+  logs.push(...data.logs as JobRunLogDetail[])
   attachments.value = data.attachments as JobRunAttachmentInfo[]
 }
 

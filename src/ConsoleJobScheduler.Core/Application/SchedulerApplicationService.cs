@@ -15,6 +15,8 @@ public interface ISchedulerApplicationService
     Task<JobDetail?> GetJobDetail(string group, string name);
 
     Task AddOrUpdateJob(JobAddOrUpdateModel model);
+
+    Task TriggerJob(string group, string name, CancellationToken cancellationToken = default);
 }
 
 public sealed class SchedulerApplicationService(ISchedulerService schedulerService) : ISchedulerApplicationService
@@ -86,5 +88,10 @@ public sealed class SchedulerApplicationService(ISchedulerService schedulerServi
     public Task AddOrUpdateJob(JobAddOrUpdateModel model)
     {
         return _schedulerService.AddOrUpdateJob(model);
+    }
+
+    public Task TriggerJob(string group, string name, CancellationToken cancellationToken = default)
+    {
+        return _schedulerService.TriggerJob(new JobKey(name, group), cancellationToken);
     }
 }

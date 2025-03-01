@@ -1,6 +1,7 @@
 using ConsoleJobScheduler.Core.Domain.History;
 using ConsoleJobScheduler.Core.Domain.History.Infra;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +28,8 @@ public sealed class JobHistoryModule
             {
                 dbContextOptionsBuilderAction(o);
             }
+
+            o.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddScoped<IJobHistoryRepository, JobHistoryRepository>();
         services.AddScoped<IJobHistoryService, JobHistoryService>();

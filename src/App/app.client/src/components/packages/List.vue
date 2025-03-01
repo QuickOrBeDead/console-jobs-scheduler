@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { createApi } from '../../api'
-import { PackageListItemPagedResult, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
+import { JobPackageListItemPagedResult, PackagesApi } from '../../metadata/console-jobs-scheduler-api'
 
 const packagesApi = createApi(PackagesApi)
-const packages = ref<PackageListItemPagedResult>()
+const packages = ref<JobPackageListItemPagedResult>()
 
 async function loadPage(page: number)  {
     const { data } = await packagesApi.apiPackagesListPageNumberGet(page)

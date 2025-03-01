@@ -4,7 +4,7 @@ using Quartz.Spi;
 
 namespace ConsoleJobScheduler.Core.Domain.Scheduler.Infra.Quartz;
 
-public interface IExtendedJobStore : IJobStore, IQuartzDbStore
+public interface IExtendedJobStore : IJobStore
 {
     Task<IReadOnlyCollection<SchedulerStateRecord>> SelectSchedulerStateRecords(CancellationToken cancellationToken = default);
 }

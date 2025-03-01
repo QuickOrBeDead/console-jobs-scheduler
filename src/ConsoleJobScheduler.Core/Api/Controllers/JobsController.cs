@@ -61,4 +61,20 @@ public sealed class JobsController : ControllerBase
 
         return Ok();
     }
+
+    [Authorize(Roles = $"{Roles.Admin},{Roles.JobEditor}")]
+    [HttpPost("{group}/{name}/TriggerJob")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Post(string group, string name)
+    {
+        if (string.IsNullOrWhiteSpace(group) || string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest();
+        }
+
+        await _schedulerApplicationService.TriggerJob(group, name).ConfigureAwait(false);
+
+        return Ok();
+    }
 }

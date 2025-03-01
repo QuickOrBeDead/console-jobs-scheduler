@@ -161,10 +161,10 @@ export interface JobExecutionDetailModel {
     'attachments'?: Array<JobRunAttachmentInfo> | null;
     /**
      * 
-     * @type {Array<JobRunLog>}
+     * @type {Array<JobRunLogDetail>}
      * @memberof JobExecutionDetailModel
      */
-    'logs'?: Array<JobRunLog> | null;
+    'logs'?: Array<JobRunLogDetail> | null;
 }
 /**
  * 
@@ -247,10 +247,10 @@ export interface JobExecutionHistoryDetail {
     'firedTime'?: string;
     /**
      * 
-     * @type {TimeSpan}
+     * @type {string}
      * @memberof JobExecutionHistoryDetail
      */
-    'runTime'?: TimeSpan;
+    'runTime'?: string | null;
     /**
      * 
      * @type {boolean}
@@ -356,10 +356,10 @@ export interface JobExecutionHistoryListItem {
     'nextFireTime'?: string | null;
     /**
      * 
-     * @type {TimeSpan}
+     * @type {string}
      * @memberof JobExecutionHistoryListItem
      */
-    'runTime'?: TimeSpan;
+    'runTime'?: string | null;
     /**
      * 
      * @type {boolean}
@@ -542,6 +542,75 @@ export interface JobListItemPagedResult {
 /**
  * 
  * @export
+ * @interface JobPackageDetails
+ */
+export interface JobPackageDetails {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobPackageDetails
+     */
+    'name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobPackageDetails
+     */
+    'modifyDate'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface JobPackageListItem
+ */
+export interface JobPackageListItem {
+    /**
+     * 
+     * @type {string}
+     * @memberof JobPackageListItem
+     */
+    'name'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface JobPackageListItemPagedResult
+ */
+export interface JobPackageListItemPagedResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof JobPackageListItemPagedResult
+     */
+    'page'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobPackageListItemPagedResult
+     */
+    'totalCount'?: number;
+    /**
+     * 
+     * @type {Array<JobPackageListItem>}
+     * @memberof JobPackageListItemPagedResult
+     */
+    'items'?: Array<JobPackageListItem> | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobPackageListItemPagedResult
+     */
+    'pageSize'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobPackageListItemPagedResult
+     */
+    'totalPages'?: number;
+}
+/**
+ * 
+ * @export
  * @interface JobRunAttachmentInfo
  */
 export interface JobRunAttachmentInfo {
@@ -561,31 +630,25 @@ export interface JobRunAttachmentInfo {
 /**
  * 
  * @export
- * @interface JobRunLog
+ * @interface JobRunLogDetail
  */
-export interface JobRunLog {
+export interface JobRunLogDetail {
     /**
      * 
      * @type {string}
-     * @memberof JobRunLog
-     */
-    'jobRunId'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobRunLog
+     * @memberof JobRunLogDetail
      */
     'content'?: string | null;
     /**
      * 
      * @type {boolean}
-     * @memberof JobRunLog
+     * @memberof JobRunLogDetail
      */
     'isError'?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof JobRunLog
+     * @memberof JobRunLogDetail
      */
     'createDate'?: string;
 }
@@ -613,75 +676,6 @@ export interface LoginModel {
      * @memberof LoginModel
      */
     'rememberMe'?: boolean;
-}
-/**
- * 
- * @export
- * @interface PackageDetails
- */
-export interface PackageDetails {
-    /**
-     * 
-     * @type {string}
-     * @memberof PackageDetails
-     */
-    'name'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof PackageDetails
-     */
-    'modifyDate'?: string | null;
-}
-/**
- * 
- * @export
- * @interface PackageListItem
- */
-export interface PackageListItem {
-    /**
-     * 
-     * @type {string}
-     * @memberof PackageListItem
-     */
-    'name'?: string | null;
-}
-/**
- * 
- * @export
- * @interface PackageListItemPagedResult
- */
-export interface PackageListItemPagedResult {
-    /**
-     * 
-     * @type {number}
-     * @memberof PackageListItemPagedResult
-     */
-    'page'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PackageListItemPagedResult
-     */
-    'totalCount'?: number;
-    /**
-     * 
-     * @type {Array<PackageListItem>}
-     * @memberof PackageListItemPagedResult
-     */
-    'items'?: Array<PackageListItem> | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PackageListItemPagedResult
-     */
-    'pageSize'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PackageListItemPagedResult
-     */
-    'totalPages'?: number;
 }
 /**
  * 
@@ -846,10 +840,10 @@ export interface SchedulerMetadataModel {
 export interface SchedulerStateRecordModel {
     /**
      * 
-     * @type {TimeSpan}
+     * @type {string}
      * @memberof SchedulerStateRecordModel
      */
-    'checkInInterval'?: TimeSpan;
+    'checkInInterval'?: string;
     /**
      * 
      * @type {string}
@@ -948,103 +942,6 @@ export interface SmtpSettings {
      * @memberof SmtpSettings
      */
     'domain'?: string | null;
-}
-/**
- * 
- * @export
- * @interface TimeSpan
- */
-export interface TimeSpan {
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'ticks'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'days'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'hours'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'milliseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'microseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'nanoseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'minutes'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'seconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalDays'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalHours'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalMilliseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalMicroseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalNanoseconds'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalMinutes'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof TimeSpan
-     */
-    'totalSeconds'?: number;
 }
 /**
  * 
@@ -2031,6 +1928,43 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobsGroupNameTriggerJobPost: async (group: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'group' is not null or undefined
+            assertParamExists('apiJobsGroupNameTriggerJobPost', 'group', group)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('apiJobsGroupNameTriggerJobPost', 'name', name)
+            const localVarPath = `/api/Jobs/{group}/{name}/TriggerJob`
+                .replace(`{${"group"}}`, encodeURIComponent(String(group)))
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2118,6 +2052,17 @@ export const JobsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGroupNameTriggerJobPost(group, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2158,6 +2103,16 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.apiJobsGroupNameTriggerJobPost(group, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2194,6 +2149,18 @@ export class JobsApi extends BaseAPI {
      */
     public apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig) {
         return JobsApiFp(this.configuration).apiJobsGroupNameGet(group, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} group 
+     * @param {string} name 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobsApi
+     */
+    public apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: AxiosRequestConfig) {
+        return JobsApiFp(this.configuration).apiJobsGroupNameTriggerJobPost(group, name, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2385,7 +2352,7 @@ export const PackagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageDetails>> {
+        async apiPackagesDetailGet(packageName?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobPackageDetails>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesDetailGet(packageName, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2404,7 +2371,7 @@ export const PackagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PackageListItemPagedResult>> {
+        async apiPackagesListPageNumberGet(pageNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobPackageListItemPagedResult>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiPackagesListPageNumberGet(pageNumber, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2435,7 +2402,7 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesDetailGet(packageName?: string, options?: any): AxiosPromise<PackageDetails> {
+        apiPackagesDetailGet(packageName?: string, options?: any): AxiosPromise<JobPackageDetails> {
             return localVarFp.apiPackagesDetailGet(packageName, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2452,7 +2419,7 @@ export const PackagesApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiPackagesListPageNumberGet(pageNumber: number, options?: any): AxiosPromise<PackageListItemPagedResult> {
+        apiPackagesListPageNumberGet(pageNumber: number, options?: any): AxiosPromise<JobPackageListItemPagedResult> {
             return localVarFp.apiPackagesListPageNumberGet(pageNumber, options).then((request) => request(axios, basePath));
         },
         /**
