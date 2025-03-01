@@ -1928,6 +1928,43 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobsGroupNameTriggerJobPost: async (group: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'group' is not null or undefined
+            assertParamExists('apiJobsGroupNameTriggerJobPost', 'group', group)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('apiJobsGroupNameTriggerJobPost', 'name', name)
+            const localVarPath = `/api/Jobs/{group}/{name}/TriggerJob`
+                .replace(`{${"group"}}`, encodeURIComponent(String(group)))
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2015,6 +2052,17 @@ export const JobsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiJobsGroupNameTriggerJobPost(group, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2055,6 +2103,16 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
         },
         /**
          * 
+         * @param {string} group 
+         * @param {string} name 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.apiJobsGroupNameTriggerJobPost(group, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {number} pageNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2091,6 +2149,18 @@ export class JobsApi extends BaseAPI {
      */
     public apiJobsGroupNameGet(group: string, name: string, options?: AxiosRequestConfig) {
         return JobsApiFp(this.configuration).apiJobsGroupNameGet(group, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} group 
+     * @param {string} name 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobsApi
+     */
+    public apiJobsGroupNameTriggerJobPost(group: string, name: string, options?: AxiosRequestConfig) {
+        return JobsApiFp(this.configuration).apiJobsGroupNameTriggerJobPost(group, name, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

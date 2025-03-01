@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.7",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.8",
@@ -24,12 +24,12 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.16.3",
+    "@openapitools/openapi-generator-cli": "^2.17.0",
     "@types/bootstrap": "^5.2.10",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.7",
     "@vitejs/plugin-vue": "^5.2.1",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.1",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0",
     "volar-service-vetur": "latest",
     "vue-tsc": "^2.2.4"
   }

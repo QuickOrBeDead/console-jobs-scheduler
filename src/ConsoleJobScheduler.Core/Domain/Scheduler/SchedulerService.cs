@@ -24,6 +24,8 @@ public interface ISchedulerService
     Task<SchedulerMetaData> GetMetaData();
 
     Task<IReadOnlyCollection<SchedulerStateRecord>> GetInstances();
+
+    Task TriggerJob(JobKey jobKey, CancellationToken cancellationToken = default);
 }
 
 public sealed class SchedulerService : ISchedulerService
@@ -61,6 +63,11 @@ public sealed class SchedulerService : ISchedulerService
         }
 
         await _scheduler.ScheduleJob(job, trigger);
+    }
+
+    public async Task TriggerJob(JobKey jobKey, CancellationToken cancellationToken = default)
+    {
+        await _scheduler.TriggerJob(jobKey, cancellationToken);
     }
 
     public async Task<JobDetail?> GetJobDetail(JobKey jobKey)

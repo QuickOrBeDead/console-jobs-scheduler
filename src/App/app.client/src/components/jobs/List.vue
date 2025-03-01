@@ -10,6 +10,12 @@ async function loadPage(page: number)  {
     const { data } = await jobsApi.apiJobsPageNumberGet(page)
     jobs.value = data
 }
+
+async function trigger(group: string, name: string) {
+    await jobsApi.apiJobsGroupNameTriggerJobPost(group, name)
+
+    alert(`'${group}/${name}' job is triggered'`)
+}
 </script>
 <template>
     <div class="page-container">
@@ -59,6 +65,7 @@ async function loadPage(page: number)  {
                                                         <router-link :to="{ name: 'JobHistory', params: { jobName: job.jobName }}" v-slot="{ navigate }" custom>
                                                             <button type="button" class="btn btn-secondary btn-sm rounded-pill" @click="navigate" title="History"><i class="bi bi-search"></i></button>
                                                         </router-link>
+                                                        <button type="button" class="btn btn-primary btn-sm rounded-pill" @click="() => trigger(job.jobGroup!, job.jobName!)" title="Trigger"><i class="bi bi-play-fill"></i></button>
                                                     </td>
                                                 </tr>
                                             </tbody>
