@@ -142,8 +142,27 @@ public sealed class JobRunService : IJobRunService
         }
 
         var manifest = await GetPackageManifest(content).ConfigureAwait(false);
-        var jobPackage = manifest.CreateJobPackage(packageName, content);
-        await _jobPackageRepository.Add(jobPackage).ConfigureAwait(false);
+        var manifestPackage = manifest.CreateJobPackage(packageName, content);
+
+        var jobPackage = await _jobPackageRepository.Get(packageName).ConfigureAwait(false);
+        if (jobPackage != null)
+        {
+            jobPackage.Name = manifestPackage.Name;
+            jobPackage.Author = manifestPackage.Author;
+            jobPackage.Version = manifestPackage.Version;
+            jobPackage.Description = manifestPackage.Description;
+            jobPackage.Content = manifestPackage.Content;
+            jobPackage.FileName = manifestPackage.FileName;
+            jobPackage.Arguments = manifestPackage.Arguments;
+            jobPackage.CreateDate = manifestPackage.CreateDate;
+        }
+        else
+        {
+            jobPackage = manifestPackage;
+
+            await _jobPackageRepository.Add(jobPackage).ConfigureAwait(false);
+        }
+
         await _jobPackageRepository.SaveChanges().ConfigureAwait(false);
     }
 

@@ -46,20 +46,20 @@ watch(
 )
 
 function onFileChanged() {
-    if (fileInput.value && fileInput.value.files) {
-        file.value = fileInput.value.files[0];
-    }
+  if (fileInput.value && fileInput.value.files) {
+    file.value = fileInput.value.files[0];
+  }
 }
 
 async function save() {
-    const packageName = isInEditMode ? name : packageDetail.value.name
+    const packageName = packageDetail.value.name
     if (file.value && packageName) {
         await packagesApi.apiPackagesSavePost(packageName, file.value)
 
         if (isInEditMode) {
             await loadPage()
         } else {
-            await router.push({ name: 'EditPackage', params: { name: packageName }})
+            router.push({ name: 'EditPackage', params: { name: packageName }})
         }
     }
 }
