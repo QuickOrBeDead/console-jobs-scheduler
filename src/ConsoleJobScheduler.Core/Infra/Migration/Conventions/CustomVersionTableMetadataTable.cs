@@ -1,8 +1,12 @@
+using FluentMigrator.Runner.Conventions;
+using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.VersionTableInfo;
+using Microsoft.Extensions.Options;
 
 namespace ConsoleJobScheduler.Core.Infra.Migration.Conventions;
 
-public sealed class CustomVersionTableMetadataTable : DefaultVersionTableMetaData
+public sealed class CustomVersionTableMetadataTable(IConventionSet conventionSet, IOptions<RunnerOptions> runnerOptions)
+    : DefaultVersionTableMetaData(conventionSet, runnerOptions)
 {
     public override string SchemaName => string.Empty;
 

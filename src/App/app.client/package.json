@@ -10,27 +10,27 @@
     "generate-api": "openapi-generator-cli generate -i http://localhost:5000/swagger/v1/swagger.json -g typescript-axios -o src/metadata/console-jobs-scheduler-api"
   },
   "dependencies": {
-    "@microsoft/signalr": "^8.0.7",
-    "axios": "^1.8.1",
-    "bootstrap": "^5.3.3",
-    "bootstrap-icons": "^1.11.3",
-    "chart.js": "^4.4.8",
+    "@microsoft/signalr": "^10.0.0",
+    "axios": "^1.13.2",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "chart.js": "^4.5.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^4.1.0",
-    "pinia": "^3.0.1",
-    "pinia-plugin-persistedstate": "^4.2.0",
-    "vue": "^3.5.13",
-    "vue-chartjs": "^5.3.2",
-    "vue-router": "^4.5.0"
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "vue": "^3.5.26",
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.17.0",
+    "@openapitools/openapi-generator-cli": "^2.26.0",
     "@types/bootstrap": "^5.2.10",
-    "@types/node": "^22.13.7",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "typescript": "^5.8.2",
-    "vite": "^6.2.0",
+    "@types/node": "^25.0.3",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
     "volar-service-vetur": "latest",
-    "vue-tsc": "^2.2.4"
+    "vue-tsc": "^3.2.1"
   }
 }
